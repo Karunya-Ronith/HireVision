@@ -1,9 +1,28 @@
 import gradio as gr
 from resume_analyzer import process_resume_analysis
 from learning_path_analyzer import process_learning_path_analysis
+import traceback
+
+def safe_process_resume_analysis(pdf_file, job_description):
+    """Wrapper function with error handling for resume analysis"""
+    try:
+        return process_resume_analysis(pdf_file, job_description)
+    except Exception as e:
+        error_msg = f"## ❌ Application Error\n\nAn unexpected error occurred: {str(e)}\n\nPlease try again or contact support if the issue persists."
+        print(f"Resume analysis error: {traceback.format_exc()}")
+        return error_msg
+
+def safe_process_learning_path_analysis(current_skills, dream_role):
+    """Wrapper function with error handling for learning path analysis"""
+    try:
+        return process_learning_path_analysis(current_skills, dream_role)
+    except Exception as e:
+        error_msg = f"## ❌ Application Error\n\nAn unexpected error occurred: {str(e)}\n\nPlease try again or contact support if the issue persists."
+        print(f"Learning path analysis error: {traceback.format_exc()}")
+        return error_msg
 
 # Create the main HireVision application
-with gr.Blocks(title="HireVision - AI Career Coach", theme=gr.themes.Soft()) as demo:
+with gr.Blocks(title="HireVision - AI Career Coach", theme="soft") as demo:
     
     # Navigation tabs
     with gr.Tabs():
@@ -95,15 +114,21 @@ with gr.Blocks(title="HireVision - AI Career Coach", theme=gr.themes.Soft()) as 
                 - The analysis works best with detailed job descriptions
                 
                 **What the ATS Score Means:**
-                - **90-100**: Excellent match, high chance of passing ATS
-                - **70-89**: Good match, some improvements needed
-                - **50-69**: Fair match, significant improvements recommended
-                - **Below 50**: Poor match, major revisions needed
+                - **85-100**: Excellent match, high chance of passing ATS
+                - **65-84**: Good match, some improvements needed
+                - **45-64**: Fair match, significant improvements recommended
+                - **Below 45**: Poor match, major revisions needed
+                
+                **Error Handling:**
+                - If you encounter any errors, please try again
+                - Ensure your PDF file is not corrupted
+                - Check your internet connection
+                - Contact support if issues persist
                 """)
             
-            # Connect the button to the processing function
+            # Connect the button to the processing function with error handling
             analyze_btn.click(
-                fn=process_resume_analysis,
+                fn=safe_process_resume_analysis,
                 inputs=[pdf_input, job_desc_input],
                 outputs=resume_output
             )
@@ -167,6 +192,12 @@ with gr.Blocks(title="HireVision - AI Career Coach", theme=gr.themes.Soft()) as 
                 - **Hands-on projects** to build your portfolio
                 - **Success metrics** to track your progress
                 - **Career advice** and networking tips
+                
+                **Resource Verification:**
+                - All recommended resources are verified to exist
+                - Unverified resources are clearly marked
+                - Focus on well-known, established platforms
+                - No fake or hallucinated links
                 """)
             
             # Add example inputs
@@ -195,9 +226,9 @@ with gr.Blocks(title="HireVision - AI Career Coach", theme=gr.themes.Soft()) as 
                 ```
                 """)
             
-            # Connect the button to the processing function
+            # Connect the button to the processing function with error handling
             learning_analyze_btn.click(
-                fn=process_learning_path_analysis,
+                fn=safe_process_learning_path_analysis,
                 inputs=[current_skills_input, dream_role_input],
                 outputs=learning_output
             )
@@ -291,6 +322,9 @@ with gr.Blocks(title="HireVision - AI Career Coach", theme=gr.themes.Soft()) as 
             
             ### 🔄 Continuous Learning
             Our platform evolves with industry trends and user feedback.
+            
+            ### 🛡️ Robust Error Handling
+            Comprehensive error handling ensures a smooth user experience even when issues arise.
             
             ---
             
