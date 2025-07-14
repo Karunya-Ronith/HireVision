@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}Resume Generated - HireVision{% endblock %}
+
+{% block content %}
+<!-- Professional header -->
+<div class="header-container">
+    <h1>Resume Generated Successfully!</h1>
+    <p>Your professional resume is ready</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <!-- Success Message -->
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                <h3 class="card-title">Resume Generated Successfully!</h3>
+                <p class="lead">Your resume has been generated in both LaTeX and PDF formats.</p>
+            </div>
+        </div>
+
+        <!-- Download Section -->
+        {% if resume.pdf_file %}
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <h4 class="card-title">
+                        <i class="fas fa-download"></i> Download Your Resume
+                    </h4>
+                    <p class="card-text">Get your professional PDF resume ready for immediate use.</p>
+                    <a href="{% url 'hirevision:download_pdf' resume.id %}" class="btn btn-success btn-lg">
+                        <i class="fas fa-file-pdf"></i> Download PDF
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- LaTeX Code Section -->
+        {% if resume.latex_content %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">
+                        <i class="fas fa-code"></i> LaTeX Code
+                    </h4>
+                    <p class="card-text">Copy this LaTeX code for customization and compilation.</p>
+                    <div class="bg-light p-3 rounded">
+                        <pre class="mb-0"><code>{{ resume.latex_content }}</code></pre>
+                    </div>
+                    <button class="btn btn-outline-primary mt-3" onclick="copyLatexCode()">
+                        <i class="fas fa-copy"></i> Copy LaTeX Code
+                    </button>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- How to Use Section -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i class="fas fa-question-circle"></i> How to Use
+                </h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center mb-3">
+                            <i class="fas fa-copy fa-2x text-primary mb-2"></i>
+                            <h6>1. Copy the LaTeX code</h6>
+                            <p class="small">Copy the code above for customization</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center mb-3">
+                            <i class="fas fa-download fa-2x text-success mb-2"></i>
+                            <h6>2. Download the PDF</h6>
+                            <p class="small">Get the PDF below for immediate use</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center mb-3">
+                            <i class="fas fa-cog fa-2x text-warning mb-2"></i>
+                            <h6>3. Compile LaTeX</h6>
+                            <p class="small">Use online editors or local installation</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compilation Options -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i class="fas fa-tools"></i> Compilation Options
+                </h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-globe text-primary"></i> Option 1: Online LaTeX Editor</h6>
+                        <ul class="list-unstyled">
+                            <li>• Go to <a href="https://www.overleaf.com/" target="_blank">Overleaf</a> (free)</li>
+                            <li>• Create a new project</li>
+                            <li>• Paste the code and compile</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-desktop text-success"></i> Option 2: Local Installation</h6>
+                        <ul class="list-unstyled">
+                            <li>• Install TeX Live or MiKTeX</li>
+                            <li>• Install TeXstudio or TeXmaker</li>
+                            <li>• Open .tex file and compile</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-terminal text-warning"></i> Option 3: Command Line</h6>
+                        <ul class="list-unstyled">
+                            <li>• Save as resume.tex</li>
+                            <li>• Run: <code>pdflatex resume.tex</code></li>
+                            <li>• Get resume.pdf</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customization Tips -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i class="fas fa-palette"></i> Customization Tips
+                </h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-font text-primary"></i> <strong>Fonts:</strong> Uncomment different font options in the header</li>
+                            <li><i class="fas fa-palette text-success"></i> <strong>Colors:</strong> Modify the color scheme in the header</li>
+                            <li><i class="fas fa-ruler text-warning"></i> <strong>Layout:</strong> Adjust margins and spacing as needed</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-edit text-info"></i> <strong>Content:</strong> Edit the generated content to match your preferences</li>
+                            <li><i class="fas fa-search text-danger"></i> <strong>ATS Optimization:</strong> Template is designed to be ATS-friendly</li>
+                            <li><i class="fas fa-save text-success"></i> <strong>Save Both:</strong> Keep both .tex and .pdf versions</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pro Tips -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i class="fas fa-star"></i> Pro Tips
+                </h4>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Keep descriptions concise and action-oriented</li>
+                    <li><i class="fas fa-check text-success"></i> Use bullet points for easy scanning</li>
+                    <li><i class="fas fa-check text-success"></i> Include relevant keywords from job descriptions</li>
+                    <li><i class="fas fa-check text-success"></i> Proofread carefully before submitting</li>
+                    <li><i class="fas fa-check text-success"></i> The LaTeX community is very helpful - check out <a href="https://tex.stackexchange.com/" target="_blank">TeX Stack Exchange</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card">
+            <div class="card-body text-center">
+                <h4 class="card-title">What's Next?</h4>
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <a href="{% url 'hirevision:resume_analyzer' %}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-file-alt"></i> Analyze Resume
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="{% url 'hirevision:learning_path_analyzer' %}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-road"></i> Plan Learning
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="{% url 'hirevision:resume_builder' %}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-redo"></i> Build Another
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resume Details -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle"></i> Resume Details
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Name:</strong> {{ resume.name }}</p>
+                        <p><strong>Generated Date:</strong> {{ resume.created_at|date:"F j, Y, g:i a" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Email:</strong> {{ resume.email|default:"Not provided" }}</p>
+                        <p><strong>Resume ID:</strong> #{{ resume.id }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyLatexCode() {
+    const latexCode = `{{ resume.latex_content|escapejs }}`;
+    navigator.clipboard.writeText(latexCode).then(function() {
+        alert('LaTeX code copied to clipboard!');
+    }, function(err) {
+        console.error('Could not copy text: ', err);
+    });
+}
+</script>
+{% endblock %} 

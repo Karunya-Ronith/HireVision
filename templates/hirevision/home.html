@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}HireVision - AI Career Coach{% endblock %}
+
+{% block content %}
+<!-- Professional header -->
+<div class="header-container">
+    <h1>HireVision</h1>
+    <p>Your AI-Powered Career Success Platform</p>
+</div>
+
+<!-- Welcome section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Welcome to HireVision</h2>
+                <p class="card-text text-center lead">
+                    Your comprehensive AI-powered platform for career success. Get personalized insights, 
+                    optimize your resume for ATS systems, and create a roadmap to your dream career.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Services section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="text-center mb-4">What We Offer</h3>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Resume ATS Analyzer -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
+                <h4 class="card-title">Resume ATS Analyzer</h4>
+                <p class="card-text">
+                    Upload your resume and get AI-powered analysis to optimize it for Applicant Tracking Systems (ATS).
+                </p>
+                <ul class="list-unstyled text-start">
+                    <li><i class="fas fa-check text-success"></i> ATS Score (0-100)</li>
+                    <li><i class="fas fa-check text-success"></i> Strengths & Weaknesses</li>
+                    <li><i class="fas fa-check text-success"></i> Skills Gap Analysis</li>
+                    <li><i class="fas fa-check text-success"></i> Upskilling Recommendations</li>
+                </ul>
+                <a href="{% url 'hirevision:resume_analyzer' %}" class="btn btn-primary">
+                    <i class="fas fa-rocket"></i> Get Started
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Learning Path Analyzer -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-road fa-3x text-primary mb-3"></i>
+                <h4 class="card-title">Learning Path Analyzer</h4>
+                <p class="card-text">
+                    Input your current skills and dream role to get a detailed roadmap to your career goals.
+                </p>
+                <ul class="list-unstyled text-start">
+                    <li><i class="fas fa-check text-success"></i> Step-by-Step Learning Plan</li>
+                    <li><i class="fas fa-check text-success"></i> Curated Resources</li>
+                    <li><i class="fas fa-check text-success"></i> Hands-on Projects</li>
+                    <li><i class="fas fa-check text-success"></i> Timeline & Success Metrics</li>
+                </ul>
+                <a href="{% url 'hirevision:learning_path_analyzer' %}" class="btn btn-primary">
+                    <i class="fas fa-road"></i> Plan Your Path
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resume Builder -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-tools fa-3x text-primary mb-3"></i>
+                <h4 class="card-title">Resume Builder</h4>
+                <p class="card-text">
+                    Create professional LaTeX resumes with our AI-powered builder.
+                </p>
+                <ul class="list-unstyled text-start">
+                    <li><i class="fas fa-check text-success"></i> Professional Templates</li>
+                    <li><i class="fas fa-check text-success"></i> ATS-Optimized</li>
+                    <li><i class="fas fa-check text-success"></i> Customizable Sections</li>
+                    <li><i class="fas fa-check text-success"></i> Easy Export</li>
+                </ul>
+                <a href="{% url 'hirevision:resume_builder' %}" class="btn btn-primary">
+                    <i class="fas fa-tools"></i> Build Resume
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Get Started section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <h3 class="card-title">Get Started</h3>
+                <p class="card-text">
+                    Choose your path above to begin your career journey with AI-powered insights!
+                </p>
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <a href="{% url 'hirevision:resume_analyzer' %}" class="btn btn-outline-primary btn-lg w-100 mb-2">
+                            <i class="fas fa-file-alt"></i> Analyze Resume
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{% url 'hirevision:learning_path_analyzer' %}" class="btn btn-outline-primary btn-lg w-100 mb-2">
+                            <i class="fas fa-road"></i> Plan Learning
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{% url 'hirevision:resume_builder' %}" class="btn btn-outline-primary btn-lg w-100 mb-2">
+                            <i class="fas fa-tools"></i> Build Resume
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pro Tip -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="fas fa-lightbulb"></i>
+            <strong>Pro Tip:</strong> Use both tools together for maximum impact - analyze your resume first, 
+            then create a learning path to fill any gaps!
+        </div>
+    </div>
+</div>
+{% endblock %} 

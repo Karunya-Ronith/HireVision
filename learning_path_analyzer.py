@@ -1,20 +1,30 @@
 import os
 from openai import OpenAI
-from config import OPENAI_API_KEY, OPENAI_MODEL, OPENAI_TEMPERATURE, OPENAI_MAX_TOKENS, ERROR_MESSAGES
-from utils import (
-    create_error_analysis, retry_with_backoff, handle_api_error, 
-    sanitize_input, extract_json_from_text
+from config import (
+    OPENAI_API_KEY,
+    OPENAI_MODEL,
+    OPENAI_TEMPERATURE,
+    OPENAI_MAX_TOKENS,
+    ERROR_MESSAGES,
 )
+from utils import (
+    create_error_analysis,
+    retry_with_backoff,
+    handle_api_error,
+    sanitize_input,
+    extract_json_from_text,
+)
+
 
 def analyze_learning_path(current_skills, dream_role):
     """Analyze current skills against dream role and provide detailed learning path with enhanced error handling"""
     if not current_skills or not dream_role:
         return "Please provide both your current skills and dream role."
-    
+
     # Sanitize inputs
     current_skills = sanitize_input(current_skills)
     dream_role = sanitize_input(dream_role)
-    
+
     # Check if OpenAI API key is available
     if not OPENAI_API_KEY or OPENAI_API_KEY == "your_openai_api_key_here":
         return """
@@ -27,7 +37,7 @@ To get AI-powered learning path guidance, please:
 3. Add your API key: `OPENAI_API_KEY=your_actual_api_key_here`
 4. Restart the application
 """
-    
+
     def make_api_call():
         """Make the actual API call with retry logic"""
         # Create the enhanced analysis prompt with anti-hallucination instructions
@@ -150,28 +160,33 @@ To get AI-powered learning path guidance, please:
         - Networking and career advice
         - Industry-specific recommendations
         """
-        
+
         # Call OpenAI API
         client = OpenAI(api_key=OPENAI_API_KEY)
         response = client.chat.completions.create(
             model=OPENAI_MODEL,
             messages=[
-                {"role": "system", "content": "You are an expert career coach and learning path specialist. Provide detailed, actionable learning paths with verified resources only. Never hallucinate or invent fake links."},
-                {"role": "user", "content": prompt}
+                {
+                    "role": "system",
+                    "content": "You are an expert career coach and learning path specialist. Provide detailed, actionable learning paths with verified resources only. Never hallucinate or invent fake links.",
+                },
+                {"role": "user", "content": prompt},
             ],
             temperature=OPENAI_TEMPERATURE,
-            max_tokens=OPENAI_MAX_TOKENS
+            max_tokens=OPENAI_MAX_TOKENS,
         )
-        
+
         return response.choices[0].message.content
-    
+
     try:
         # Use retry logic for API calls
         analysis_text = retry_with_backoff(make_api_call)
-        
+
         if not analysis_text:
-            return create_error_analysis("Failed to get response from AI service after multiple attempts")
-        
+            return create_error_analysis(
+                "Failed to get response from AI service after multiple attempts"
+            )
+
         # Try to extract JSON from the response
         analysis = extract_json_from_text(analysis_text)
         if analysis is None:
@@ -183,20 +198,21 @@ To get AI-powered learning path guidance, please:
                 "timeline": "See detailed analysis above",
                 "success_metrics": ["Review the analysis"],
                 "career_advice": analysis_text,
-                "networking_tips": ["Refer to the analysis"]
+                "networking_tips": ["Refer to the analysis"],
             }
-        
+
         return analysis
-        
+
     except Exception as e:
         error_message = handle_api_error(e)
         return create_error_analysis(error_message)
+
 
 def format_learning_path_output(analysis):
     """Format the learning path analysis into a readable markdown output with resource verification"""
     if not isinstance(analysis, dict):
         return str(analysis)
-    
+
     output = f"""
 ## 🎯 Dream Role Analysis
 
@@ -205,13 +221,13 @@ def format_learning_path_output(analysis):
 ## 🔍 Skills Gap Analysis
 
 """
-    
-    for skill in analysis.get('skills_gap', []):
+
+    for skill in analysis.get("skills_gap", []):
         output += f"• {skill}\n"
-    
+
     output += "\n## 📚 Detailed Learning Path\n"
-    
-    for phase in analysis.get('learning_path', []):
+
+    for phase in analysis.get("learning_path", []):
         output += f"""
 ### {phase.get('phase', 'Phase')} ({phase.get('duration', 'Duration TBD')})
 
@@ -219,19 +235,19 @@ def format_learning_path_output(analysis):
 
 **Skills to Learn:**
 """
-        for skill in phase.get('skills_to_learn', []):
+        for skill in phase.get("skills_to_learn", []):
             output += f"• {skill}\n"
-        
+
         output += "\n**📖 Learning Resources:**\n"
-        for resource in phase.get('resources', []):
-            resource_type = resource.get('type', 'Resource')
-            resource_name = resource.get('name', 'Name')
-            resource_url = resource.get('url', '#')
-            resource_desc = resource.get('description', 'No description')
-            resource_diff = resource.get('difficulty', 'Not specified')
-            is_verified = resource.get('verified', False)
-            
-            if is_verified and resource_url and resource_url != '#':
+        for resource in phase.get("resources", []):
+            resource_type = resource.get("type", "Resource")
+            resource_name = resource.get("name", "Name")
+            resource_url = resource.get("url", "#")
+            resource_desc = resource.get("description", "No description")
+            resource_diff = resource.get("difficulty", "Not specified")
+            is_verified = resource.get("verified", False)
+
+            if is_verified and resource_url and resource_url != "#":
                 output += f"""
 **{resource_type}**: [{resource_name}]({resource_url})
 - **Difficulty**: {resource_diff}
@@ -245,19 +261,19 @@ def format_learning_path_output(analysis):
 - **Why this resource**: {resource_desc}
 - **⚠️ Resource not verified - please research before using**
 """
-        
+
         output += "\n**🛠️ Hands-on Projects:**\n"
-        for project in phase.get('projects', []):
+        for project in phase.get("projects", []):
             output += f"""
 **{project.get('name', 'Project Name')}**
 - **Description**: {project.get('description', 'No description')}
 - **Skills practiced**: {', '.join(project.get('skills_practiced', []))}
 """
-            if project.get('github_template'):
+            if project.get("github_template"):
                 output += f"- **Template**: [GitHub Repository]({project.get('github_template')})\n"
-        
+
         output += "\n---\n"
-    
+
     output += f"""
 ## ⏱️ Overall Timeline
 
@@ -266,9 +282,9 @@ def format_learning_path_output(analysis):
 ## 📊 Success Metrics
 
 """
-    for metric in analysis.get('success_metrics', []):
+    for metric in analysis.get("success_metrics", []):
         output += f"• {metric}\n"
-    
+
     output += f"""
 ## 💼 Career Advice
 
@@ -277,30 +293,31 @@ def format_learning_path_output(analysis):
 ## 🤝 Networking Tips
 
 """
-    for tip in analysis.get('networking_tips', []):
+    for tip in analysis.get("networking_tips", []):
         output += f"• {tip}\n"
-    
+
     return output
+
 
 def process_learning_path_analysis(current_skills, dream_role):
     """Main function to process learning path analysis with comprehensive error handling"""
     try:
         if not current_skills or not dream_role:
             return "## ❌ Input Error\n\nPlease provide both your current skills and dream role."
-        
+
         # Check if inputs are meaningful
         if len(current_skills.strip()) < 10:
             return "## ❌ Insufficient Skills Information\n\nPlease provide more detailed information about your current skills and experience."
-        
+
         if len(dream_role.strip()) < 10:
             return "## ❌ Insufficient Role Information\n\nPlease provide more detailed information about your dream role."
-        
+
         # Analyze learning path
         analysis = analyze_learning_path(current_skills, dream_role)
-        
+
         # Format the output
         return format_learning_path_output(analysis)
-        
+
     except Exception as e:
         error_message = handle_api_error(e)
-        return f"## ❌ Unexpected Error\n\n{error_message}\n\nPlease try again or contact support if the issue persists." 
+        return f"## ❌ Unexpected Error\n\n{error_message}\n\nPlease try again or contact support if the issue persists."

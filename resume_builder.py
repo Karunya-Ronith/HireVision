@@ -6,70 +6,73 @@ from config import OPENAI_API_KEY, OPENAI_MODEL, OPENAI_TEMPERATURE, OPENAI_MAX_
 from utils import retry_with_backoff, handle_api_error, sanitize_input
 from pdf_generator import generate_pdf_from_latex, get_sample_pdf_path
 
+
 def validate_resume_data(data: Dict[str, Any]) -> tuple[bool, str]:
     """Validate the resume data provided by user"""
-    required_fields = ['name', 'education', 'projects', 'skills']
-    
+    required_fields = ["name", "education", "projects", "skills"]
+
     for field in required_fields:
         if not data.get(field):
             return False, f"Missing required field: {field}"
-    
+
     # Validate name
-    if len(data['name'].strip()) < 2:
+    if len(data["name"].strip()) < 2:
         return False, "Name must be at least 2 characters long"
-    
+
     # Validate education
-    if not isinstance(data['education'], list) or len(data['education']) == 0:
+    if not isinstance(data["education"], list) or len(data["education"]) == 0:
         return False, "Education must be a list with at least one entry"
-    
+
     # Validate projects
-    if not isinstance(data['projects'], list) or len(data['projects']) == 0:
+    if not isinstance(data["projects"], list) or len(data["projects"]) == 0:
         return False, "Projects must be a list with at least one entry"
-    
+
     # Validate skills
-    if not isinstance(data['skills'], dict) or not data['skills']:
+    if not isinstance(data["skills"], dict) or not data["skills"]:
         return False, "Skills must be provided"
-    
+
     return True, ""
+
 
 def generate_latex_resume(data: Dict[str, Any]) -> str:
     """Generate LaTeX resume from user data"""
-    
+
     # Validate data first
     is_valid, error_msg = validate_resume_data(data)
     if not is_valid:
         return f"Error: {error_msg}"
-    
+
     # Sanitize inputs
-    name = sanitize_input(data['name'])
-    email = sanitize_input(data.get('email', ''))
-    phone = sanitize_input(data.get('phone', ''))
-    linkedin = sanitize_input(data.get('linkedin', ''))
-    github = sanitize_input(data.get('github', ''))
-    
+    name = sanitize_input(data["name"])
+    email = sanitize_input(data.get("email", ""))
+    phone = sanitize_input(data.get("phone", ""))
+    linkedin = sanitize_input(data.get("linkedin", ""))
+    github = sanitize_input(data.get("github", ""))
+
     # Generate LaTeX content
     latex_content = generate_latex_header()
     latex_content += generate_heading_section(name, email, phone, linkedin, github)
-    latex_content += generate_education_section(data['education'])
-    
-    if data.get('experience'):
-        latex_content += generate_experience_section(data['experience'])
-    
-    latex_content += generate_projects_section(data['projects'])
-    latex_content += generate_skills_section(data['skills'])
-    
-    if data.get('research_papers'):
-        latex_content += generate_research_section(data['research_papers'])
-    
-    if data.get('achievements'):
-        latex_content += generate_achievements_section(data['achievements'])
-    
-    if data.get('others'):
-        latex_content += generate_others_section(data['others'])
-    
+    latex_content += generate_education_section(data["education"])
+
+    if data.get("experience"):
+        latex_content += generate_experience_section(data["experience"])
+
+    latex_content += generate_projects_section(data["projects"])
+    latex_content += generate_skills_section(data["skills"])
+
+    if data.get("research_papers"):
+        latex_content += generate_research_section(data["research_papers"])
+
+    if data.get("achievements"):
+        latex_content += generate_achievements_section(data["achievements"])
+
+    if data.get("others"):
+        latex_content += generate_others_section(data["others"])
+
     latex_content += generate_latex_footer()
-    
+
     return latex_content
+
 
 def generate_latex_header() -> str:
     """Generate LaTeX document header"""
@@ -182,10 +185,13 @@ def generate_latex_header() -> str:
 
 """
 
-def generate_heading_section(name: str, email: str, phone: str, linkedin: str, github: str) -> str:
+
+def generate_heading_section(
+    name: str, email: str, phone: str, linkedin: str, github: str
+) -> str:
     """Generate the heading section with contact information"""
     contact_parts = []
-    
+
     if phone:
         contact_parts.append(phone)
     if email:
@@ -194,9 +200,9 @@ def generate_heading_section(name: str, email: str, phone: str, linkedin: str, g
         contact_parts.append(f"\\href{{{linkedin}}}{{\\underline{{{linkedin}}}}}")
     if github:
         contact_parts.append(f"\\href{{{github}}}{{\\underline{{{github}}}}}")
-    
+
     contact_line = " $|$ ".join(contact_parts) if contact_parts else ""
-    
+
     return f"""
 %----------HEADING----------
 \\begin{{center}}
@@ -206,53 +212,57 @@ def generate_heading_section(name: str, email: str, phone: str, linkedin: str, g
 
 """
 
+
 def generate_education_section(education: List[Dict[str, Any]]) -> str:
     """Generate education section"""
     latex = "\n%-----------EDUCATION-----------\n\\section{Education}\n  \\resumeSubHeadingListStart\n"
-    
+
     for edu in education:
-        institution = sanitize_input(edu.get('institution', ''))
-        location = sanitize_input(edu.get('location', ''))
-        degree = sanitize_input(edu.get('degree', ''))
-        duration = sanitize_input(edu.get('duration', ''))
-        
+        institution = sanitize_input(edu.get("institution", ""))
+        location = sanitize_input(edu.get("location", ""))
+        degree = sanitize_input(edu.get("degree", ""))
+        duration = sanitize_input(edu.get("duration", ""))
+
         if institution and degree:
             latex += f"    \\resumeSubheading\n      {{{institution}}}{{{location}}}\n      {{{degree}}}{{{duration}}}\n"
-    
+
     latex += "  \\resumeSubHeadingListEnd\n"
     return latex
+
 
 def generate_experience_section(experience: List[Dict[str, Any]]) -> str:
     """Generate experience section"""
     latex = "\n%-----------EXPERIENCE-----------\n\\section{Experience}\n  \\resumeSubHeadingListStart\n"
-    
+
     for exp in experience:
-        title = sanitize_input(exp.get('title', ''))
-        company = sanitize_input(exp.get('company', ''))
-        location = sanitize_input(exp.get('location', ''))
-        duration = sanitize_input(exp.get('duration', ''))
-        description = exp.get('description', [])
-        positions = exp.get('positions', [])  # For multiple positions at same company
-        
+        title = sanitize_input(exp.get("title", ""))
+        company = sanitize_input(exp.get("company", ""))
+        location = sanitize_input(exp.get("location", ""))
+        duration = sanitize_input(exp.get("duration", ""))
+        description = exp.get("description", [])
+        positions = exp.get("positions", [])  # For multiple positions at same company
+
         if title and company:
             latex += f"\n    \\resumeSubheading\n      {{{title}}}{{{duration}}}\n      {{{company}}}{{{location}}}\n"
-            
+
             if description:
                 latex += "      \\resumeItemListStart\n"
                 for item in description:
                     if isinstance(item, str):
                         latex += f"        \\resumeItem{{{sanitize_input(item)}}}\n"
                 latex += "      \\resumeItemListEnd\n"
-            
+
             # Handle multiple positions at the same company
             if positions:
                 for position in positions:
-                    pos_title = sanitize_input(position.get('title', ''))
-                    pos_duration = sanitize_input(position.get('duration', ''))
-                    pos_description = position.get('description', [])
-                    
+                    pos_title = sanitize_input(position.get("title", ""))
+                    pos_duration = sanitize_input(position.get("duration", ""))
+                    pos_description = position.get("description", [])
+
                     if pos_title:
-                        latex += f"\n% -----------Multiple Positions Heading-----------\n"
+                        latex += (
+                            f"\n% -----------Multiple Positions Heading-----------\n"
+                        )
                         latex += f"    \\resumeSubSubheading\n"
                         latex += f"     {{{pos_title}}}{{{pos_duration}}}\n"
                         if pos_description:
@@ -263,168 +273,221 @@ def generate_experience_section(experience: List[Dict[str, Any]]) -> str:
                             latex += "     \\resumeItemListEnd\n"
                         latex += "    \\resumeSubHeadingListEnd\n"
                         latex += "%-------------------------------------------\n"
-    
+
     latex += "\n  \\resumeSubHeadingListEnd\n"
     return latex
+
 
 def generate_projects_section(projects: List[Dict[str, Any]]) -> str:
     """Generate projects section"""
     latex = "\n%-----------PROJECTS-----------\n\\section{Projects}\n    \\resumeSubHeadingListStart\n"
-    
+
     for project in projects:
-        name = sanitize_input(project.get('name', ''))
-        tech_stack = sanitize_input(project.get('tech_stack', ''))
-        description = project.get('description', [])
-        
+        name = sanitize_input(project.get("name", ""))
+        tech_stack = sanitize_input(project.get("tech_stack", ""))
+        description = project.get("description", [])
+
         if name:
             tech_info = f" $|$ \\emph{{{tech_stack}}}" if tech_stack else ""
             latex += f"      \\resumeProjectHeading\n          {{\\textbf{{{name}}}{tech_info}}}\n"
-            
+
             if description:
                 latex += "          \\resumeItemListStart\n"
                 for item in description:
                     if isinstance(item, str):
                         latex += f"            \\resumeItem{{{sanitize_input(item)}}}\n"
                 latex += "          \\resumeItemListEnd\n"
-    
+
     latex += "    \\resumeSubHeadingListEnd\n"
     return latex
+
 
 def generate_skills_section(skills: Dict[str, List[str]]) -> str:
     """Generate skills section"""
     latex = "\n%-----------PROGRAMMING SKILLS-----------\n\\section{Technical Skills}\n \\begin{itemize}[leftmargin=0.15in, label={}]\n    \\small{\\item{\n"
-    
+
     skill_lines = []
     for category, skill_list in skills.items():
         if skill_list:
             skills_str = ", ".join([sanitize_input(skill) for skill in skill_list])
             skill_lines.append(f"     \\textbf{{{category}}}{{: {skills_str}}} \\\\")
-    
+
     latex += "\n".join(skill_lines)
     latex += "\n    }}\n \\end{itemize}\n"
     return latex
 
+
 def generate_research_section(research_papers: List[Dict[str, Any]]) -> str:
     """Generate research papers section"""
     latex = "\n%-----------RESEARCH PAPERS-----------\n\\section{Research Papers}\n  \\resumeSubHeadingListStart\n"
-    
+
     for paper in research_papers:
-        title = sanitize_input(paper.get('title', ''))
-        authors = sanitize_input(paper.get('authors', ''))
-        journal = sanitize_input(paper.get('journal', ''))
-        year = sanitize_input(paper.get('year', ''))
-        
+        title = sanitize_input(paper.get("title", ""))
+        authors = sanitize_input(paper.get("authors", ""))
+        journal = sanitize_input(paper.get("journal", ""))
+        year = sanitize_input(paper.get("year", ""))
+
         if title:
             latex += f"    \\resumeSubheading\n      {{{title}}}{{{year}}}\n      {{{authors}}}{{{journal}}}\n"
-    
+
     latex += "  \\resumeSubHeadingListEnd\n"
     return latex
+
 
 def generate_achievements_section(achievements: List[str]) -> str:
     """Generate achievements section"""
     latex = "\n%-----------ACHIEVEMENTS-----------\n\\section{Achievements}\n \\begin{itemize}[leftmargin=0.15in, label={}]\n"
-    
+
     for achievement in achievements:
         if isinstance(achievement, str):
             latex += f"    \\small{{\\item{{{sanitize_input(achievement)}}}}}\n"
-    
+
     latex += " \\end{itemize}\n"
     return latex
+
 
 def generate_others_section(others: List[str]) -> str:
     """Generate others section"""
     latex = "\n%-----------OTHERS-----------\n\\section{Others}\n \\begin{itemize}[leftmargin=0.15in, label={}]\n"
-    
+
     for item in others:
         if isinstance(item, str):
             latex += f"    \\small{{\\item{{{sanitize_input(item)}}}}}\n"
-    
+
     latex += " \\end{itemize}\n"
     return latex
+
 
 def generate_latex_footer() -> str:
     """Generate LaTeX document footer"""
     return "\n%-------------------------------------------\n\\end{document}"
 
-def process_resume_builder(name, email, phone, linkedin, github, education, experience, projects, skills, research_papers, achievements, others):
+
+def process_resume_builder(
+    name,
+    email,
+    phone,
+    linkedin,
+    github,
+    education,
+    experience,
+    projects,
+    skills,
+    research_papers,
+    achievements,
+    others,
+):
     """Main function to process resume building with error handling"""
     try:
         import json
-        
+
         # Parse JSON inputs
         user_data = {
-            'name': name,
-            'email': email,
-            'phone': phone,
-            'linkedin': linkedin,
-            'github': github
+            "name": name,
+            "email": email,
+            "phone": phone,
+            "linkedin": linkedin,
+            "github": github,
         }
-        
+
         # Parse education
         try:
             if education and education.strip():
-                user_data['education'] = json.loads(education)
+                user_data["education"] = json.loads(education)
             else:
-                return "## ❌ Error\n\nEducation is required. Please provide at least one education entry.", None
+                return (
+                    "## ❌ Error\n\nEducation is required. Please provide at least one education entry.",
+                    None,
+                )
         except json.JSONDecodeError:
-            return "## ❌ Error\n\nInvalid JSON format in Education field. Please check the format and try again.", None
-        
+            return (
+                "## ❌ Error\n\nInvalid JSON format in Education field. Please check the format and try again.",
+                None,
+            )
+
         # Parse experience (optional)
         try:
             if experience and experience.strip():
-                user_data['experience'] = json.loads(experience)
+                user_data["experience"] = json.loads(experience)
         except json.JSONDecodeError:
-            return "## ❌ Error\n\nInvalid JSON format in Experience field. Please check the format and try again.", None
-        
+            return (
+                "## ❌ Error\n\nInvalid JSON format in Experience field. Please check the format and try again.",
+                None,
+            )
+
         # Parse projects
         try:
             if projects and projects.strip():
-                user_data['projects'] = json.loads(projects)
+                user_data["projects"] = json.loads(projects)
             else:
-                return "## ❌ Error\n\nProjects are required. Please provide at least one project.", None
+                return (
+                    "## ❌ Error\n\nProjects are required. Please provide at least one project.",
+                    None,
+                )
         except json.JSONDecodeError:
-            return "## ❌ Error\n\nInvalid JSON format in Projects field. Please check the format and try again.", None
-        
+            return (
+                "## ❌ Error\n\nInvalid JSON format in Projects field. Please check the format and try again.",
+                None,
+            )
+
         # Parse skills
         try:
             if skills and skills.strip():
-                user_data['skills'] = json.loads(skills)
+                user_data["skills"] = json.loads(skills)
             else:
-                return "## ❌ Error\n\nSkills are required. Please provide your skills.", None
+                return (
+                    "## ❌ Error\n\nSkills are required. Please provide your skills.",
+                    None,
+                )
         except json.JSONDecodeError:
-            return "## ❌ Error\n\nInvalid JSON format in Skills field. Please check the format and try again.", None
-        
+            return (
+                "## ❌ Error\n\nInvalid JSON format in Skills field. Please check the format and try again.",
+                None,
+            )
+
         # Parse optional sections
         try:
             if research_papers and research_papers.strip():
-                user_data['research_papers'] = json.loads(research_papers)
+                user_data["research_papers"] = json.loads(research_papers)
         except json.JSONDecodeError:
-            return "## ❌ Error\n\nInvalid JSON format in Research Papers field. Please check the format and try again.", None
-        
+            return (
+                "## ❌ Error\n\nInvalid JSON format in Research Papers field. Please check the format and try again.",
+                None,
+            )
+
         try:
             if achievements and achievements.strip():
-                user_data['achievements'] = json.loads(achievements)
+                user_data["achievements"] = json.loads(achievements)
         except json.JSONDecodeError:
-            return "## ❌ Error\n\nInvalid JSON format in Achievements field. Please check the format and try again.", None
-        
+            return (
+                "## ❌ Error\n\nInvalid JSON format in Achievements field. Please check the format and try again.",
+                None,
+            )
+
         try:
             if others and others.strip():
-                user_data['others'] = json.loads(others)
+                user_data["others"] = json.loads(others)
         except json.JSONDecodeError:
-            return "## ❌ Error\n\nInvalid JSON format in Others field. Please check the format and try again.", None
-        
+            return (
+                "## ❌ Error\n\nInvalid JSON format in Others field. Please check the format and try again.",
+                None,
+            )
+
         # Generate LaTeX resume
         latex_content = generate_latex_resume(user_data)
-        
+
         if latex_content.startswith("Error:"):
             return f"## ❌ Resume Generation Error\n\n{latex_content}", None
-        
+
         # Generate PDF
         pdf_path = generate_pdf_from_latex(latex_content)
-        
+
         # Return both LaTeX content and PDF path
         return latex_content, pdf_path
-        
+
     except Exception as e:
         error_message = handle_api_error(e)
-        return f"## ❌ Unexpected Error\n\n{error_message}\n\nPlease try again or contact support if the issue persists.", None 
+        return (
+            f"## ❌ Unexpected Error\n\n{error_message}\n\nPlease try again or contact support if the issue persists.",
+            None,
+        )

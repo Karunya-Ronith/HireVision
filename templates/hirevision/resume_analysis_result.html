@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block title %}Resume Analysis Result - HireVision{% endblock %}
+
+{% block content %}
+<!-- Professional header -->
+<div class="header-container">
+    <h1>Resume Analysis Result</h1>
+    <p>Your AI-Powered Resume Analysis</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <!-- ATS Score Card -->
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <h2 class="card-title">
+                    <i class="fas fa-chart-line"></i> ATS Score
+                </h2>
+                <div class="display-4 text-primary mb-3">{{ analysis.ats_score }}/100</div>
+                <p class="lead">{{ analysis.score_explanation }}</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Strengths -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4 class="card-title text-success">
+                            <i class="fas fa-plus-circle"></i> Strengths
+                        </h4>
+                        {% if analysis.strengths %}
+                            <ul class="list-unstyled">
+                                {% for strength in analysis.strengths %}
+                                    <li><i class="fas fa-check text-success"></i> {{ strength }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">No specific strengths identified.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weaknesses -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4 class="card-title text-warning">
+                            <i class="fas fa-exclamation-triangle"></i> Areas for Improvement
+                        </h4>
+                        {% if analysis.weaknesses %}
+                            <ul class="list-unstyled">
+                                {% for weakness in analysis.weaknesses %}
+                                    <li><i class="fas fa-arrow-right text-warning"></i> {{ weakness }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">No specific areas for improvement identified.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Recommendations -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4 class="card-title text-info">
+                            <i class="fas fa-lightbulb"></i> Recommendations
+                        </h4>
+                        {% if analysis.recommendations %}
+                            <ul class="list-unstyled">
+                                {% for rec in analysis.recommendations %}
+                                    <li><i class="fas fa-arrow-right text-info"></i> {{ rec }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">No specific recommendations available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills Gap -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4 class="card-title text-danger">
+                            <i class="fas fa-gap"></i> Skills Gap Analysis
+                        </h4>
+                        {% if analysis.skills_gap %}
+                            <ul class="list-unstyled">
+                                {% for skill in analysis.skills_gap %}
+                                    <li><i class="fas fa-times text-danger"></i> {{ skill }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">No significant skills gaps identified.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upskilling Suggestions -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title text-success">
+                    <i class="fas fa-graduation-cap"></i> Upskilling Suggestions
+                </h4>
+                {% if analysis.upskilling_suggestions %}
+                    <div class="row">
+                        {% for suggestion in analysis.upskilling_suggestions %}
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start mb-2">
+                                    <i class="fas fa-graduation-cap text-success mt-1 me-2"></i>
+                                    <span>{{ suggestion }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No specific upskilling suggestions available.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Overall Assessment -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i class="fas fa-clipboard-check"></i> Overall Assessment
+                </h4>
+                <p class="lead">{{ analysis.overall_assessment }}</p>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card">
+            <div class="card-body text-center">
+                <h4 class="card-title">What's Next?</h4>
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <a href="{% url 'hirevision:learning_path_analyzer' %}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-road"></i> Plan Learning Path
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="{% url 'hirevision:resume_builder' %}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-tools"></i> Build New Resume
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="{% url 'hirevision:resume_analyzer' %}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-redo"></i> Analyze Another
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Details -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle"></i> Analysis Details
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Analysis Date:</strong> {{ analysis.created_at|date:"F j, Y, g:i a" }}</p>
+                        <p><strong>Resume File:</strong> {{ analysis.resume_file.name|slice:"9:" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Job Description Length:</strong> {{ analysis.job_description|length }} characters</p>
+                        <p><strong>Analysis ID:</strong> #{{ analysis.id }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

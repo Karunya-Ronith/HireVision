@@ -16,7 +16,7 @@ DEMO_TITLE = "Resume ATS Analyzer - Demo"
 THEME = "soft"
 
 # File Configuration
-SUPPORTED_FILE_TYPES = [".pdf", "docx", ".doc", ".tex", ".txt"]
+SUPPORTED_FILE_TYPES = [".pdf", ".docx", ".doc", ".tex", ".txt"]
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
 # UI Configuration
@@ -29,7 +29,7 @@ ATS_SCORE_RANGES = {
     "excellent": (85, 100),
     "good": (65, 84),
     "fair": (45, 64),
-    "poor": (0, 44)
+    "poor": (0, 44),
 }
 
 # Error Messages
@@ -45,15 +45,15 @@ ERROR_MESSAGES = {
     "rate_limit_error": "Rate limit exceeded. Please wait a moment and try again.",
     "server_error": "Server error. Please try again later.",
     "timeout_error": "Request timed out. Please try again.",
-    "unknown_error": "An unexpected error occurred. Please try again."
+    "unknown_error": "An unexpected error occurred. Please try again.",
 }
 
 # Success Messages
 SUCCESS_MESSAGES = {
     "analysis_complete": "Analysis completed successfully!",
-    "demo_mode": "Demo mode - showing interface functionality"
+    "demo_mode": "Demo mode - showing interface functionality",
 }
 
 # Retry Configuration
 MAX_RETRIES = 3
-RETRY_DELAY = 1  # seconds 
+RETRY_DELAY = 1  # seconds

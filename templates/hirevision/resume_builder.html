@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% block title %}Resume Builder - HireVision{% endblock %}
+
+{% block content %}
+<!-- Professional header -->
+<div class="header-container">
+    <h1>Resume Builder</h1>
+    <p>AI-Powered Professional Resume Creation</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">
+                    <i class="fas fa-tools"></i> Build Your Professional Resume
+                </h3>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Personal Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                <i class="fas fa-user"></i> Full Name *
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.name.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                <i class="fas fa-envelope"></i> Email
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.email.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="{{ form.phone.id_for_label }}" class="form-label">
+                                <i class="fas fa-phone"></i> Phone
+                            </label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.phone.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.linkedin.id_for_label }}" class="form-label">
+                                <i class="fab fa-linkedin"></i> LinkedIn
+                            </label>
+                            {{ form.linkedin }}
+                            {% if form.linkedin.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.linkedin.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="{{ form.github.id_for_label }}" class="form-label">
+                                <i class="fab fa-github"></i> GitHub
+                            </label>
+                            {{ form.github }}
+                            {% if form.github.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.github.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Education -->
+                    <div class="mb-4">
+                        <label for="{{ form.education.id_for_label }}" class="form-label">
+                            <i class="fas fa-graduation-cap"></i> Education *
+                        </label>
+                        {{ form.education }}
+                        {% if form.education.errors %}
+                            <div class="text-danger">
+                                {% for error in form.education.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Enter in JSON format: [{"degree": "Bachelor of Science", "school": "University Name", "year": "2020", "gpa": "3.8"}]
+                        </div>
+                    </div>
+                    
+                    <!-- Experience -->
+                    <div class="mb-4">
+                        <label for="{{ form.experience.id_for_label }}" class="form-label">
+                            <i class="fas fa-briefcase"></i> Work Experience
+                        </label>
+                        {{ form.experience }}
+                        {% if form.experience.errors %}
+                            <div class="text-danger">
+                                {% for error in form.experience.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Enter in JSON format: [{"title": "Software Engineer", "company": "Company Name", "duration": "2020-2023", "description": "Job description"}]
+                        </div>
+                    </div>
+                    
+                    <!-- Projects -->
+                    <div class="mb-4">
+                        <label for="{{ form.projects.id_for_label }}" class="form-label">
+                            <i class="fas fa-code"></i> Projects *
+                        </label>
+                        {{ form.projects }}
+                        {% if form.projects.errors %}
+                            <div class="text-danger">
+                                {% for error in form.projects.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Enter in JSON format: [{"name": "Project Name", "description": "Project description", "technologies": ["Python", "Django"]}]
+                        </div>
+                    </div>
+                    
+                    <!-- Skills -->
+                    <div class="mb-4">
+                        <label for="{{ form.skills.id_for_label }}" class="form-label">
+                            <i class="fas fa-tools"></i> Skills *
+                        </label>
+                        {{ form.skills }}
+                        {% if form.skills.errors %}
+                            <div class="text-danger">
+                                {% for error in form.skills.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Enter in JSON format: {"Programming Languages": ["Python", "JavaScript"], "Frameworks": ["Django", "React"]}
+                        </div>
+                    </div>
+                    
+                    <!-- Research Papers -->
+                    <div class="mb-4">
+                        <label for="{{ form.research_papers.id_for_label }}" class="form-label">
+                            <i class="fas fa-file-alt"></i> Research Papers
+                        </label>
+                        {{ form.research_papers }}
+                        {% if form.research_papers.errors %}
+                            <div class="text-danger">
+                                {% for error in form.research_papers.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Enter in JSON format: [{"title": "Paper Title", "conference": "Conference Name", "year": "2023"}]
+                        </div>
+                    </div>
+                    
+                    <!-- Achievements -->
+                    <div class="mb-4">
+                        <label for="{{ form.achievements.id_for_label }}" class="form-label">
+                            <i class="fas fa-trophy"></i> Achievements
+                        </label>
+                        {{ form.achievements }}
+                        {% if form.achievements.errors %}
+                            <div class="text-danger">
+                                {% for error in form.achievements.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Enter one achievement per line
+                        </div>
+                    </div>
+                    
+                    <!-- Others -->
+                    <div class="mb-4">
+                        <label for="{{ form.others.id_for_label }}" class="form-label">
+                            <i class="fas fa-plus"></i> Additional Information
+                        </label>
+                        {{ form.others }}
+                        {% if form.others.errors %}
+                            <div class="text-danger">
+                                {% for error in form.others.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Any additional information you'd like to include
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-magic"></i> Generate Resume
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Information card -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i class="fas fa-info-circle"></i> What You'll Get
+                </h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-file-pdf text-danger"></i> <strong>Professional PDF</strong> - Ready-to-use resume</li>
+                            <li><i class="fas fa-code text-primary"></i> <strong>LaTeX Code</strong> - For customization</li>
+                            <li><i class="fas fa-eye text-success"></i> <strong>ATS-Optimized</strong> - Machine-readable format</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-palette text-info"></i> <strong>Clean Design</strong> - Professional template</li>
+                            <li><i class="fas fa-edit text-warning"></i> <strong>Customizable</strong> - Easy to modify</li>
+                            <li><i class="fas fa-download text-success"></i> <strong>Easy Export</strong> - Multiple formats</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tips card -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i class="fas fa-lightbulb"></i> Tips for Better Results
+                </h4>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Use action verbs in experience descriptions</li>
+                    <li><i class="fas fa-check text-success"></i> Quantify achievements with numbers</li>
+                    <li><i class="fas fa-check text-success"></i> Include relevant keywords from job descriptions</li>
+                    <li><i class="fas fa-check text-success"></i> Keep descriptions concise and impactful</li>
+                    <li><i class="fas fa-check text-success"></i> Use standard section headers</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Sample card -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i class="fas fa-eye"></i> Need Help?
+                </h4>
+                <p class="card-text">
+                    Check out our sample resume to see the format and get inspiration for your own resume.
+                </p>
+                <a href="{% url 'hirevision:sample_resume' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-file-alt"></i> View Sample Resume
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

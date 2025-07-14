@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Sample Resume - HireVision{% endblock %}
+
+{% block content %}
+<!-- Professional header -->
+<div class="header-container">
+    <h1>Sample Resume Preview</h1>
+    <p>Complete example of what your generated LaTeX resume will look like</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <!-- Sample Info -->
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <h3 class="card-title">
+                    <i class="fas fa-file-alt"></i> Sample Resume Template
+                </h3>
+                <p class="lead">This is a complete example of what your generated LaTeX resume will look like.</p>
+            </div>
+        </div>
+
+        <!-- Key Features -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i class="fas fa-star"></i> Key Features of This Template
+                </h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success"></i> <strong>Professional Layout:</strong> Clean, modern design</li>
+                            <li><i class="fas fa-check text-success"></i> <strong>ATS-Optimized:</strong> Machine-readable formatting</li>
+                            <li><i class="fas fa-check text-success"></i> <strong>Multiple Sections:</strong> Education, Experience, Projects, Skills</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success"></i> <strong>Flexible Structure:</strong> Easy to customize</li>
+                            <li><i class="fas fa-check text-success"></i> <strong>Industry Standard:</strong> Based on proven template</li>
+                            <li><i class="fas fa-check text-success"></i> <strong>Print-Ready:</strong> Professional PDF output</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How to Use -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i class="fas fa-question-circle"></i> How to Use Your Generated Resume
+                </h4>
+                <ol>
+                    <li>Copy the LaTeX code from your generated resume</li>
+                    <li>Paste it into <a href="https://overleaf.com" target="_blank">Overleaf</a> (overleaf.com) or save as .tex file</li>
+                    <li>Compile to get a professional PDF</li>
+                    <li>Customize further if needed</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Pro Tips -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i class="fas fa-lightbulb"></i> Pro Tips
+                </h4>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> The template is designed to be ATS-friendly</li>
+                    <li><i class="fas fa-check text-success"></i> All sections are properly formatted for scanning</li>
+                    <li><i class="fas fa-check text-success"></i> Use action verbs and quantify achievements</li>
+                    <li><i class="fas fa-check text-success"></i> Keep descriptions concise and impactful</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Sample LaTeX Code -->
+        {% if sample_content %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">
+                        <i class="fas fa-code"></i> Sample LaTeX Code
+                    </h4>
+                    <p class="card-text">This is the LaTeX code that generates the sample resume below.</p>
+                    <div class="bg-light p-3 rounded">
+                        <pre class="mb-0"><code>{{ sample_content }}</code></pre>
+                    </div>
+                    <button class="btn btn-outline-primary mt-3" onclick="copySampleCode()">
+                        <i class="fas fa-copy"></i> Copy Sample Code
+                    </button>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Sample PDF Preview -->
+        {% if sample_pdf_path %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">
+                        <i class="fas fa-file-pdf"></i> Sample PDF Preview
+                    </h4>
+                    <p class="card-text">This is what the compiled PDF looks like.</p>
+                    <div class="text-center">
+                        <iframe src="{{ sample_pdf_path }}" width="100%" height="600px" style="border: 1px solid #ddd;"></iframe>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ sample_pdf_path }}" target="_blank" class="btn btn-success">
+                            <i class="fas fa-external-link-alt"></i> Open PDF in New Tab
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="card">
+            <div class="card-body text-center">
+                <h4 class="card-title">Ready to Create Your Resume?</h4>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <a href="{% url 'hirevision:resume_builder' %}" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-tools"></i> Build Your Resume
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <a href="{% url 'hirevision:resume_analyzer' %}" class="btn btn-outline-primary btn-lg w-100">
+                            <i class="fas fa-file-alt"></i> Analyze Resume
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copySampleCode() {
+    const sampleCode = `{{ sample_content|escapejs }}`;
+    navigator.clipboard.writeText(sampleCode).then(function() {
+        alert('Sample LaTeX code copied to clipboard!');
+    }, function(err) {
+        console.error('Could not copy text: ', err);
+    });
+}
+</script>
+{% endblock %} 

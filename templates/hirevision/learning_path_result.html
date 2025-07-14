@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+
+{% block title %}Learning Path Result - HireVision{% endblock %}
+
+{% block content %}
+<!-- Professional header -->
+<div class="header-container">
+    <h1>Your Learning Path</h1>
+    <p>AI-Generated Roadmap to {{ learning_path.dream_role }}</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <!-- Role Analysis -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="card-title">
+                    <i class="fas fa-briefcase"></i> Role Analysis
+                </h3>
+                <p class="lead">{{ learning_path.role_analysis }}</p>
+            </div>
+        </div>
+
+        <!-- Skills Gap -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title text-danger">
+                    <i class="fas fa-gap"></i> Skills Gap Analysis
+                </h4>
+                {% if learning_path.skills_gap %}
+                    <div class="row">
+                        {% for skill in learning_path.skills_gap %}
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start mb-2">
+                                    <i class="fas fa-times text-danger mt-1 me-2"></i>
+                                    <span>{{ skill }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No significant skills gaps identified.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Learning Path Phases -->
+        {% if learning_path.learning_path_data %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">
+                        <i class="fas fa-road"></i> Your Learning Journey
+                    </h4>
+                    
+                    {% for phase in learning_path.learning_path_data %}
+                        <div class="phase-card mb-4 p-3 border rounded">
+                            <h5 class="text-primary">{{ phase.phase }}</h5>
+                            <p class="text-muted mb-2"><i class="fas fa-clock"></i> {{ phase.duration }}</p>
+                            <p>{{ phase.description }}</p>
+                            
+                            {% if phase.skills_to_learn %}
+                                <div class="mb-3">
+                                    <h6><i class="fas fa-graduation-cap"></i> Skills to Learn:</h6>
+                                    <div class="row">
+                                        {% for skill in phase.skills_to_learn %}
+                                            <div class="col-md-6">
+                                                <span class="badge bg-primary me-1">{{ skill }}</span>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            {% if phase.resources %}
+                                <div class="mb-3">
+                                    <h6><i class="fas fa-book"></i> Recommended Resources:</h6>
+                                    {% for resource in phase.resources %}
+                                        <div class="resource-item mb-2 p-2 bg-light rounded">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <strong>{{ resource.name }}</strong>
+                                                    <br>
+                                                    <small class="text-muted">{{ resource.description }}</small>
+                                                    <br>
+                                                    <span class="badge bg-secondary">{{ resource.difficulty }}</span>
+                                                    {% if resource.verified %}
+                                                        <span class="badge bg-success">Verified</span>
+                                                    {% endif %}
+                                                </div>
+                                                {% if resource.url and resource.url != "placeholder" %}
+                                                    <a href="{{ resource.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-external-link-alt"></i> Visit
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            {% if phase.projects %}
+                                <div class="mb-3">
+                                    <h6><i class="fas fa-code"></i> Hands-on Projects:</h6>
+                                    {% for project in phase.projects %}
+                                        <div class="project-item mb-2 p-2 bg-light rounded">
+                                            <h6 class="mb-1">{{ project.name }}</h6>
+                                            <p class="mb-2">{{ project.description }}</p>
+                                            <div class="mb-2">
+                                                <strong>Skills practiced:</strong>
+                                                {% for skill in project.skills_practiced %}
+                                                    <span class="badge bg-info me-1">{{ skill }}</span>
+                                                {% endfor %}
+                                            </div>
+                                            {% if project.github_template %}
+                                                <a href="{{ project.github_template }}" target="_blank" class="btn btn-sm btn-outline-dark">
+                                                    <i class="fab fa-github"></i> Template
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Timeline -->
+        {% if learning_path.timeline %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">
+                        <i class="fas fa-clock"></i> Overall Timeline
+                    </h4>
+                    <p class="lead">{{ learning_path.timeline }}</p>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Success Metrics -->
+        {% if learning_path.success_metrics %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">
+                        <i class="fas fa-chart-line"></i> Success Metrics
+                    </h4>
+                    <div class="row">
+                        {% for metric in learning_path.success_metrics %}
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start mb-2">
+                                    <i class="fas fa-check-circle text-success mt-1 me-2"></i>
+                                    <span>{{ metric }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Career Advice -->
+        {% if learning_path.career_advice %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">
+                        <i class="fas fa-lightbulb"></i> Career Advice
+                    </h4>
+                    <p class="lead">{{ learning_path.career_advice }}</p>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Networking Tips -->
+        {% if learning_path.networking_tips %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">
+                        <i class="fas fa-network-wired"></i> Networking Tips
+                    </h4>
+                    <div class="row">
+                        {% for tip in learning_path.networking_tips %}
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start mb-2">
+                                    <i class="fas fa-users text-primary mt-1 me-2"></i>
+                                    <span>{{ tip }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="card">
+            <div class="card-body text-center">
+                <h4 class="card-title">What's Next?</h4>
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <a href="{% url 'hirevision:resume_builder' %}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-tools"></i> Build Resume
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="{% url 'hirevision:resume_analyzer' %}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-file-alt"></i> Analyze Resume
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="{% url 'hirevision:learning_path_analyzer' %}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-redo"></i> New Analysis
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Details -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle"></i> Analysis Details
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Analysis Date:</strong> {{ learning_path.created_at|date:"F j, Y, g:i a" }}</p>
+                        <p><strong>Target Role:</strong> {{ learning_path.dream_role }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Skills Input Length:</strong> {{ learning_path.current_skills|length }} characters</p>
+                        <p><strong>Analysis ID:</strong> #{{ learning_path.id }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
