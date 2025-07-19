@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+
+{% block title %}HireVision - AI-Powered Career Success Platform{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section text-center py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px; margin-bottom: 3rem;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    <i class="fas fa-eye me-3"></i>
+                    HireVision
+                </h1>
+                <p class="lead mb-4">
+                    Your AI-powered career success platform. Get personalized resume analysis, 
+                    learning paths, and professional resume building tools to accelerate your career growth.
+                </p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <a href="{% url 'hirevision:signup' %}" class="btn btn-light btn-lg px-4">
+                        <i class="fas fa-rocket me-2"></i>Get Started Free
+                    </a>
+                    <a href="{% url 'hirevision:login' %}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image text-center">
+                    <i class="fas fa-chart-line fa-8x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container mb-5">
+    <h2 class="text-center mb-5">
+        <i class="fas fa-star me-2"></i>
+        Why Choose HireVision?
+    </h2>
+    
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-search fa-3x text-primary"></i>
+                    </div>
+                    <h4 class="card-title">AI Resume Analysis</h4>
+                    <p class="card-text">
+                        Get instant feedback on your resume with our advanced AI analysis. 
+                        Improve your ATS score and stand out to recruiters.
+                    </p>
+                    <ul class="list-unstyled text-start">
+                        <li><i class="fas fa-check text-success me-2"></i>ATS Score Analysis</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Skills Gap Identification</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Personalized Recommendations</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-road fa-3x text-primary"></i>
+                    </div>
+                    <h4 class="card-title">Learning Paths</h4>
+                    <p class="card-text">
+                        Discover personalized learning paths to reach your dream career. 
+                        Get step-by-step guidance with curated resources and projects.
+                    </p>
+                    <ul class="list-unstyled text-start">
+                        <li><i class="fas fa-check text-success me-2"></i>Personalized Roadmaps</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Curated Resources</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Project Recommendations</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-file-alt fa-3x text-primary"></i>
+                    </div>
+                    <h4 class="card-title">Resume Builder</h4>
+                    <p class="card-text">
+                        Create professional resumes with our AI-powered builder. 
+                        Generate beautiful PDFs with customizable templates.
+                    </p>
+                    <ul class="list-unstyled text-start">
+                        <li><i class="fas fa-check text-success me-2"></i>Professional Templates</li>
+                        <li><i class="fas fa-check text-success me-2"></i>AI Content Suggestions</li>
+                        <li><i class="fas fa-check text-success me-2"></i>PDF Export</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works Section -->
+<div class="container mb-5">
+    <h2 class="text-center mb-5">
+        <i class="fas fa-cogs me-2"></i>
+        How It Works
+    </h2>
+    
+    <div class="row g-4">
+        <div class="col-md-3 text-center">
+            <div class="step-circle mb-3">
+                <span class="step-number">1</span>
+            </div>
+            <h5>Sign Up</h5>
+            <p class="text-muted">Create your free account in seconds</p>
+        </div>
+        
+        <div class="col-md-3 text-center">
+            <div class="step-circle mb-3">
+                <span class="step-number">2</span>
+            </div>
+            <h5>Upload Resume</h5>
+            <p class="text-muted">Upload your resume for AI analysis</p>
+        </div>
+        
+        <div class="col-md-3 text-center">
+            <div class="step-circle mb-3">
+                <span class="step-number">3</span>
+            </div>
+            <h5>Get Insights</h5>
+            <p class="text-muted">Receive detailed feedback and recommendations</p>
+        </div>
+        
+        <div class="col-md-3 text-center">
+            <div class="step-circle mb-3">
+                <span class="step-number">4</span>
+            </div>
+            <h5>Take Action</h5>
+            <p class="text-muted">Follow learning paths and improve your profile</p>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="container mb-5">
+    <div class="card bg-primary text-white text-center p-5 border-0 shadow">
+        <h3 class="mb-3">
+            <i class="fas fa-rocket me-2"></i>
+            Ready to Accelerate Your Career?
+        </h3>
+        <p class="lead mb-4">
+            Join thousands of professionals who have transformed their careers with HireVision.
+        </p>
+        <a href="{% url 'hirevision:signup' %}" class="btn btn-light btn-lg px-5">
+            <i class="fas fa-user-plus me-2"></i>Start Your Journey
+        </a>
+    </div>
+</div>
+
+<!-- Testimonials Section -->
+<div class="container mb-5">
+    <h2 class="text-center mb-5">
+        <i class="fas fa-quote-left me-2"></i>
+        What Our Users Say
+    </h2>
+    
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                    </div>
+                    <p class="card-text">
+                        "HireVision helped me identify the skills I needed to advance in my career. 
+                        The learning path was incredibly detailed and actionable."
+                    </p>
+                    <div class="d-flex align-items-center">
+                        <div class="avatar me-3">
+                            <i class="fas fa-user-circle fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Sarah Johnson</h6>
+                            <small class="text-muted">Software Engineer</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                    </div>
+                    <p class="card-text">
+                        "The resume analysis was spot-on! I improved my ATS score by 25 points 
+                        and got more interview calls within weeks."
+                    </p>
+                    <div class="d-flex align-items-center">
+                        <div class="avatar me-3">
+                            <i class="fas fa-user-circle fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Michael Chen</h6>
+                            <small class="text-muted">Data Scientist</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                        <i class="fas fa-star text-warning"></i>
+                    </div>
+                    <p class="card-text">
+                        "The resume builder is amazing! I created a professional resume in minutes 
+                        and the PDF output looks perfect."
+                    </p>
+                    <div class="d-flex align-items-center">
+                        <div class="avatar me-3">
+                            <i class="fas fa-user-circle fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Emily Rodriguez</h6>
+                            <small class="text-muted">Product Manager</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 4rem 0;
+    border-radius: 15px;
+    margin-bottom: 3rem;
+}
+
+.step-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.step-number {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.feature-icon {
+    color: #667eea;
+}
+
+.card {
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+}
+</style>
+{% endblock %} 

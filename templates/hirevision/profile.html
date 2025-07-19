@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - HireVision{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-user-circle me-2"></i>
+                        My Profile
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-4">
+                            <div class="profile-picture-container">
+                                {% if user.profile_picture %}
+                                    <img src="{{ user.profile_picture.url }}" alt="Profile Picture" 
+                                         class="rounded-circle img-fluid" style="width: 150px; height: 150px; object-fit: cover;">
+                                {% else %}
+                                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto" 
+                                         style="width: 150px; height: 150px;">
+                                        <i class="fas fa-user fa-4x text-white"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">
+                                        <i class="fas fa-user me-1"></i>First Name
+                                    </label>
+                                    <p class="form-control-plaintext">{{ user.first_name|default:"Not provided" }}</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">
+                                        <i class="fas fa-user me-1"></i>Last Name
+                                    </label>
+                                    <p class="form-control-plaintext">{{ user.last_name|default:"Not provided" }}</p>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-envelope me-1"></i>Email Address
+                                </label>
+                                <p class="form-control-plaintext">{{ user.email }}</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-at me-1"></i>Username
+                                </label>
+                                <p class="form-control-plaintext">{{ user.username }}</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-phone me-1"></i>Phone Number
+                                </label>
+                                <p class="form-control-plaintext">{{ user.phone|default:"Not provided" }}</p>
+                            </div>
+
+                            {% if user.date_of_birth %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-birthday-cake me-1"></i>Date of Birth
+                                </label>
+                                <p class="form-control-plaintext">{{ user.date_of_birth|date:"F j, Y" }}</p>
+                            </div>
+                            {% endif %}
+
+                            {% if user.bio %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-info-circle me-1"></i>Bio
+                                </label>
+                                <p class="form-control-plaintext">{{ user.bio }}</p>
+                            </div>
+                            {% endif %}
+
+                            {% if user.linkedin_url %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fab fa-linkedin me-1"></i>LinkedIn
+                                </label>
+                                <p class="form-control-plaintext">
+                                    <a href="{{ user.linkedin_url }}" target="_blank" class="text-decoration-none">
+                                        {{ user.linkedin_url }}
+                                    </a>
+                                </p>
+                            </div>
+                            {% endif %}
+
+                            {% if user.github_url %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fab fa-github me-1"></i>GitHub
+                                </label>
+                                <p class="form-control-plaintext">
+                                    <a href="{{ user.github_url }}" target="_blank" class="text-decoration-none">
+                                        {{ user.github_url }}
+                                    </a>
+                                </p>
+                            </div>
+                            {% endif %}
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-calendar me-1"></i>Member Since
+                                </label>
+                                <p class="form-control-plaintext">{{ user.created_at|date:"F j, Y" }}</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-shield-alt me-1"></i>Account Status
+                                </label>
+                                <p class="form-control-plaintext">
+                                    {% if user.is_verified %}
+                                        <span class="badge bg-success">Verified</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Unverified</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <a href="#" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-edit me-2"></i>Edit Profile
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'hirevision:logout' %}" class="btn btn-outline-danger w-100">
+                                <i class="fas fa-sign-out-alt me-2"></i>Sign Out
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

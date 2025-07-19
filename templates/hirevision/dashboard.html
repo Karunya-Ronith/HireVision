@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - HireVision{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<div class="container mb-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-primary text-white border-0 shadow">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2 class="mb-2">
+                                <i class="fas fa-user-circle me-2"></i>
+                                Welcome back, {{ user.first_name|default:user.username }}!
+                            </h2>
+                            <p class="mb-0 opacity-75">
+                                Ready to accelerate your career? Let's get started with your next steps.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="d-flex justify-content-end">
+                                <div class="text-center me-4">
+                                    <div class="h4 mb-0">{{ user.resumeanalysis_set.count }}</div>
+                                    <small class="opacity-75">Resume Analyses</small>
+                                </div>
+                                <div class="text-center me-4">
+                                    <div class="h4 mb-0">{{ user.learningpath_set.count }}</div>
+                                    <small class="opacity-75">Learning Paths</small>
+                                </div>
+                                <div class="text-center">
+                                    <div class="h4 mb-0">{{ user.resumebuilder_set.count }}</div>
+                                    <small class="opacity-75">Resumes Built</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="container mb-5">
+    <h3 class="mb-4">
+        <i class="fas fa-bolt me-2"></i>
+        Quick Actions
+    </h3>
+    
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-search fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title">Analyze Resume</h5>
+                    <p class="card-text">
+                        Upload your resume and get instant AI-powered feedback to improve your ATS score.
+                    </p>
+                    <a href="{% url 'hirevision:resume_analyzer' %}" class="btn btn-primary">
+                        <i class="fas fa-upload me-2"></i>Start Analysis
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-road fa-3x text-success"></i>
+                    </div>
+                    <h5 class="card-title">Learning Path</h5>
+                    <p class="card-text">
+                        Discover personalized learning paths to reach your dream career goals.
+                    </p>
+                    <a href="{% url 'hirevision:learning_path_analyzer' %}" class="btn btn-success">
+                        <i class="fas fa-map me-2"></i>Explore Paths
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-file-alt fa-3x text-info"></i>
+                    </div>
+                    <h5 class="card-title">Build Resume</h5>
+                    <p class="card-text">
+                        Create a professional resume with our AI-powered builder and templates.
+                    </p>
+                    <a href="{% url 'hirevision:resume_builder' %}" class="btn btn-info text-white">
+                        <i class="fas fa-plus me-2"></i>Create Resume
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="container mb-5">
+    <h3 class="mb-4">
+        <i class="fas fa-history me-2"></i>
+        Recent Activity
+    </h3>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-search me-2"></i>
+                        Recent Resume Analyses
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if user.resumeanalysis_set.all %}
+                        {% for analysis in user.resumeanalysis_set.all|slice:":3" %}
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <i class="fas fa-file-pdf fa-2x text-danger"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">{{ analysis.resume_file.name|slice:"8:"|truncatechars:30 }}</h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ analysis.created_at|date:"M j, Y" }}
+                                    {% if analysis.ats_score %}
+                                        <span class="badge bg-primary ms-2">ATS: {{ analysis.ats_score }}</span>
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <a href="{% url 'hirevision:resume_analysis_result' analysis_id=analysis.id %}" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">
+                            <i class="fas fa-inbox fa-2x mb-2"></i><br>
+                            No resume analyses yet. 
+                            <a href="{% url 'hirevision:resume_analyzer' %}">Start your first analysis</a>
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-road me-2"></i>
+                        Recent Learning Paths
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if user.learningpath_set.all %}
+                        {% for path in user.learningpath_set.all|slice:":3" %}
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <i class="fas fa-map fa-2x text-success"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">{{ path.dream_role|truncatechars:30 }}</h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ path.created_at|date:"M j, Y" }}
+                                    {% if path.timeline %}
+                                        <span class="badge bg-success ms-2">{{ path.timeline }}</span>
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <a href="{% url 'hirevision:learning_path_result' path_id=path.id %}" 
+                               class="btn btn-sm btn-outline-success">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">
+                            <i class="fas fa-road fa-2x mb-2"></i><br>
+                            No learning paths yet. 
+                            <a href="{% url 'hirevision:learning_path_analyzer' %}">Create your first path</a>
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tips Section -->
+<div class="container mb-5">
+    <div class="card bg-light border-0">
+        <div class="card-body p-4">
+            <h4 class="mb-3">
+                <i class="fas fa-lightbulb me-2 text-warning"></i>
+                Career Tips
+            </h4>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                        <div>
+                            <h6>Keep Your Resume Updated</h6>
+                            <small class="text-muted">Regular updates help you stay ready for new opportunities.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                        <div>
+                            <h6>Focus on Skills Development</h6>
+                            <small class="text-muted">Continuous learning is key to career advancement.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                        <div>
+                            <h6>Network Actively</h6>
+                            <small class="text-muted">Build professional relationships to open new doors.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.feature-icon {
+    color: #667eea;
+}
+
+.card {
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+</style>
+{% endblock %} 

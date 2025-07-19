@@ -4,22 +4,31 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
 import json
 import os
 
-from .forms import ResumeAnalysisForm, LearningPathForm, ResumeBuilderForm
-from .models import ResumeAnalysis, LearningPath, ResumeBuilder
+from .forms import ResumeAnalysisForm, LearningPathForm, ResumeBuilderForm, UserSignUpForm, UserLoginForm
+from .models import ResumeAnalysis, LearningPath, ResumeBuilder, User
 
 # Import the existing modules
 from resume_analyzer import process_resume_analysis
 from learning_path_analyzer import process_learning_path_analysis
 from resume_builder import process_resume_builder
-from pdf_generator import get_sample_pdf_path
+from pdf_generator import get_sample_pdf_path, generate_pdf_from_latex
 
 def home(request):
     """Home page view"""
-    return render(request, 'hirevision/home.html')
+    if request.user.is_authenticated:
+        # Show dashboard for logged-in users
+        return render(request, 'hirevision/dashboard.html')
+    else:
+        # Show landing page for non-logged-in users
+        return render(request, 'hirevision/landing.html')
 
+@login_required
 def resume_analyzer(request):
     """Resume analyzer view"""
     if request.method == 'POST':
@@ -28,6 +37,10 @@ def resume_analyzer(request):
             try:
                 # Save the form to get the model instance
                 analysis = form.save(commit=False)
+                
+                # Associate with current user if logged in
+                if request.user.is_authenticated:
+                    analysis.user = request.user
                 
                 # Save the file first so it exists on disk
                 analysis.save()
@@ -114,15 +127,21 @@ def resume_analyzer(request):
     
     return render(request, 'hirevision/resume_analyzer.html', {'form': form})
 
+@login_required
 def resume_analysis_result(request, analysis_id):
     """Display resume analysis result"""
     try:
         analysis = ResumeAnalysis.objects.get(id=analysis_id)
+        # Check if user has permission to view this analysis
+        if request.user.is_authenticated and analysis.user and analysis.user != request.user:
+            messages.error(request, "You don't have permission to view this analysis.")
+            return redirect('hirevision:resume_analyzer')
         return render(request, 'hirevision/resume_analysis_result.html', {'analysis': analysis})
     except ResumeAnalysis.DoesNotExist:
         messages.error(request, "Analysis not found.")
         return redirect('hirevision:resume_analyzer')
 
+@login_required
 def learning_path_analyzer(request):
     """Learning path analyzer view"""
     if request.method == 'POST':
@@ -131,6 +150,10 @@ def learning_path_analyzer(request):
             try:
                 # Save the form to get the model instance
                 learning_path = form.save(commit=False)
+                
+                # Associate with current user if logged in
+                if request.user.is_authenticated:
+                    learning_path.user = request.user
                 
                 # Process the learning path analysis using the existing function
                 result = process_learning_path_analysis(
@@ -249,15 +272,21 @@ def learning_path_analyzer(request):
     
     return render(request, 'hirevision/learning_path_analyzer.html', {'form': form})
 
+@login_required
 def learning_path_result(request, path_id):
     """Display learning path result"""
     try:
         learning_path = LearningPath.objects.get(id=path_id)
+        # Check if user has permission to view this learning path
+        if request.user.is_authenticated and learning_path.user and learning_path.user != request.user:
+            messages.error(request, "You don't have permission to view this learning path.")
+            return redirect('hirevision:learning_path_analyzer')
         return render(request, 'hirevision/learning_path_result.html', {'learning_path': learning_path})
     except LearningPath.DoesNotExist:
         messages.error(request, "Learning path not found.")
         return redirect('hirevision:learning_path_analyzer')
 
+@login_required
 def resume_builder(request):
     """Resume builder view"""
     if request.method == 'POST':
@@ -267,42 +296,82 @@ def resume_builder(request):
                 # Save the form to get the model instance
                 resume = form.save(commit=False)
                 
+                # Associate with current user if logged in
+                if request.user.is_authenticated:
+                    resume.user = request.user
+                
                 # Convert form data to the format expected by the existing function
                 name = resume.name
-                email = resume.email or ""
-                phone = resume.phone or ""
-                linkedin = resume.linkedin or ""
-                github = resume.github or ""
+                email = resume.email
+                phone = resume.phone
+                linkedin = resume.linkedin
+                github = resume.github
                 
                 # Parse JSON fields
-                education = resume.education if isinstance(resume.education, list) else json.loads(resume.education or '[]')
-                experience = resume.experience if isinstance(resume.experience, list) else json.loads(resume.experience or '[]')
-                projects = resume.projects if isinstance(resume.projects, list) else json.loads(resume.projects or '[]')
-                skills = resume.skills if isinstance(resume.skills, dict) else json.loads(resume.skills or '{}')
-                research_papers = resume.research_papers if isinstance(resume.research_papers, list) else json.loads(resume.research_papers or '[]')
-                achievements = resume.achievements if isinstance(resume.achievements, list) else json.loads(resume.achievements or '[]')
-                others = resume.others if isinstance(resume.others, list) else json.loads(resume.others or '[]')
+                try:
+                    education = json.loads(resume.education) if resume.education else []
+                    experience = json.loads(resume.experience) if resume.experience else []
+                    projects = json.loads(resume.projects) if resume.projects else []
+                    skills = json.loads(resume.skills) if resume.skills else {}
+                    research_papers = json.loads(resume.research_papers) if resume.research_papers else []
+                    achievements = resume.achievements if isinstance(resume.achievements, list) else [resume.achievements] if resume.achievements else []
+                    others = resume.others if isinstance(resume.others, list) else [resume.others] if resume.others else []
+                except json.JSONDecodeError as e:
+                    messages.error(request, f"Invalid JSON format in one of the fields: {str(e)}")
+                    return render(request, 'hirevision/resume_builder.html', {'form': form})
                 
                 # Process the resume builder using the existing function
-                latex_content, pdf_path, output = process_resume_builder(
+                result = process_resume_builder(
                     name, email, phone, linkedin, github,
                     education, experience, projects, skills,
                     research_papers, achievements, others
                 )
                 
-                # Save the results
-                resume.latex_content = latex_content
-                if pdf_path and os.path.exists(pdf_path):
-                    with open(pdf_path, 'rb') as f:
-                        resume.pdf_file.save(
-                            f"{name.replace(' ', '_')}_resume.pdf",
-                            ContentFile(f.read())
-                        )
+                # Debug: Print the result to see what we're getting
+                print(f"Resume builder result: {result[:200]}...")
                 
-                resume.save()
+                # Check if the result is an error message
+                if isinstance(result, str) and result.startswith('## ❌'):
+                    # Error occurred
+                    messages.error(request, "Resume generation failed. Please try again.")
+                    return render(request, 'hirevision/resume_builder.html', {'form': form})
                 
-                messages.success(request, "Resume generated successfully!")
-                return redirect('hirevision:resume_builder_result', resume_id=resume.id)
+                # Check if it's the OpenAI API key error
+                if isinstance(result, str) and "OpenAI API Key Not Configured" in result:
+                    # Provide demo data instead of error
+                    messages.info(request, "Demo mode: Using sample resume data. Set up your OpenAI API key for real AI generation.")
+                    
+                    # Demo data - save the resume with demo content
+                    resume.latex_content = "Demo LaTeX content for resume"
+                    resume.save()
+                    
+                    # Create a demo PDF file
+                    demo_pdf_path = get_sample_pdf_path()
+                    if demo_pdf_path and os.path.exists(demo_pdf_path):
+                        with open(demo_pdf_path, 'rb') as pdf_file:
+                            resume.pdf_file.save(f"demo_resume_{resume.id}.pdf", ContentFile(pdf_file.read()), save=True)
+                    
+                    messages.success(request, "Demo resume created successfully!")
+                    return redirect('hirevision:resume_builder_result', resume_id=resume.id)
+                else:
+                    # The result is a LaTeX string, save it
+                    resume.latex_content = result
+                    resume.save()
+                    
+                    # Generate PDF from LaTeX
+                    try:
+                        pdf_path = generate_pdf_from_latex(result)
+                        if pdf_path and os.path.exists(pdf_path):
+                            with open(pdf_path, 'rb') as pdf_file:
+                                resume.pdf_file.save(f"resume_{resume.id}.pdf", ContentFile(pdf_file.read()), save=True)
+                            # Clean up temporary file
+                            os.remove(pdf_path)
+                    except Exception as e:
+                        print(f"PDF generation error: {e}")
+                        # Continue without PDF
+                    
+                    messages.success(request, "Resume created successfully!")
+                    return redirect('hirevision:resume_builder_result', resume_id=resume.id)
                 
             except Exception as e:
                 messages.error(request, f"An error occurred: {str(e)}")
@@ -311,14 +380,19 @@ def resume_builder(request):
     
     return render(request, 'hirevision/resume_builder.html', {'form': form})
 
+@login_required
 def resume_builder_result(request, resume_id):
     """Display resume builder result"""
     try:
         resume = ResumeBuilder.objects.get(id=resume_id)
+        # Check if user has permission to view this resume
+        if request.user.is_authenticated and resume.user and resume.user != request.user:
+            messages.error(request, "You don't have permission to view this resume.")
+            return redirect('hirevision:resume_builder')
         return render(request, 'hirevision/resume_builder_result.html', {'resume': resume})
     except ResumeBuilder.DoesNotExist:
         messages.error(request, "Resume not found.")
-        return redirect('resume_builder')
+        return redirect('hirevision:resume_builder')
 
 def sample_resume(request):
     """Show sample resume"""
@@ -344,6 +418,10 @@ def download_pdf(request, resume_id):
     """Download generated PDF"""
     try:
         resume = ResumeBuilder.objects.get(id=resume_id)
+        # Check if user has permission to download this resume
+        if request.user.is_authenticated and resume.user and resume.user != request.user:
+            messages.error(request, "You don't have permission to download this resume.")
+            return redirect('hirevision:resume_builder_result', resume_id=resume_id)
         if resume.pdf_file:
             response = HttpResponse(resume.pdf_file, content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="{resume.name}_resume.pdf"'
@@ -354,3 +432,64 @@ def download_pdf(request, resume_id):
     except ResumeBuilder.DoesNotExist:
         messages.error(request, "Resume not found.")
         return redirect('hirevision:resume_builder')
+
+def signup(request):
+    """User registration view"""
+    if request.user.is_authenticated:
+        return redirect('hirevision:home')
+    
+    if request.method == 'POST':
+        form = UserSignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.username = form.cleaned_data['username']
+            user.email = form.cleaned_data['email']
+            user.first_name = form.cleaned_data['first_name']
+            user.last_name = form.cleaned_data['last_name']
+            user.phone = form.cleaned_data.get('phone', '')
+            user.save()
+            
+            # Log the user in after successful registration
+            login(request, user)
+            messages.success(request, f"Welcome to HireVision, {user.first_name}! Your account has been created successfully.")
+            return redirect('hirevision:home')
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = UserSignUpForm()
+    
+    return render(request, 'hirevision/signup.html', {'form': form})
+
+def user_login(request):
+    """User login view"""
+    if request.user.is_authenticated:
+        return redirect('hirevision:home')
+    
+    if request.method == 'POST':
+        form = UserLoginForm(request, data=request.POST)
+        if form.is_valid():
+            email = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=email, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, f"Welcome back, {user.first_name}!")
+                return redirect('hirevision:home')
+        else:
+            messages.error(request, "Invalid email or password.")
+    else:
+        form = UserLoginForm()
+    
+    return render(request, 'hirevision/login.html', {'form': form})
+
+@login_required
+def user_logout(request):
+    """User logout view"""
+    logout(request)
+    messages.success(request, "You have been logged out successfully.")
+    return redirect('hirevision:home')
+
+@login_required
+def profile(request):
+    """User profile view"""
+    return render(request, 'hirevision/profile.html', {'user': request.user})
