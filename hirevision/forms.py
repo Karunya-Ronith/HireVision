@@ -1,11 +1,99 @@
 from django import forms
-from .models import ResumeAnalysis, LearningPath, ResumeBuilder
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import authenticate
+from .models import ResumeAnalysis, LearningPath, ResumeBuilder, User
+
+class UserSignUpForm(UserCreationForm):
+    """Form for user registration"""
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'your.email@example.com'
+        })
+    )
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Choose a username'
+        })
+    )
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Create a password'
+        })
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirm your password'
+        })
+    )
+    first_name = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'First Name'
+        })
+    )
+    last_name = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Last Name'
+        })
+    )
+    phone = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Phone Number (optional)'
+        })
+    )
+    
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'phone', 'password1', 'password2']
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("This email is already registered.")
+        return email
+
+class UserLoginForm(AuthenticationForm):
+    """Form for user login"""
+    username = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'your.email@example.com'
+        })
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Your password'
+        })
+    )
+    
+    def clean(self):
+        email = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+        
+        if email and password:
+            # Try to authenticate with email
+            user = authenticate(username=email, password=password)
+            if user is None:
+                raise forms.ValidationError("Invalid email or password.")
+            if not user.is_active:
+                raise forms.ValidationError("This account is inactive.")
+        
+        return self.cleaned_data
 
 class ResumeAnalysisForm(forms.ModelForm):
     """Form for resume analysis"""
     class Meta:
         model = ResumeAnalysis
         fields = ['resume_file', 'job_description']
+        exclude = ['user']  # User will be set automatically
         widgets = {
             'job_description': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -38,6 +126,7 @@ class LearningPathForm(forms.ModelForm):
     class Meta:
         model = LearningPath
         fields = ['current_skills', 'dream_role']
+        exclude = ['user']  # User will be set automatically
         widgets = {
             'current_skills': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -59,6 +148,7 @@ class ResumeBuilderForm(forms.ModelForm):
             'education', 'experience', 'projects', 'skills',
             'research_papers', 'achievements', 'others'
         ]
+        exclude = ['user']  # User will be set automatically
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
