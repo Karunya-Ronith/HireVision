@@ -2,181 +2,665 @@
 
 {% block title %}Resume Analysis Result - HireVision{% endblock %}
 
+{% block extra_css %}
+<style>
+    .result-container {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .result-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem 0;
+    }
+
+    .result-title {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .result-subtitle {
+        font-size: 1.25rem;
+        color: var(--secondary-color);
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    .score-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        border: none;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .score-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .score-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .score-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .score-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .score-value {
+        font-size: 4rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .score-description {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+        line-height: 1.6;
+    }
+
+    .score-body {
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .score-explanation {
+        font-size: 1.1rem;
+        color: var(--secondary-color);
+        line-height: 1.6;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .analysis-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .analysis-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        border: none;
+        transition: all 0.3s ease;
+        height: fit-content;
+    }
+
+    .analysis-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+        padding: 1.5rem;
+        text-align: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-header.strengths {
+        background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+    }
+
+    .card-header.improvements {
+        background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
+    }
+
+    .card-header.recommendations {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+
+    .card-header.skills-gap {
+        background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
+    }
+
+    .card-header.upskilling {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    }
+
+    .card-header.assessment {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    }
+
+    .card-header h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .card-header p {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .analysis-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .analysis-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--light-color);
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .analysis-list li:hover {
+        transform: translateX(4px);
+        background: rgba(37, 99, 235, 0.05);
+    }
+
+    .analysis-list li:last-child {
+        margin-bottom: 0;
+    }
+
+    .analysis-list i {
+        font-size: 1.2rem;
+        width: 20px;
+        text-align: center;
+        margin-top: 0.25rem;
+    }
+
+    .analysis-list .strengths i {
+        color: var(--success-color);
+    }
+
+    .analysis-list .improvements i {
+        color: var(--accent-color);
+    }
+
+    .analysis-list .recommendations i {
+        color: #3b82f6;
+    }
+
+    .analysis-list .skills-gap i {
+        color: var(--danger-color);
+    }
+
+    .analysis-list .upskilling i {
+        color: #8b5cf6;
+    }
+
+    .analysis-list span {
+        font-weight: 500;
+        color: var(--dark-color);
+        line-height: 1.5;
+    }
+
+    .assessment-content {
+        background: var(--light-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        line-height: 1.6;
+        color: var(--dark-color);
+    }
+
+    .assessment-content h4 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .assessment-content p {
+        margin-bottom: 1rem;
+    }
+
+    .assessment-content p:last-child {
+        margin-bottom: 0;
+    }
+
+    .action-section {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        border: none;
+        margin-bottom: 2rem;
+    }
+
+    .action-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .action-header h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .action-content {
+        padding: 2rem;
+    }
+
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .action-btn {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 1.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .action-btn.learning {
+        background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .action-btn.learning:hover {
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .action-btn.builder {
+        background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    .action-btn.builder:hover {
+        box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .action-btn.analyze {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .action-btn.analyze:hover {
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .details-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        border: none;
+    }
+
+    .details-header {
+        background: linear-gradient(135deg, var(--secondary-color) 0%, #64748b 100%);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .details-header h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .details-content {
+        padding: 2rem;
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .detail-item {
+        background: var(--light-color);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .detail-label {
+        font-size: 0.875rem;
+        color: var(--secondary-color);
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .detail-value {
+        font-size: 1.125rem;
+        color: var(--dark-color);
+        font-weight: 600;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: var(--secondary-color);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    @media (max-width: 768px) {
+        .result-title {
+            font-size: 2.5rem;
+        }
+        
+        .score-value {
+            font-size: 3rem;
+        }
+        
+        .analysis-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .details-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<!-- Professional header -->
-<div class="header-container">
-    <h1>Resume Analysis Result</h1>
-    <p>Your AI-Powered Resume Analysis</p>
-</div>
-
-<div class="row">
-    <div class="col-lg-10 mx-auto">
-        <!-- ATS Score Card -->
-        <div class="card mb-4">
-            <div class="card-body text-center">
-                <h2 class="card-title">
-                    <i class="fas fa-chart-line"></i> ATS Score
-                </h2>
-                <div class="display-4 text-primary mb-3">{{ analysis.ats_score }}/100</div>
-                <p class="lead">{{ analysis.score_explanation }}</p>
-            </div>
+<div class="result-container">
+    <div class="container">
+        <!-- Header -->
+        <div class="result-header">
+            <h1 class="result-title">Resume Analysis Result</h1>
+            <p class="result-subtitle">Your AI-Powered Resume Analysis</p>
         </div>
 
-        <div class="row">
-            <!-- Strengths -->
-            <div class="col-md-6 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h4 class="card-title text-success">
-                            <i class="fas fa-plus-circle"></i> Strengths
-                        </h4>
-                        {% if analysis.strengths %}
-                            <ul class="list-unstyled">
-                                {% for strength in analysis.strengths %}
-                                    <li><i class="fas fa-check text-success"></i> {{ strength }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p class="text-muted">No specific strengths identified.</p>
-                        {% endif %}
+        <div class="row justify-content-center">
+            <div class="col-lg-12">
+                <!-- ATS Score Card -->
+                <div class="score-card">
+                    <div class="score-header">
+                        <div class="score-content">
+                            <h2 class="score-title">
+                                <i class="fas fa-chart-line me-2"></i>ATS Score
+                            </h2>
+                            <div class="score-value">{{ analysis.ats_score }}/100</div>
+                            <p class="score-description">Analysis completed successfully</p>
+                        </div>
+                    </div>
+                    <div class="score-body">
+                        <p class="score-explanation">{{ analysis.score_explanation }}</p>
                     </div>
                 </div>
-            </div>
 
-            <!-- Weaknesses -->
-            <div class="col-md-6 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h4 class="card-title text-warning">
-                            <i class="fas fa-exclamation-triangle"></i> Areas for Improvement
-                        </h4>
-                        {% if analysis.weaknesses %}
-                            <ul class="list-unstyled">
-                                {% for weakness in analysis.weaknesses %}
-                                    <li><i class="fas fa-arrow-right text-warning"></i> {{ weakness }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p class="text-muted">No specific areas for improvement identified.</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <!-- Recommendations -->
-            <div class="col-md-6 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h4 class="card-title text-info">
-                            <i class="fas fa-lightbulb"></i> Recommendations
-                        </h4>
-                        {% if analysis.recommendations %}
-                            <ul class="list-unstyled">
-                                {% for rec in analysis.recommendations %}
-                                    <li><i class="fas fa-arrow-right text-info"></i> {{ rec }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p class="text-muted">No specific recommendations available.</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Skills Gap -->
-            <div class="col-md-6 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h4 class="card-title text-danger">
-                            <i class="fas fa-gap"></i> Skills Gap Analysis
-                        </h4>
-                        {% if analysis.skills_gap %}
-                            <ul class="list-unstyled">
-                                {% for skill in analysis.skills_gap %}
-                                    <li><i class="fas fa-times text-danger"></i> {{ skill }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p class="text-muted">No significant skills gaps identified.</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Upskilling Suggestions -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h4 class="card-title text-success">
-                    <i class="fas fa-graduation-cap"></i> Upskilling Suggestions
-                </h4>
-                {% if analysis.upskilling_suggestions %}
-                    <div class="row">
-                        {% for suggestion in analysis.upskilling_suggestions %}
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-start mb-2">
-                                    <i class="fas fa-graduation-cap text-success mt-1 me-2"></i>
-                                    <span>{{ suggestion }}</span>
+                <!-- Analysis Grid -->
+                <div class="analysis-grid">
+                    <!-- Strengths -->
+                    <div class="analysis-card">
+                        <div class="card-header strengths">
+                            <h3><i class="fas fa-plus-circle me-2"></i>Strengths</h3>
+                            <p>What you're doing right</p>
+                        </div>
+                        <div class="card-body">
+                            {% if analysis.strengths %}
+                                <ul class="analysis-list">
+                                    {% for strength in analysis.strengths %}
+                                        <li class="strengths">
+                                            <i class="fas fa-check"></i>
+                                            <span>{{ strength }}</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <div class="empty-state">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>No specific strengths identified.</p>
                                 </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Areas for Improvement -->
+                    <div class="analysis-card">
+                        <div class="card-header improvements">
+                            <h3><i class="fas fa-exclamation-triangle me-2"></i>Areas for Improvement</h3>
+                            <p>What needs enhancement</p>
+                        </div>
+                        <div class="card-body">
+                            {% if analysis.weaknesses %}
+                                <ul class="analysis-list">
+                                    {% for weakness in analysis.weaknesses %}
+                                        <li class="improvements">
+                                            <i class="fas fa-arrow-right"></i>
+                                            <span>{{ weakness }}</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <div class="empty-state">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>No specific areas for improvement identified.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="analysis-card">
+                        <div class="card-header recommendations">
+                            <h3><i class="fas fa-lightbulb me-2"></i>Recommendations</h3>
+                            <p>Actionable advice</p>
+                        </div>
+                        <div class="card-body">
+                            {% if analysis.recommendations %}
+                                <ul class="analysis-list">
+                                    {% for rec in analysis.recommendations %}
+                                        <li class="recommendations">
+                                            <i class="fas fa-arrow-right"></i>
+                                            <span>{{ rec }}</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <div class="empty-state">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>No specific recommendations available.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Skills Gap -->
+                    <div class="analysis-card">
+                        <div class="card-header skills-gap">
+                            <h3><i class="fas fa-gap me-2"></i>Skills Gap Analysis</h3>
+                            <p>Missing competencies</p>
+                        </div>
+                        <div class="card-body">
+                            {% if analysis.skills_gap %}
+                                <ul class="analysis-list">
+                                    {% for skill in analysis.skills_gap %}
+                                        <li class="skills-gap">
+                                            <i class="fas fa-times"></i>
+                                            <span>{{ skill }}</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <div class="empty-state">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>No significant skills gaps identified.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Upskilling Suggestions -->
+                    <div class="analysis-card">
+                        <div class="card-header upskilling">
+                            <h3><i class="fas fa-graduation-cap me-2"></i>Upskilling Suggestions</h3>
+                            <p>Learning recommendations</p>
+                        </div>
+                        <div class="card-body">
+                            {% if analysis.upskilling_suggestions %}
+                                <ul class="analysis-list">
+                                    {% for suggestion in analysis.upskilling_suggestions %}
+                                        <li class="upskilling">
+                                            <i class="fas fa-graduation-cap"></i>
+                                            <span>{{ suggestion }}</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <div class="empty-state">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>No specific upskilling suggestions available.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Overall Assessment -->
+                    <div class="analysis-card" style="grid-column: 1 / -1;">
+                        <div class="card-header assessment">
+                            <h3><i class="fas fa-clipboard-check me-2"></i>Overall Assessment</h3>
+                            <p>Comprehensive evaluation</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="assessment-content">
+                                {{ analysis.overall_assessment|linebreaks }}
                             </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <p class="text-muted">No specific upskilling suggestions available.</p>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Overall Assessment -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h4 class="card-title">
-                    <i class="fas fa-clipboard-check"></i> Overall Assessment
-                </h4>
-                <p class="lead">{{ analysis.overall_assessment }}</p>
-            </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="card">
-            <div class="card-body text-center">
-                <h4 class="card-title">What's Next?</h4>
-                <div class="row">
-                    <div class="col-md-4 mb-2">
-                        <a href="{% url 'hirevision:learning_path_analyzer' %}" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-road"></i> Plan Learning Path
-                        </a>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <a href="{% url 'hirevision:resume_builder' %}" class="btn btn-outline-success w-100">
-                            <i class="fas fa-tools"></i> Build New Resume
-                        </a>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <a href="{% url 'hirevision:resume_analyzer' %}" class="btn btn-outline-info w-100">
-                            <i class="fas fa-redo"></i> Analyze Another
-                        </a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Analysis Details -->
-        <div class="card mt-4">
-            <div class="card-body">
-                <h5 class="card-title">
-                    <i class="fas fa-info-circle"></i> Analysis Details
-                </h5>
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Analysis Date:</strong> {{ analysis.created_at|date:"F j, Y, g:i a" }}</p>
-                        <p><strong>Resume File:</strong> {{ analysis.resume_file.name|slice:"9:" }}</p>
+                <!-- Action Section -->
+                <div class="action-section">
+                    <div class="action-header">
+                        <h3><i class="fas fa-rocket me-2"></i>What's Next?</h3>
+                        <p>Take action to improve your career prospects</p>
                     </div>
-                    <div class="col-md-6">
-                        <p><strong>Job Description Length:</strong> {{ analysis.job_description|length }} characters</p>
-                        <p><strong>Analysis ID:</strong> #{{ analysis.id }}</p>
+                    <div class="action-content">
+                        <div class="action-grid">
+                            <a href="{% url 'hirevision:learning_path_analyzer' %}" class="action-btn learning">
+                                <i class="fas fa-road"></i>
+                                <div>
+                                    <div>Plan Learning Path</div>
+                                    <small>Create a personalized roadmap</small>
+                                </div>
+                            </a>
+                            <a href="{% url 'hirevision:resume_builder' %}" class="action-btn builder">
+                                <i class="fas fa-tools"></i>
+                                <div>
+                                    <div>Build New Resume</div>
+                                    <small>Create an optimized resume</small>
+                                </div>
+                            </a>
+                            <a href="{% url 'hirevision:resume_analyzer' %}" class="action-btn analyze">
+                                <i class="fas fa-redo"></i>
+                                <div>
+                                    <div>Analyze Another</div>
+                                    <small>Test a different resume</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Details -->
+                <div class="details-card">
+                    <div class="details-header">
+                        <h3><i class="fas fa-info-circle me-2"></i>Analysis Details</h3>
+                        <p>Technical information about this analysis</p>
+                    </div>
+                    <div class="details-content">
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">Analysis Date</div>
+                                <div class="detail-value">{{ analysis.created_at|date:"M j, Y" }}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Analysis Time</div>
+                                <div class="detail-value">{{ analysis.created_at|date:"g:i A" }}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Resume File</div>
+                                <div class="detail-value">{{ analysis.resume_file.name|slice:"9:"|truncatechars:20 }}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Job Description</div>
+                                <div class="detail-value">{{ analysis.job_description|length }} chars</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Analysis ID</div>
+                                <div class="detail-value">#{{ analysis.id|slice:":8" }}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Score Range</div>
+                                <div class="detail-value">0-100</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

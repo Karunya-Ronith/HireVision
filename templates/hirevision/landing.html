@@ -3,296 +3,536 @@
 {% block title %}HireVision - AI-Powered Career Success Platform{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="hero-section text-center py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px; margin-bottom: 3rem;">
-    <div class="container">
+<!-- Full-Screen Hero Section -->
+<section class="hero-section d-flex align-items-center justify-content-center text-white" style="min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); position: relative; overflow: hidden;">
+    <!-- Background Pattern -->
+    <div class="hero-pattern" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.1;">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
+    </div>
+    
+    <div class="container position-relative">
         <div class="row align-items-center">
             <div class="col-lg-6">
-                <h1 class="display-4 fw-bold mb-4">
-                    <i class="fas fa-eye me-3"></i>
-                    HireVision
-                </h1>
-                <p class="lead mb-4">
-                    Your AI-powered career success platform. Get personalized resume analysis, 
-                    learning paths, and professional resume building tools to accelerate your career growth.
-                </p>
-                <div class="d-flex gap-3 justify-content-center">
-                    <a href="{% url 'hirevision:signup' %}" class="btn btn-light btn-lg px-4">
-                        <i class="fas fa-rocket me-2"></i>Get Started Free
-                    </a>
-                    <a href="{% url 'hirevision:login' %}" class="btn btn-outline-light btn-lg px-4">
-                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
-                    </a>
+                <div class="hero-content">
+                    <h1 class="display-3 fw-bold mb-4" style="text-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                        <i class="fas fa-eye me-3 text-warning"></i>
+                        HireVision
+                    </h1>
+                    <p class="lead mb-4 fs-5" style="text-shadow: 0 2px 4px rgba(0,0,0,0.2); line-height: 1.8;">
+                        Your AI-powered career success platform. Get personalized resume analysis, 
+                        learning paths, and professional resume building tools to accelerate your career growth.
+                    </p>
+                    <div class="hero-stats mb-4">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <h3 class="fw-bold mb-1">10K+</h3>
+                                    <small>Users</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <h3 class="fw-bold mb-1">95%</h3>
+                                    <small>Success Rate</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <h3 class="fw-bold mb-1">24/7</h3>
+                                    <small>AI Support</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="{% url 'hirevision:signup' %}" class="btn btn-warning btn-lg px-5 py-3 fw-bold">
+                            <i class="fas fa-rocket me-2"></i>Get Started Free
+                        </a>
+                        <a href="{% url 'hirevision:login' %}" class="btn btn-outline-light btn-lg px-5 py-3 fw-bold">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </a>
+                    </div>
                 </div>
             </div>
             <div class="col-lg-6">
-                <div class="hero-image text-center">
-                    <i class="fas fa-chart-line fa-8x opacity-75"></i>
+                <div class="hero-visual text-center">
+                    <div class="hero-illustration position-relative">
+                        <div class="floating-card" style="position: absolute; top: -20px; right: 20px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 12px; padding: 1rem; border: 1px solid rgba(255,255,255,0.2);">
+                            <i class="fas fa-chart-line fa-2x text-warning"></i>
+                            <p class="mb-0 mt-2 small">Career Growth</p>
+                        </div>
+                        <div class="floating-card" style="position: absolute; bottom: 20px; left: 20px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 12px; padding: 1rem; border: 1px solid rgba(255,255,255,0.2);">
+                            <i class="fas fa-search fa-2x text-info"></i>
+                            <p class="mb-0 mt-2 small">AI Analysis</p>
+                        </div>
+                        <i class="fas fa-brain fa-8x opacity-75 mb-4" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+    
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator position-absolute bottom-0 start-50 translate-middle-x mb-4">
+        <div class="scroll-arrow">
+            <i class="fas fa-chevron-down fa-2x"></i>
+        </div>
+    </div>
+</section>
 
 <!-- Features Section -->
-<div class="container mb-5">
-    <h2 class="text-center mb-5">
-        <i class="fas fa-star me-2"></i>
-        Why Choose HireVision?
-    </h2>
-    
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-body text-center p-4">
-                    <div class="feature-icon mb-3">
-                        <i class="fas fa-search fa-3x text-primary"></i>
-                    </div>
-                    <h4 class="card-title">AI Resume Analysis</h4>
-                    <p class="card-text">
-                        Get instant feedback on your resume with our advanced AI analysis. 
-                        Improve your ATS score and stand out to recruiters.
-                    </p>
-                    <ul class="list-unstyled text-start">
-                        <li><i class="fas fa-check text-success me-2"></i>ATS Score Analysis</li>
-                        <li><i class="fas fa-check text-success me-2"></i>Skills Gap Identification</li>
-                        <li><i class="fas fa-check text-success me-2"></i>Personalized Recommendations</li>
-                    </ul>
-                </div>
-            </div>
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">
+                <span class="text-gradient">Why Choose</span> HireVision?
+            </h2>
+            <p class="lead text-muted">Comprehensive AI-powered tools designed to accelerate your career success</p>
         </div>
         
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-body text-center p-4">
-                    <div class="feature-icon mb-3">
-                        <i class="fas fa-road fa-3x text-primary"></i>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-4">
+                            <div class="icon-circle bg-primary bg-gradient">
+                                <i class="fas fa-search fa-2x text-white"></i>
+                            </div>
+                        </div>
+                        <h4 class="card-title fw-bold mb-3">AI Resume Analysis</h4>
+                        <p class="card-text text-muted mb-4">
+                            Get instant feedback on your resume with our advanced AI analysis. 
+                            Improve your ATS score and stand out to recruiters.
+                        </p>
+                        <ul class="list-unstyled text-start">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>ATS Score Analysis</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Skills Gap Identification</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Personalized Recommendations</li>
+                        </ul>
                     </div>
-                    <h4 class="card-title">Learning Paths</h4>
-                    <p class="card-text">
-                        Discover personalized learning paths to reach your dream career. 
-                        Get step-by-step guidance with curated resources and projects.
-                    </p>
-                    <ul class="list-unstyled text-start">
-                        <li><i class="fas fa-check text-success me-2"></i>Personalized Roadmaps</li>
-                        <li><i class="fas fa-check text-success me-2"></i>Curated Resources</li>
-                        <li><i class="fas fa-check text-success me-2"></i>Project Recommendations</li>
-                    </ul>
                 </div>
             </div>
-        </div>
-        
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-body text-center p-4">
-                    <div class="feature-icon mb-3">
-                        <i class="fas fa-file-alt fa-3x text-primary"></i>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-4">
+                            <div class="icon-circle bg-warning bg-gradient">
+                                <i class="fas fa-road fa-2x text-white"></i>
+                            </div>
+                        </div>
+                        <h4 class="card-title fw-bold mb-3">Learning Paths</h4>
+                        <p class="card-text text-muted mb-4">
+                            Discover personalized learning paths to reach your dream career. 
+                            Get step-by-step guidance with curated resources and projects.
+                        </p>
+                        <ul class="list-unstyled text-start">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Personalized Roadmaps</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Curated Resources</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Project Recommendations</li>
+                        </ul>
                     </div>
-                    <h4 class="card-title">Resume Builder</h4>
-                    <p class="card-text">
-                        Create professional resumes with our AI-powered builder. 
-                        Generate beautiful PDFs with customizable templates.
-                    </p>
-                    <ul class="list-unstyled text-start">
-                        <li><i class="fas fa-check text-success me-2"></i>Professional Templates</li>
-                        <li><i class="fas fa-check text-success me-2"></i>AI Content Suggestions</li>
-                        <li><i class="fas fa-check text-success me-2"></i>PDF Export</li>
-                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-4">
+                            <div class="icon-circle bg-success bg-gradient">
+                                <i class="fas fa-file-alt fa-2x text-white"></i>
+                            </div>
+                        </div>
+                        <h4 class="card-title fw-bold mb-3">Resume Builder</h4>
+                        <p class="card-text text-muted mb-4">
+                            Create professional resumes with our AI-powered builder. 
+                            Generate beautiful PDFs with customizable templates.
+                        </p>
+                        <ul class="list-unstyled text-start">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Professional Templates</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>AI Content Suggestions</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>PDF Export</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
 <!-- How It Works Section -->
-<div class="container mb-5">
-    <h2 class="text-center mb-5">
-        <i class="fas fa-cogs me-2"></i>
-        How It Works
-    </h2>
-    
-    <div class="row g-4">
-        <div class="col-md-3 text-center">
-            <div class="step-circle mb-3">
-                <span class="step-number">1</span>
-            </div>
-            <h5>Sign Up</h5>
-            <p class="text-muted">Create your free account in seconds</p>
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">
+                <span class="text-gradient">How It</span> Works
+            </h2>
+            <p class="lead text-muted">Simple steps to transform your career</p>
         </div>
         
-        <div class="col-md-3 text-center">
-            <div class="step-circle mb-3">
-                <span class="step-number">2</span>
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6 text-center">
+                <div class="step-item">
+                    <div class="step-circle mb-4">
+                        <span class="step-number">1</span>
+                    </div>
+                    <h5 class="fw-bold mb-3">Sign Up</h5>
+                    <p class="text-muted">Create your free account in seconds</p>
+                </div>
             </div>
-            <h5>Upload Resume</h5>
-            <p class="text-muted">Upload your resume for AI analysis</p>
-        </div>
-        
-        <div class="col-md-3 text-center">
-            <div class="step-circle mb-3">
-                <span class="step-number">3</span>
+            
+            <div class="col-lg-3 col-md-6 text-center">
+                <div class="step-item">
+                    <div class="step-circle mb-4">
+                        <span class="step-number">2</span>
+                    </div>
+                    <h5 class="fw-bold mb-3">Upload Resume</h5>
+                    <p class="text-muted">Upload your resume for AI analysis</p>
+                </div>
             </div>
-            <h5>Get Insights</h5>
-            <p class="text-muted">Receive detailed feedback and recommendations</p>
-        </div>
-        
-        <div class="col-md-3 text-center">
-            <div class="step-circle mb-3">
-                <span class="step-number">4</span>
+            
+            <div class="col-lg-3 col-md-6 text-center">
+                <div class="step-item">
+                    <div class="step-circle mb-4">
+                        <span class="step-number">3</span>
+                    </div>
+                    <h5 class="fw-bold mb-3">Get Insights</h5>
+                    <p class="text-muted">Receive detailed feedback and recommendations</p>
+                </div>
             </div>
-            <h5>Take Action</h5>
-            <p class="text-muted">Follow learning paths and improve your profile</p>
+            
+            <div class="col-lg-3 col-md-6 text-center">
+                <div class="step-item">
+                    <div class="step-circle mb-4">
+                        <span class="step-number">4</span>
+                    </div>
+                    <h5 class="fw-bold mb-3">Take Action</h5>
+                    <p class="text-muted">Follow learning paths and improve your profile</p>
+                </div>
+            </div>
         </div>
     </div>
-</div>
+</section>
 
 <!-- CTA Section -->
-<div class="container mb-5">
-    <div class="card bg-primary text-white text-center p-5 border-0 shadow">
-        <h3 class="mb-3">
-            <i class="fas fa-rocket me-2"></i>
-            Ready to Accelerate Your Career?
-        </h3>
-        <p class="lead mb-4">
-            Join thousands of professionals who have transformed their careers with HireVision.
-        </p>
-        <a href="{% url 'hirevision:signup' %}" class="btn btn-light btn-lg px-5">
-            <i class="fas fa-user-plus me-2"></i>Start Your Journey
-        </a>
+<section class="py-5">
+    <div class="container">
+        <div class="cta-card card bg-gradient-primary text-white text-center p-5 border-0 shadow-lg">
+            <h3 class="display-6 fw-bold mb-3">
+                <i class="fas fa-rocket me-3"></i>
+                Ready to Accelerate Your Career?
+            </h3>
+            <p class="lead mb-4 fs-5">
+                Join thousands of professionals who have transformed their careers with HireVision.
+            </p>
+            <a href="{% url 'hirevision:signup' %}" class="btn btn-warning btn-lg px-5 py-3 fw-bold">
+                <i class="fas fa-user-plus me-2"></i>Start Your Journey
+            </a>
+        </div>
     </div>
-</div>
+</section>
 
 <!-- Testimonials Section -->
-<div class="container mb-5">
-    <h2 class="text-center mb-5">
-        <i class="fas fa-quote-left me-2"></i>
-        What Our Users Say
-    </h2>
-    
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-star text-warning"></i>
-                        <i class="fas fa-star text-warning"></i>
-                        <i class="fas fa-star text-warning"></i>
-                        <i class="fas fa-star text-warning"></i>
-                        <i class="fas fa-star text-warning"></i>
-                    </div>
-                    <p class="card-text">
-                        "HireVision helped me identify the skills I needed to advance in my career. 
-                        The learning path was incredibly detailed and actionable."
-                    </p>
-                    <div class="d-flex align-items-center">
-                        <div class="avatar me-3">
-                            <i class="fas fa-user-circle fa-2x text-primary"></i>
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">
+                <span class="text-gradient">What Our</span> Users Say
+            </h2>
+            <p class="lead text-muted">Real stories from professionals who transformed their careers</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="testimonial-card card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
                         </div>
-                        <div>
-                            <h6 class="mb-0">Sarah Johnson</h6>
-                            <small class="text-muted">Software Engineer</small>
+                        <p class="card-text mb-4">
+                            "HireVision helped me identify the skills I needed to advance in my career. 
+                            The learning path was incredibly detailed and actionable."
+                        </p>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar me-3">
+                                <div class="avatar-circle bg-primary">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Sarah Johnson</h6>
+                                <small class="text-muted">Software Engineer</small>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-star text-warning"></i>
-                        <i class="fas fa-star text-warning"></i>
-                        <i class="fas fa-star text-warning"></i>
-                        <i class="fas fa-star text-warning"></i>
-                        <i class="fas fa-star text-warning"></i>
-                    </div>
-                    <p class="card-text">
-                        "The resume analysis was spot-on! I improved my ATS score by 25 points 
-                        and got more interview calls within weeks."
-                    </p>
-                    <div class="d-flex align-items-center">
-                        <div class="avatar me-3">
-                            <i class="fas fa-user-circle fa-2x text-primary"></i>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="testimonial-card card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
                         </div>
-                        <div>
-                            <h6 class="mb-0">Michael Chen</h6>
-                            <small class="text-muted">Data Scientist</small>
+                        <p class="card-text mb-4">
+                            "The resume analysis was spot-on! I improved my ATS score by 25 points 
+                            and got more interview calls within weeks."
+                        </p>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar me-3">
+                                <div class="avatar-circle bg-warning">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Michael Chen</h6>
+                                <small class="text-muted">Data Scientist</small>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-star text-warning"></i>
-                        <i class="fas fa-star text-warning"></i>
-                        <i class="fas fa-star text-warning"></i>
-                        <i class="fas fa-star text-warning"></i>
-                        <i class="fas fa-star text-warning"></i>
-                    </div>
-                    <p class="card-text">
-                        "The resume builder is amazing! I created a professional resume in minutes 
-                        and the PDF output looks perfect."
-                    </p>
-                    <div class="d-flex align-items-center">
-                        <div class="avatar me-3">
-                            <i class="fas fa-user-circle fa-2x text-primary"></i>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="testimonial-card card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
                         </div>
-                        <div>
-                            <h6 class="mb-0">Emily Rodriguez</h6>
-                            <small class="text-muted">Product Manager</small>
+                        <p class="card-text mb-4">
+                            "The resume builder is amazing! I created a professional resume in minutes 
+                            and the PDF output looks perfect."
+                        </p>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar me-3">
+                                <div class="avatar-circle bg-success">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Emily Rodriguez</h6>
+                                <small class="text-muted">Product Manager</small>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
 <style>
+/* Hero Section Styles */
 .hero-section {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 4rem 0;
-    border-radius: 15px;
-    margin-bottom: 3rem;
+    position: relative;
 }
 
-.step-circle {
+.hero-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.1;
+}
+
+.hero-content {
+    animation: fadeInUp 1s ease-out;
+}
+
+.hero-stats {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-item h3 {
+    color: var(--accent-color);
+    font-size: 2rem;
+}
+
+.floating-card {
+    animation: float 3s ease-in-out infinite;
+}
+
+.floating-card:nth-child(2) {
+    animation-delay: 1.5s;
+}
+
+.scroll-indicator {
+    animation: bounce 2s infinite;
+}
+
+.scroll-arrow {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Feature Cards */
+.feature-card {
+    transition: all 0.3s ease;
+    border-radius: 16px;
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+}
+
+.icon-circle {
     width: 80px;
     height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+}
+
+.icon-circle.bg-warning {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
+}
+
+.icon-circle.bg-success {
+    background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+}
+
+/* Step Circles */
+.step-circle {
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto;
+    box-shadow: var(--shadow-md);
 }
 
 .step-number {
     color: white;
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: bold;
 }
 
-.feature-icon {
-    color: #667eea;
+/* Testimonial Cards */
+.testimonial-card {
+    transition: all 0.3s ease;
+    border-radius: 16px;
 }
 
-.card {
-    transition: transform 0.3s ease;
+.testimonial-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
 }
 
-.card:hover {
-    transform: translateY(-5px);
+.avatar-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.avatar {
-    width: 40px;
-    height: 40px;
+/* CTA Card */
+.cta-card {
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 80vh;
+        padding: 2rem 0;
+    }
+    
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+    
+    .hero-stats {
+        padding: 1rem;
+    }
+    
+    .stat-item h3 {
+        font-size: 1.5rem;
+    }
+    
+    .step-circle {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .step-number {
+        font-size: 1.5rem;
+    }
+    
+    .icon-circle {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .icon-circle i {
+        font-size: 1.5rem;
+    }
 }
 </style>
 {% endblock %} 

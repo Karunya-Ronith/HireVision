@@ -2,18 +2,295 @@
 
 {% block title %}Sign Up - HireVision{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Override base template styles for full-screen auth */
+    main {
+        margin-top: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .auth-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        margin: 0;
+        padding: 0;
+        position: relative;
+        top: -80px; /* Compensate for fixed navbar */
+        padding-top: 80px; /* Add padding to account for navbar */
+    }
+
+    .auth-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        max-width: 1000px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .auth-form-section {
+        padding: 3rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 100vh;
+    }
+
+    .auth-banner-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+    }
+
+    .auth-banner-pattern {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0.1;
+    }
+
+    .auth-banner-content {
+        text-align: center;
+        color: white;
+        position: relative;
+        z-index: 2;
+    }
+
+    .auth-banner-content h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .auth-banner-content p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        line-height: 1.6;
+    }
+
+    .auth-logo {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .auth-logo i {
+        font-size: 2rem;
+        margin-right: 0.75rem;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .auth-title {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .auth-subtitle {
+        color: var(--secondary-color);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .auth-main-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 0;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-control {
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.875rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+
+    .input-group {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--secondary-color);
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    .input-icon:hover {
+        color: var(--primary-color);
+    }
+
+    .btn-auth {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 0.875rem 2rem;
+        font-weight: 600;
+        font-size: 1rem;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-auth:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+        color: white;
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .auth-footer a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .auth-footer a:hover {
+        color: var(--primary-dark);
+    }
+
+    .floating-shapes {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .shape {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .shape:nth-child(1) {
+        width: 80px;
+        height: 80px;
+        top: 20%;
+        left: 10%;
+        animation-delay: 0s;
+    }
+
+    .shape:nth-child(2) {
+        width: 120px;
+        height: 120px;
+        top: 60%;
+        right: 15%;
+        animation-delay: 2s;
+    }
+
+    .shape:nth-child(3) {
+        width: 60px;
+        height: 60px;
+        bottom: 20%;
+        left: 20%;
+        animation-delay: 4s;
+    }
+
+    .form-text {
+        font-size: 0.8rem;
+        color: var(--secondary-color);
+        margin-top: 0.5rem;
+    }
+
+    .form-text ul {
+        margin-bottom: 0;
+        padding-left: 1.2rem;
+    }
+
+    .form-text li {
+        margin-bottom: 0.25rem;
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+        50% {
+            transform: translateY(-20px) rotate(180deg);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .auth-banner-section {
+            display: none;
+        }
+        
+        .auth-form-section {
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        
+        .auth-banner-content h2 {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-lg">
-                <div class="card-header bg-primary text-white text-center">
-                    <h3 class="mb-0">
-                        <i class="fas fa-user-plus me-2"></i>
-                        Create Your Account
-                    </h3>
-                </div>
-                <div class="card-body p-4">
+<div class="auth-container">
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <div class="col-lg-6">
+                <div class="auth-form-section">
+                    <!-- Logo -->
+                    <div class="auth-logo">
+                        <i class="fas fa-eye"></i>
+                        HireVision
+                    </div>
+
+                    <!-- Title -->
+                    <div class="auth-title">
+                        <p class="auth-subtitle">Start your journey</p>
+                        <h1 class="auth-main-title">Sign Up to HireVision</h1>
+                    </div>
+
+                    <!-- Messages -->
                     {% if messages %}
                         {% for message in messages %}
                             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -23,43 +300,51 @@
                         {% endfor %}
                     {% endif %}
 
+                    <!-- Signup Form -->
                     <form method="post" novalidate>
                         {% csrf_token %}
                         
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.first_name.id_for_label }}" class="form-label">
-                                    <i class="fas fa-user me-1"></i>First Name *
-                                </label>
-                                {{ form.first_name }}
-                                {% if form.first_name.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {% for error in form.first_name.errors %}
-                                            {{ error }}
-                                        {% endfor %}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name</label>
+                                    <div class="input-group">
+                                        {{ form.first_name }}
+                                        <i class="fas fa-user input-icon"></i>
                                     </div>
-                                {% endif %}
+                                    {% if form.first_name.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.first_name.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.last_name.id_for_label }}" class="form-label">
-                                    <i class="fas fa-user me-1"></i>Last Name *
-                                </label>
-                                {{ form.last_name }}
-                                {% if form.last_name.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {% for error in form.last_name.errors %}
-                                            {{ error }}
-                                        {% endfor %}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
+                                    <div class="input-group">
+                                        {{ form.last_name }}
+                                        <i class="fas fa-user input-icon"></i>
                                     </div>
-                                {% endif %}
+                                    {% if form.last_name.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.last_name.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="{{ form.username.id_for_label }}" class="form-label">
-                                <i class="fas fa-at me-1"></i>Username *
-                            </label>
-                            {{ form.username }}
+                        <div class="form-group">
+                            <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+                            <div class="input-group">
+                                {{ form.username }}
+                                <i class="fas fa-at input-icon"></i>
+                            </div>
                             {% if form.username.errors %}
                                 <div class="text-danger small mt-1">
                                     {% for error in form.username.errors %}
@@ -69,11 +354,12 @@
                             {% endif %}
                         </div>
 
-                        <div class="mb-3">
-                            <label for="{{ form.email.id_for_label }}" class="form-label">
-                                <i class="fas fa-envelope me-1"></i>Email Address *
-                            </label>
-                            {{ form.email }}
+                        <div class="form-group">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">Email Address</label>
+                            <div class="input-group">
+                                {{ form.email }}
+                                <i class="fas fa-envelope input-icon"></i>
+                            </div>
                             {% if form.email.errors %}
                                 <div class="text-danger small mt-1">
                                     {% for error in form.email.errors %}
@@ -83,11 +369,12 @@
                             {% endif %}
                         </div>
 
-                        <div class="mb-3">
-                            <label for="{{ form.phone.id_for_label }}" class="form-label">
-                                <i class="fas fa-phone me-1"></i>Phone Number
-                            </label>
-                            {{ form.phone }}
+                        <div class="form-group">
+                            <label for="{{ form.phone.id_for_label }}" class="form-label">Phone Number</label>
+                            <div class="input-group">
+                                {{ form.phone }}
+                                <i class="fas fa-phone input-icon"></i>
+                            </div>
                             {% if form.phone.errors %}
                                 <div class="text-danger small mt-1">
                                     {% for error in form.phone.errors %}
@@ -97,11 +384,12 @@
                             {% endif %}
                         </div>
 
-                        <div class="mb-3">
-                            <label for="{{ form.password1.id_for_label }}" class="form-label">
-                                <i class="fas fa-lock me-1"></i>Password *
-                            </label>
-                            {{ form.password1 }}
+                        <div class="form-group">
+                            <label for="{{ form.password1.id_for_label }}" class="form-label">Password</label>
+                            <div class="input-group">
+                                {{ form.password1 }}
+                                <i class="fas fa-eye input-icon" id="togglePassword1"></i>
+                            </div>
                             {% if form.password1.errors %}
                                 <div class="text-danger small mt-1">
                                     {% for error in form.password1.errors %}
@@ -110,17 +398,18 @@
                                 </div>
                             {% endif %}
                             {% if form.password1.help_text %}
-                                <div class="form-text small">
+                                <div class="form-text">
                                     {{ form.password1.help_text|safe }}
                                 </div>
                             {% endif %}
                         </div>
 
-                        <div class="mb-4">
-                            <label for="{{ form.password2.id_for_label }}" class="form-label">
-                                <i class="fas fa-lock me-1"></i>Confirm Password *
-                            </label>
-                            {{ form.password2 }}
+                        <div class="form-group">
+                            <label for="{{ form.password2.id_for_label }}" class="form-label">Confirm Password</label>
+                            <div class="input-group">
+                                {{ form.password2 }}
+                                <i class="fas fa-eye input-icon" id="togglePassword2"></i>
+                            </div>
                             {% if form.password2.errors %}
                                 <div class="text-danger small mt-1">
                                     {% for error in form.password2.errors %}
@@ -131,26 +420,85 @@
                         </div>
 
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">
+                            <button type="submit" class="btn btn-auth">
                                 <i class="fas fa-user-plus me-2"></i>
-                                Create Account
+                                Sign Up
                             </button>
                         </div>
                     </form>
 
-                    <hr class="my-4">
-
-                    <div class="text-center">
+                    <!-- Footer -->
+                    <div class="auth-footer">
                         <p class="mb-0">
-                            Already have an account? 
-                            <a href="{% url 'hirevision:login' %}" class="text-decoration-none">
-                                <i class="fas fa-sign-in-alt me-1"></i>Sign In
-                            </a>
+                            Have an account? 
+                            <a href="{% url 'hirevision:login' %}">Sign in</a>
                         </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="auth-banner-section">
+                    <!-- Background Pattern -->
+                    <div class="auth-banner-pattern">
+                        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/>
+                                </pattern>
+                            </defs>
+                            <rect width="100%" height="100%" fill="url(#grid)" />
+                        </svg>
+                    </div>
+                    
+                    <!-- Floating Shapes -->
+                    <div class="floating-shapes">
+                        <div class="shape"></div>
+                        <div class="shape"></div>
+                        <div class="shape"></div>
+                    </div>
+                    
+                    <!-- Banner Content -->
+                    <div class="auth-banner-content">
+                        <h2>Join HireVision!</h2>
+                        <p>Start your career transformation with AI-powered resume analysis, personalized learning paths, and professional tools.</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+// Password toggle functionality for both password fields
+document.getElementById('togglePassword1').addEventListener('click', function() {
+    const passwordField = document.getElementById('{{ form.password1.id_for_label }}');
+    const icon = this;
+    
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        passwordField.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+});
+
+document.getElementById('togglePassword2').addEventListener('click', function() {
+    const passwordField = document.getElementById('{{ form.password2.id_for_label }}');
+    const icon = this;
+    
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        passwordField.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+});
+</script>
 {% endblock %} 
