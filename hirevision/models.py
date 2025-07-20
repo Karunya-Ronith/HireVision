@@ -46,6 +46,21 @@ class ResumeAnalysis(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     resume_file = models.FileField(upload_to='resumes/')
     job_description = models.TextField()
+    
+    # Task tracking fields
+    task_id = models.CharField(max_length=255, null=True, blank=True)
+    task_status = models.CharField(
+        max_length=20, 
+        choices=[
+            ('pending', 'Pending'),
+            ('running', 'Running'),
+            ('completed', 'Completed'),
+            ('failed', 'Failed'),
+        ],
+        default='pending'
+    )
+    task_error = models.TextField(blank=True, null=True)
+    
     ats_score = models.IntegerField(null=True, blank=True)
     score_explanation = models.TextField(blank=True)
     strengths = models.JSONField(default=list)
@@ -69,6 +84,21 @@ class LearningPath(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     current_skills = models.TextField()
     dream_role = models.CharField(max_length=200)
+    
+    # Task tracking fields
+    task_id = models.CharField(max_length=255, null=True, blank=True)
+    task_status = models.CharField(
+        max_length=20, 
+        choices=[
+            ('pending', 'Pending'),
+            ('running', 'Running'),
+            ('completed', 'Completed'),
+            ('failed', 'Failed'),
+        ],
+        default='pending'
+    )
+    task_error = models.TextField(blank=True, null=True)
+    
     role_analysis = models.TextField(blank=True)
     skills_gap = models.JSONField(default=list)
     learning_path_data = models.JSONField(default=list)
@@ -94,6 +124,21 @@ class ResumeBuilder(models.Model):
     phone = models.CharField(max_length=20, blank=True)
     linkedin = models.URLField(blank=True)
     github = models.URLField(blank=True)
+    
+    # Task tracking fields
+    task_id = models.CharField(max_length=255, null=True, blank=True)
+    task_status = models.CharField(
+        max_length=20, 
+        choices=[
+            ('pending', 'Pending'),
+            ('running', 'Running'),
+            ('completed', 'Completed'),
+            ('failed', 'Failed'),
+        ],
+        default='pending'
+    )
+    task_error = models.TextField(blank=True, null=True)
+    
     education = models.JSONField(default=list)
     experience = models.JSONField(default=list)
     projects = models.JSONField(default=list)

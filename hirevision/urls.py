@@ -17,4 +17,9 @@ urlpatterns = [
     path('resume-builder/<uuid:resume_id>/', views.resume_builder_result, name='resume_builder_result'),
     path('sample-resume/', views.sample_resume, name='sample_resume'),
     path('download-pdf/<uuid:resume_id>/', views.download_pdf, name='download_pdf'),
+    
+    # Async task status endpoints
+    path('api/resume-analysis/<uuid:analysis_id>/status/', views.check_resume_analysis_status, name='check_resume_analysis_status'),
+    path('api/learning-path/<uuid:path_id>/status/', views.check_learning_path_status, name='check_learning_path_status'),
+    path('api/resume-builder/<uuid:resume_id>/status/', views.check_resume_builder_status, name='check_resume_builder_status'),
 ] 

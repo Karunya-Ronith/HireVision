@@ -612,6 +612,36 @@
             <p class="path-subtitle">AI-Generated Roadmap to "{{ learning_path.dream_role }}"</p>
         </div>
 
+        <!-- Loading State -->
+        <div id="loading-state"{% if learning_path.task_status == 'completed' %} style="display: none;"{% endif %}>
+            <div class="text-center">
+                <div class="loading-spinner mb-4">
+                    <div class="spinner-border text-success" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <h3>Creating Your Learning Path...</h3>
+                <p class="text-muted">Please wait while our AI creates a personalized learning roadmap for your career goals. This usually takes 30-60 seconds.</p>
+                <div class="progress mt-3" style="max-width: 400px; margin: 0 auto;">
+                    <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div id="error-state" style="display: none;">
+            <div class="text-center">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                    <h4>Learning Path Generation Failed</h4>
+                    <p id="error-message">An error occurred while creating your learning path. Please try again.</p>
+                    <a href="{% url 'hirevision:learning_path_analyzer' %}" class="btn btn-success">Try Again</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Content -->
+        <div id="results-content"{% if learning_path.task_status != 'completed' %} style="display: none;"{% endif %}>
         <div class="row justify-content-center">
             <div class="col-lg-12">
                 <!-- Role Analysis -->
@@ -933,6 +963,54 @@
                 </div>
             </div>
         </div>
+        </div> <!-- Close results-content -->
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const loadingState = document.getElementById('loading-state');
+    const errorState = document.getElementById('error-state');
+    const resultsContent = document.getElementById('results-content');
+    const pathId = '{{ learning_path.id }}';
+    const taskStatus = '{{ learning_path.task_status }}';
+    
+    // If task is not completed, start polling
+    if (taskStatus !== 'completed') {
+        pollTaskStatus();
+    }
+    
+    function pollTaskStatus() {
+        fetch(`/api/learning-path/${pathId}/status/`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Task status:', data);
+                
+                if (data.status === 'completed') {
+                    if (data.has_results) {
+                        // Task completed successfully, reload page to show results
+                        window.location.reload();
+                    } else {
+                        showError('Learning path completed but no results found. Please try again.');
+                    }
+                } else if (data.status === 'failed') {
+                    showError(data.error || 'Learning path generation failed. Please try again.');
+                } else if (data.status === 'running' || data.status === 'pending') {
+                    // Continue polling
+                    setTimeout(pollTaskStatus, 3000); // Poll every 3 seconds
+                }
+            })
+            .catch(error => {
+                console.error('Error checking task status:', error);
+                showError('Unable to check learning path status. Please refresh the page.');
+            });
+    }
+    
+    function showError(message) {
+        loadingState.style.display = 'none';
+        document.getElementById('error-message').textContent = message;
+        errorState.style.display = 'block';
+    }
+});
+</script>
 {% endblock %} 
