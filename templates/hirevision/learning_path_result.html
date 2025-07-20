@@ -2,234 +2,933 @@
 
 {% block title %}Learning Path Result - HireVision{% endblock %}
 
+{% block extra_css %}
+<style>
+    .path-container {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .path-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem 0;
+    }
+
+    .path-title {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .path-subtitle {
+        font-size: 1.25rem;
+        color: var(--secondary-color);
+        max-width: 800px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    .path-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        border: none;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .path-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+        padding: 1.5rem;
+        text-align: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-header.role-analysis {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    }
+
+    .card-header.skills-gap {
+        background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
+    }
+
+    .card-header.learning-journey {
+        background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+    }
+
+    .card-header.timeline {
+        background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
+    }
+
+    .card-header.metrics {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+
+    .card-header.career-advice {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    }
+
+    .card-header.networking {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    }
+
+    .card-header h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .card-header p {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .role-content {
+        background: var(--light-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        line-height: 1.6;
+        color: var(--dark-color);
+    }
+
+    .skills-gap-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .skill-gap-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(220, 38, 38, 0.1);
+        border-radius: 12px;
+        border-left: 4px solid var(--danger-color);
+        transition: all 0.3s ease;
+    }
+
+    .skill-gap-item:hover {
+        transform: translateX(4px);
+        background: rgba(220, 38, 38, 0.15);
+    }
+
+    .skill-gap-item i {
+        color: var(--danger-color);
+        font-size: 1.2rem;
+        width: 20px;
+        text-align: center;
+    }
+
+    .skill-gap-item span {
+        font-weight: 500;
+        color: var(--dark-color);
+    }
+
+    .phase-card {
+        background: var(--light-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid var(--success-color);
+        transition: all 0.3s ease;
+    }
+
+    .phase-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .phase-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .phase-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 0;
+    }
+
+    .phase-duration {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .phase-description {
+        color: var(--secondary-color);
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    .skills-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .skill-badge {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .resource-item {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .resource-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .resource-header {
+        display: flex;
+        justify-content: between;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .resource-info h6 {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.25rem;
+    }
+
+    .resource-description {
+        font-size: 0.875rem;
+        color: var(--secondary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .resource-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .resource-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .resource-badge.difficulty {
+        background: var(--light-color);
+        color: var(--secondary-color);
+    }
+
+    .resource-badge.verified {
+        background: var(--success-color);
+        color: white;
+    }
+
+    .project-item {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .project-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .project-title {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .project-description {
+        color: var(--secondary-color);
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+
+    .project-skills {
+        margin-bottom: 1rem;
+    }
+
+    .project-skills strong {
+        color: var(--dark-color);
+        margin-right: 0.5rem;
+    }
+
+    .project-skill-badge {
+        background: var(--info-color);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.25rem;
+        display: inline-block;
+    }
+
+    .timeline-display {
+        background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .timeline-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .timeline-label {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .metric-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--light-color);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .metric-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .metric-item i {
+        color: var(--success-color);
+        font-size: 1.2rem;
+        width: 20px;
+        text-align: center;
+    }
+
+    .metric-item span {
+        font-weight: 500;
+        color: var(--dark-color);
+    }
+
+    .career-advice-content {
+        background: var(--light-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    .advice-section {
+        margin-bottom: 2rem;
+    }
+
+    .advice-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .advice-section h5 {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .advice-section h5 i {
+        margin-right: 0.5rem;
+    }
+
+    .advice-content {
+        color: var(--dark-color);
+        line-height: 1.6;
+        margin-bottom: 0;
+    }
+
+    .advice-highlight {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+        border-left: 4px solid #8b5cf6;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+
+    .advice-highlight strong {
+        color: #8b5cf6;
+    }
+
+    .networking-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .networking-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--light-color);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .networking-item:hover {
+        transform: translateX(4px);
+        background: rgba(37, 99, 235, 0.05);
+    }
+
+    .networking-item i {
+        color: var(--primary-color);
+        font-size: 1.2rem;
+        width: 20px;
+        text-align: center;
+    }
+
+    .networking-item span {
+        font-weight: 500;
+        color: var(--dark-color);
+    }
+
+    .action-section {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        border: none;
+        margin-bottom: 2rem;
+    }
+
+    .action-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .action-header h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .action-content {
+        padding: 2rem;
+    }
+
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .action-btn {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 1.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .action-btn.resume {
+        background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .action-btn.resume:hover {
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .action-btn.analyze {
+        background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    .action-btn.analyze:hover {
+        box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .action-btn.new-analysis {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .action-btn.new-analysis:hover {
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .details-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        border: none;
+    }
+
+    .details-header {
+        background: linear-gradient(135deg, var(--secondary-color) 0%, #64748b 100%);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .details-header h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .details-content {
+        padding: 2rem;
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .detail-item {
+        background: var(--light-color);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .detail-label {
+        font-size: 0.875rem;
+        color: var(--secondary-color);
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .detail-value {
+        font-size: 1.125rem;
+        color: var(--dark-color);
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .path-title {
+            font-size: 2.5rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .skills-gap-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .metrics-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .networking-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .details-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<!-- Professional header -->
-<div class="header-container">
-    <h1>Your Learning Path</h1>
-    <p>AI-Generated Roadmap to {{ learning_path.dream_role }}</p>
-</div>
-
-<div class="row">
-    <div class="col-lg-10 mx-auto">
-        <!-- Role Analysis -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h3 class="card-title">
-                    <i class="fas fa-briefcase"></i> Role Analysis
-                </h3>
-                <p class="lead">{{ learning_path.role_analysis }}</p>
-            </div>
+<div class="path-container">
+    <div class="container">
+        <!-- Header -->
+        <div class="path-header">
+            <h1 class="path-title">Your Learning Path</h1>
+            <p class="path-subtitle">AI-Generated Roadmap to "{{ learning_path.dream_role }}"</p>
         </div>
 
-        <!-- Skills Gap -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h4 class="card-title text-danger">
-                    <i class="fas fa-gap"></i> Skills Gap Analysis
-                </h4>
-                {% if learning_path.skills_gap %}
-                    <div class="row">
-                        {% for skill in learning_path.skills_gap %}
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-start mb-2">
-                                    <i class="fas fa-times text-danger mt-1 me-2"></i>
-                                    <span>{{ skill }}</span>
-                                </div>
-                            </div>
-                        {% endfor %}
+        <div class="row justify-content-center">
+            <div class="col-lg-12">
+                <!-- Role Analysis -->
+                <div class="path-card">
+                    <div class="card-header role-analysis">
+                        <h3><i class="fas fa-briefcase me-2"></i>Role Analysis</h3>
+                        <p>Understanding your target role requirements</p>
                     </div>
-                {% else %}
-                    <p class="text-muted">No significant skills gaps identified.</p>
-                {% endif %}
-            </div>
-        </div>
+                    <div class="card-body">
+                        <div class="role-content">
+                            {{ learning_path.role_analysis|linebreaks }}
+                        </div>
+                    </div>
+                </div>
 
-        <!-- Learning Path Phases -->
-        {% if learning_path.learning_path_data %}
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h4 class="card-title">
-                        <i class="fas fa-road"></i> Your Learning Journey
-                    </h4>
-                    
-                    {% for phase in learning_path.learning_path_data %}
-                        <div class="phase-card mb-4 p-3 border rounded">
-                            <h5 class="text-primary">{{ phase.phase }}</h5>
-                            <p class="text-muted mb-2"><i class="fas fa-clock"></i> {{ phase.duration }}</p>
-                            <p>{{ phase.description }}</p>
-                            
-                            {% if phase.skills_to_learn %}
-                                <div class="mb-3">
-                                    <h6><i class="fas fa-graduation-cap"></i> Skills to Learn:</h6>
-                                    <div class="row">
-                                        {% for skill in phase.skills_to_learn %}
-                                            <div class="col-md-6">
-                                                <span class="badge bg-primary me-1">{{ skill }}</span>
-                                            </div>
-                                        {% endfor %}
+                <!-- Skills Gap Analysis -->
+                <div class="path-card">
+                    <div class="card-header skills-gap">
+                        <h3><i class="fas fa-gap me-2"></i>Skills Gap Analysis</h3>
+                        <p>Areas you need to develop</p>
+                    </div>
+                    <div class="card-body">
+                        {% if learning_path.skills_gap %}
+                            <div class="skills-gap-grid">
+                                {% for skill in learning_path.skills_gap %}
+                                    <div class="skill-gap-item">
+                                        <i class="fas fa-times"></i>
+                                        <span>{{ skill }}</span>
                                     </div>
-                                </div>
-                            {% endif %}
-                            
-                            {% if phase.resources %}
-                                <div class="mb-3">
-                                    <h6><i class="fas fa-book"></i> Recommended Resources:</h6>
-                                    {% for resource in phase.resources %}
-                                        <div class="resource-item mb-2 p-2 bg-light rounded">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div>
-                                                    <strong>{{ resource.name }}</strong>
-                                                    <br>
-                                                    <small class="text-muted">{{ resource.description }}</small>
-                                                    <br>
-                                                    <span class="badge bg-secondary">{{ resource.difficulty }}</span>
-                                                    {% if resource.verified %}
-                                                        <span class="badge bg-success">Verified</span>
-                                                    {% endif %}
-                                                </div>
-                                                {% if resource.url and resource.url != "placeholder" %}
-                                                    <a href="{{ resource.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                        <i class="fas fa-external-link-alt"></i> Visit
-                                                    </a>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                            
-                            {% if phase.projects %}
-                                <div class="mb-3">
-                                    <h6><i class="fas fa-code"></i> Hands-on Projects:</h6>
-                                    {% for project in phase.projects %}
-                                        <div class="project-item mb-2 p-2 bg-light rounded">
-                                            <h6 class="mb-1">{{ project.name }}</h6>
-                                            <p class="mb-2">{{ project.description }}</p>
-                                            <div class="mb-2">
-                                                <strong>Skills practiced:</strong>
-                                                {% for skill in project.skills_practiced %}
-                                                    <span class="badge bg-info me-1">{{ skill }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center text-muted">
+                                <i class="fas fa-check-circle fa-3x mb-3"></i>
+                                <p>No significant skills gaps identified. You're well-positioned for this role!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Learning Journey -->
+                {% if learning_path.learning_path_data %}
+                    <div class="path-card">
+                        <div class="card-header learning-journey">
+                            <h3><i class="fas fa-road me-2"></i>Your Learning Journey</h3>
+                            <p>Structured phases to reach your goal</p>
+                        </div>
+                        <div class="card-body">
+                            {% for phase in learning_path.learning_path_data %}
+                                <div class="phase-card">
+                                    <div class="phase-header">
+                                        <h5 class="phase-title">{{ phase.phase }}</h5>
+                                        <span class="phase-duration">
+                                            <i class="fas fa-clock me-1"></i>{{ phase.duration }}
+                                        </span>
+                                    </div>
+                                    <p class="phase-description">{{ phase.description }}</p>
+                                    
+                                    {% if phase.skills_to_learn %}
+                                        <div class="mb-3">
+                                            <h6><i class="fas fa-graduation-cap me-2"></i>Skills to Learn:</h6>
+                                            <div class="skills-badges">
+                                                {% for skill in phase.skills_to_learn %}
+                                                    <span class="skill-badge">{{ skill }}</span>
                                                 {% endfor %}
                                             </div>
-                                            {% if project.github_template %}
-                                                <a href="{{ project.github_template }}" target="_blank" class="btn btn-sm btn-outline-dark">
-                                                    <i class="fab fa-github"></i> Template
-                                                </a>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if phase.resources %}
+                                        <div class="mb-3">
+                                            <h6><i class="fas fa-book me-2"></i>Recommended Resources:</h6>
+                                            {% for resource in phase.resources %}
+                                                <div class="resource-item">
+                                                    <div class="resource-header">
+                                                        <div class="resource-info">
+                                                            <h6>{{ resource.name }}</h6>
+                                                            <p class="resource-description">{{ resource.description }}</p>
+                                                            <div class="resource-badges">
+                                                                <span class="resource-badge difficulty">{{ resource.difficulty }}</span>
+                                                                {% if resource.verified %}
+                                                                    <span class="resource-badge verified">
+                                                                        <i class="fas fa-check me-1"></i>Verified
+                                                                    </span>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                        {% if resource.url and resource.url != "placeholder" %}
+                                                            <a href="{{ resource.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                                <i class="fas fa-external-link-alt"></i> Visit
+                                                            </a>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if phase.projects %}
+                                        <div class="mb-3">
+                                            <h6><i class="fas fa-code me-2"></i>Hands-on Projects:</h6>
+                                            {% for project in phase.projects %}
+                                                <div class="project-item">
+                                                    <h6 class="project-title">{{ project.name }}</h6>
+                                                    <p class="project-description">{{ project.description }}</p>
+                                                    <div class="project-skills">
+                                                        <strong>Skills practiced:</strong>
+                                                        {% for skill in project.skills_practiced %}
+                                                            <span class="project-skill-badge">{{ skill }}</span>
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% if project.github_template %}
+                                                        <a href="{{ project.github_template }}" target="_blank" class="btn btn-sm btn-outline-dark">
+                                                            <i class="fab fa-github"></i> Template
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Timeline -->
+                {% if learning_path.timeline %}
+                    <div class="path-card">
+                        <div class="card-header timeline">
+                            <h3><i class="fas fa-clock me-2"></i>Overall Timeline</h3>
+                            <p>Estimated duration for your journey</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline-display">
+                                <div class="timeline-value">{{ learning_path.timeline }}</div>
+                                <div class="timeline-label">Estimated completion time</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Success Metrics -->
+                {% if learning_path.success_metrics %}
+                    <div class="path-card">
+                        <div class="card-header metrics">
+                            <h3><i class="fas fa-chart-line me-2"></i>Success Metrics</h3>
+                            <p>Track your progress with these key indicators</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="metrics-grid">
+                                {% for metric in learning_path.success_metrics %}
+                                    <div class="metric-item">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>{{ metric }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Career Advice -->
+                {% if learning_path.career_advice %}
+                    <div class="path-card">
+                        <div class="card-header career-advice">
+                            <h3><i class="fas fa-lightbulb me-2"></i>Career Advice</h3>
+                            <p>Strategic insights for your career growth</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="career-advice-content">
+                                {% if "role_analysis" in learning_path.career_advice %}
+                                    <div class="advice-section">
+                                        <h5><i class="fas fa-briefcase"></i>Role Analysis</h5>
+                                        <div class="advice-content">
+                                            {% if "role_analysis" in learning_path.career_advice %}
+                                                {% with role_analysis=learning_path.career_advice|slice:"role_analysis"|slice:":500" %}
+                                                    {{ role_analysis|linebreaks }}
+                                                {% endwith %}
                                             {% endif %}
                                         </div>
-                                    {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                {% if "skills_gap" in learning_path.career_advice %}
+                                    <div class="advice-section">
+                                        <h5><i class="fas fa-gap"></i>Skills Development Strategy</h5>
+                                        <div class="advice-content">
+                                            {% if "skills_gap" in learning_path.career_advice %}
+                                                {% with skills_gap=learning_path.career_advice|slice:"skills_gap"|slice:":500" %}
+                                                    {{ skills_gap|linebreaks }}
+                                                {% endwith %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                {% if "learning_path" in learning_path.career_advice %}
+                                    <div class="advice-section">
+                                        <h5><i class="fas fa-road"></i>Learning Strategy</h5>
+                                        <div class="advice-content">
+                                            {% if "learning_path" in learning_path.career_advice %}
+                                                {% with learning_path=learning_path.career_advice|slice:"learning_path"|slice:":500" %}
+                                                    {{ learning_path|linebreaks }}
+                                                {% endwith %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <div class="advice-highlight">
+                                    <strong>💡 Pro Tip:</strong> Focus on building a strong portfolio with real-world projects that demonstrate your skills. This will be crucial when applying for senior positions.
                                 </div>
-                            {% endif %}
+
+                                <div class="advice-section">
+                                    <h5><i class="fas fa-rocket"></i>Next Steps</h5>
+                                    <div class="advice-content">
+                                        <ul>
+                                            <li>Start with the foundational skills in Phase 1</li>
+                                            <li>Build at least 2-3 projects per phase</li>
+                                            <li>Network with professionals in your target role</li>
+                                            <li>Update your resume after completing each phase</li>
+                                            <li>Consider mentorship or coaching programs</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endif %}
+                    </div>
+                {% endif %}
 
-        <!-- Timeline -->
-        {% if learning_path.timeline %}
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h4 class="card-title">
-                        <i class="fas fa-clock"></i> Overall Timeline
-                    </h4>
-                    <p class="lead">{{ learning_path.timeline }}</p>
-                </div>
-            </div>
-        {% endif %}
-
-        <!-- Success Metrics -->
-        {% if learning_path.success_metrics %}
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h4 class="card-title">
-                        <i class="fas fa-chart-line"></i> Success Metrics
-                    </h4>
-                    <div class="row">
-                        {% for metric in learning_path.success_metrics %}
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-start mb-2">
-                                    <i class="fas fa-check-circle text-success mt-1 me-2"></i>
-                                    <span>{{ metric }}</span>
-                                </div>
+                <!-- Networking Tips -->
+                {% if learning_path.networking_tips %}
+                    <div class="path-card">
+                        <div class="card-header networking">
+                            <h3><i class="fas fa-network-wired me-2"></i>Networking Tips</h3>
+                            <p>Build connections in your target industry</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="networking-grid">
+                                {% for tip in learning_path.networking_tips %}
+                                    <div class="networking-item">
+                                        <i class="fas fa-users"></i>
+                                        <span>{{ tip }}</span>
+                                    </div>
+                                {% endfor %}
                             </div>
-                        {% endfor %}
+                        </div>
                     </div>
-                </div>
-            </div>
-        {% endif %}
+                {% endif %}
 
-        <!-- Career Advice -->
-        {% if learning_path.career_advice %}
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h4 class="card-title">
-                        <i class="fas fa-lightbulb"></i> Career Advice
-                    </h4>
-                    <p class="lead">{{ learning_path.career_advice }}</p>
-                </div>
-            </div>
-        {% endif %}
-
-        <!-- Networking Tips -->
-        {% if learning_path.networking_tips %}
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h4 class="card-title">
-                        <i class="fas fa-network-wired"></i> Networking Tips
-                    </h4>
-                    <div class="row">
-                        {% for tip in learning_path.networking_tips %}
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-start mb-2">
-                                    <i class="fas fa-users text-primary mt-1 me-2"></i>
-                                    <span>{{ tip }}</span>
+                <!-- Action Section -->
+                <div class="action-section">
+                    <div class="action-header">
+                        <h3><i class="fas fa-rocket me-2"></i>What's Next?</h3>
+                        <p>Take action to accelerate your career growth</p>
+                    </div>
+                    <div class="action-content">
+                        <div class="action-grid">
+                            <a href="{% url 'hirevision:resume_builder' %}" class="action-btn resume">
+                                <i class="fas fa-tools"></i>
+                                <div>
+                                    <div>Build Resume</div>
+                                    <small>Create an optimized resume</small>
                                 </div>
+                            </a>
+                            <a href="{% url 'hirevision:resume_analyzer' %}" class="action-btn analyze">
+                                <i class="fas fa-file-alt"></i>
+                                <div>
+                                    <div>Analyze Resume</div>
+                                    <small>Test your current resume</small>
+                                </div>
+                            </a>
+                            <a href="{% url 'hirevision:learning_path_analyzer' %}" class="action-btn new-analysis">
+                                <i class="fas fa-redo"></i>
+                                <div>
+                                    <div>New Analysis</div>
+                                    <small>Plan a different path</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Details -->
+                <div class="details-card">
+                    <div class="details-header">
+                        <h3><i class="fas fa-info-circle me-2"></i>Analysis Details</h3>
+                        <p>Technical information about this analysis</p>
+                    </div>
+                    <div class="details-content">
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">Analysis Date</div>
+                                <div class="detail-value">{{ learning_path.created_at|date:"M j, Y" }}</div>
                             </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        {% endif %}
-
-        <!-- Action Buttons -->
-        <div class="card">
-            <div class="card-body text-center">
-                <h4 class="card-title">What's Next?</h4>
-                <div class="row">
-                    <div class="col-md-4 mb-2">
-                        <a href="{% url 'hirevision:resume_builder' %}" class="btn btn-outline-success w-100">
-                            <i class="fas fa-tools"></i> Build Resume
-                        </a>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <a href="{% url 'hirevision:resume_analyzer' %}" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-file-alt"></i> Analyze Resume
-                        </a>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <a href="{% url 'hirevision:learning_path_analyzer' %}" class="btn btn-outline-info w-100">
-                            <i class="fas fa-redo"></i> New Analysis
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Analysis Details -->
-        <div class="card mt-4">
-            <div class="card-body">
-                <h5 class="card-title">
-                    <i class="fas fa-info-circle"></i> Analysis Details
-                </h5>
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Analysis Date:</strong> {{ learning_path.created_at|date:"F j, Y, g:i a" }}</p>
-                        <p><strong>Target Role:</strong> {{ learning_path.dream_role }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>Skills Input Length:</strong> {{ learning_path.current_skills|length }} characters</p>
-                        <p><strong>Analysis ID:</strong> #{{ learning_path.id }}</p>
+                            <div class="detail-item">
+                                <div class="detail-label">Analysis Time</div>
+                                <div class="detail-value">{{ learning_path.created_at|date:"g:i A" }}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Target Role</div>
+                                <div class="detail-value">{{ learning_path.dream_role|truncatechars:25 }}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Skills Input</div>
+                                <div class="detail-value">{{ learning_path.current_skills|length }} chars</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Analysis ID</div>
+                                <div class="detail-value">#{{ learning_path.id|slice:":8" }}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Phases</div>
+                                <div class="detail-value">{{ learning_path.learning_path_data|length }}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
