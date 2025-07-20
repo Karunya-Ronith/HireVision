@@ -5,10 +5,40 @@
 {% block content %}
 <!-- Professional header -->
 <div class="header-container">
-    <h1>Resume Generated Successfully!</h1>
-    <p>Your professional resume is ready</p>
+    <h1>Resume Builder Result</h1>
+    <p>Your professional resume</p>
 </div>
 
+<!-- Loading State -->
+<div id="loading-state"{% if resume.task_status == 'completed' %} style="display: none;"{% endif %}>
+    <div class="text-center">
+        <div class="loading-spinner mb-4">
+            <div class="spinner-border text-info" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        <h3>Building Your Resume...</h3>
+        <p class="text-muted">Please wait while we generate your professional LaTeX resume and PDF. This usually takes 30-60 seconds.</p>
+        <div class="progress mt-3" style="max-width: 400px; margin: 0 auto;">
+            <div class="progress-bar bg-info progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Error State -->
+<div id="error-state" style="display: none;">
+    <div class="text-center">
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+            <h4>Resume Generation Failed</h4>
+            <p id="error-message">An error occurred while building your resume. Please try again.</p>
+            <a href="{% url 'hirevision:resume_builder' %}" class="btn btn-info">Try Again</a>
+        </div>
+    </div>
+</div>
+
+<!-- Results Content -->
+<div id="results-content"{% if resume.task_status != 'completed' %} style="display: none;"{% endif %}>
 <div class="row">
     <div class="col-lg-10 mx-auto">
         <!-- Success Message -->
@@ -205,6 +235,7 @@
         </div>
     </div>
 </div>
+</div> <!-- Close results-content -->
 
 <script>
 function copyLatexCode() {
@@ -215,5 +246,50 @@ function copyLatexCode() {
         console.error('Could not copy text: ', err);
     });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const loadingState = document.getElementById('loading-state');
+    const errorState = document.getElementById('error-state');
+    const resultsContent = document.getElementById('results-content');
+    const resumeId = '{{ resume.id }}';
+    const taskStatus = '{{ resume.task_status }}';
+    
+    // If task is not completed, start polling
+    if (taskStatus !== 'completed') {
+        pollTaskStatus();
+    }
+    
+    function pollTaskStatus() {
+        fetch(`/api/resume-builder/${resumeId}/status/`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Task status:', data);
+                
+                if (data.status === 'completed') {
+                    if (data.has_results) {
+                        // Task completed successfully, reload page to show results
+                        window.location.reload();
+                    } else {
+                        showError('Resume building completed but no results found. Please try again.');
+                    }
+                } else if (data.status === 'failed') {
+                    showError(data.error || 'Resume building failed. Please try again.');
+                } else if (data.status === 'running' || data.status === 'pending') {
+                    // Continue polling
+                    setTimeout(pollTaskStatus, 3000); // Poll every 3 seconds
+                }
+            })
+            .catch(error => {
+                console.error('Error checking task status:', error);
+                showError('Unable to check resume building status. Please refresh the page.');
+            });
+    }
+    
+    function showError(message) {
+        loadingState.style.display = 'none';
+        document.getElementById('error-message').textContent = message;
+        errorState.style.display = 'block';
+    }
+});
 </script>
 {% endblock %} 

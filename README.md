@@ -7,7 +7,33 @@ HireVision is a comprehensive Django-based web application that leverages artifi
 ![HireVision](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![Django](https://img.shields.io/badge/Django-4.2+-green.svg)
 ![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4-orange.svg)
+![Dramatiq](https://img.shields.io/badge/Dramatiq-Async-red.svg)
+![Redis](https://img.shields.io/badge/Redis-Queue-orange.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+
+## 🚀 Quick Start
+
+Get HireVision running with async processing in 3 steps:
+
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Setup database  
+python manage.py migrate
+
+# 3. Run all services (requires 3 terminals)
+# Terminal 1: Redis
+redis-server
+
+# Terminal 2: Worker  
+python -m dramatiq hirevision.tasks
+
+# Terminal 3: Django
+python manage.py runserver
+```
+
+**Then visit**: http://localhost:8000
 
 ## ✨ Features
 
@@ -46,10 +72,13 @@ HireVision is a comprehensive Django-based web application that leverages artifi
 - **Backend**: Django 4.2+
 - **Database**: SQLite (development) / PostgreSQL (production)
 - **AI Integration**: OpenAI GPT-4 API
-- **PDF Processing**: PyPDF2, ReportLab
+- **Async Processing**: Dramatiq + Redis for background tasks
+- **Task Queue**: Redis as message broker
+- **PDF Processing**: PyPDF2, ReportLab, LaTeX
 - **Frontend**: HTML5, CSS3, JavaScript, Bootstrap
 - **Authentication**: Django's built-in authentication system
 - **File Handling**: Django's FileField for resume uploads
+- **Real-time Updates**: JavaScript polling with status endpoints
 
 ## 📋 Prerequisites
 
@@ -106,14 +135,93 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-### 7. Start Development Server
+### 7. Start Redis Server
+Redis is required for the async task queue:
+
 ```bash
+# On Windows (if Redis is installed)
+redis-server
+
+# On macOS (using Homebrew)
+brew services start redis
+
+# On Linux (using package manager)
+sudo systemctl start redis
+```
+
+**Note**: If Redis is not installed, download it from [Redis Downloads](https://redis.io/download) or use Docker:
+```bash
+docker run -d -p 6379:6379 redis:alpine
+```
+
+### 8. Start Dramatiq Worker
+In a **new terminal window**, start the background task worker:
+
+```bash
+# Navigate to project directory
+cd HireVision
+
+# Start the worker
+python -m dramatiq hirevision.tasks
+```
+
+**Important**: Keep this terminal running - it processes all AI analysis tasks in the background.
+
+### 9. Start Django Development Server
+In a **third terminal window**, start the Django server:
+
+```bash
+# Navigate to project directory
+cd HireVision
+
+# Start Django server
 python manage.py runserver
 ```
 
-### 8. Access the Application
+### 10. Access the Application
 - **Main Application**: http://127.0.0.1:8000/
 - **Admin Interface**: http://127.0.0.1:8000/admin/
+
+## ⚡ **NEW: Asynchronous Processing**
+
+HireVision now features **enterprise-grade asynchronous processing** using Dramatiq:
+
+### 🚀 **Benefits:**
+- **No More Timeouts**: AI processing happens in the background
+- **Better User Experience**: Immediate feedback with loading states
+- **Scalable**: Add more workers to handle increased load
+- **Reliable**: Built-in retries and error handling
+
+### 🔄 **How It Works:**
+1. **Submit Request** → Task queued immediately
+2. **Background Worker** → Processes AI analysis asynchronously
+3. **Real-time Updates** → Frontend polls for completion every 3 seconds
+4. **Automatic Results** → Page refreshes when analysis completes
+
+### 🛠️ **Required Services:**
+You need **3 services running** for full functionality:
+1. **Redis Server** (Message broker for task queue)
+2. **Dramatiq Worker** (Processes background tasks)
+3. **Django Server** (Web application)
+
+### 📊 **Task Status Monitoring:**
+- **Pending**: Task queued, waiting for worker
+- **Running**: AI analysis in progress
+- **Completed**: Results ready and displayed
+- **Failed**: Error occurred, user notified
+
+### 🎯 **Production Deployment:**
+For production, use a process manager like **systemd** or **supervisor** to manage Redis and Dramatiq workers:
+
+```bash
+# Example supervisor config for Dramatiq worker
+[program:hirevision-worker]
+command=python -m dramatiq hirevision.tasks
+directory=/path/to/HireVision
+user=www-data
+autostart=true
+autorestart=true
+```
 
 ## 📁 Project Structure
 
@@ -251,6 +359,9 @@ gunicorn hirevision_django.wsgi:application
 | `/resume-builder/<id>/` | Resume builder results | GET |
 | `/download-pdf/<id>/` | Download generated PDF | GET |
 | `/admin/` | Django admin interface | GET |
+| `/api/resume-analysis/<id>/status/` | Check resume analysis task status | GET |
+| `/api/learning-path/<id>/status/` | Check learning path task status | GET |
+| `/api/resume-builder/<id>/status/` | Check resume builder task status | GET |
 
 ## 🗄️ Database Models
 
@@ -264,18 +375,21 @@ gunicorn hirevision_django.wsgi:application
 - ATS scores and explanations
 - Strengths, weaknesses, and recommendations
 - Skills gap analysis
+- **Task tracking fields** (task_id, task_status, task_error)
 
 ### LearningPath Model
 - Personalized learning roadmaps
 - Skills gap identification
 - Timeline and success metrics
 - Career advice and networking tips
+- **Async processing support** with status tracking
 
 ### ResumeBuilder Model
 - Resume data storage
 - LaTeX content generation
 - PDF file management
 - Multiple section support
+- **Background processing** for LaTeX compilation
 
 ## 🤝 Contributing
 
@@ -327,6 +441,33 @@ We welcome contributions! Please follow these steps:
 - Check `STATIC_URL` and `STATIC_ROOT` settings
 - Verify web server configuration
 
+### Async Processing Issues
+
+**Tasks stuck in "pending" status:**
+- Check if Redis server is running: `redis-cli ping`
+- Verify Dramatiq worker is active: `python -m dramatiq hirevision.tasks`
+- Check Redis connection in Django settings
+
+**Dramatiq worker errors:**
+- Ensure `DJANGO_SETTINGS_MODULE` is set: `export DJANGO_SETTINGS_MODULE=hirevision_django.settings`
+- Check Redis connectivity: `python -c "import redis; redis.Redis().ping()"`
+- Verify all dependencies are installed: `pip install -r requirements.txt`
+
+**Tasks failing with errors:**
+- Check Dramatiq worker logs for detailed error messages
+- Verify OpenAI API key is configured correctly
+- Ensure file permissions for media uploads are correct
+
+**Redis connection issues:**
+- Install Redis if not available: Visit [Redis Downloads](https://redis.io/download)
+- Check if Redis is running on default port 6379
+- Use Docker as alternative: `docker run -d -p 6379:6379 redis:alpine`
+
+**Frontend not updating:**
+- Check browser console for JavaScript errors
+- Verify status API endpoints are accessible
+- Clear browser cache and reload page
+
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -351,6 +492,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **v1.1.0** - Added user authentication and profiles
 - **v1.2.0** - Enhanced AI analysis capabilities
 - **v1.3.0** - Improved resume builder with LaTeX support
+- **v1.4.0** - **🚀 MAJOR UPDATE**: Added asynchronous processing with Dramatiq
+  - Enterprise-grade async task processing
+  - Real-time status updates and loading states
+  - Background AI analysis with Redis message broker
+  - Improved scalability and user experience
+  - No more timeout errors during long operations
 
 ---
 
