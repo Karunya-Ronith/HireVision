@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Discussion Forum - HireVision{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="mb-0">
+                    <i class="fas fa-comments text-primary"></i>
+                    Discussion Forum
+                </h1>
+                <a href="{% url 'hirevision:create_thread' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Create New Thread
+                </a>
+            </div>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            {% if threads %}
+                <div class="row">
+                    {% for thread in threads %}
+                        <div class="col-12 mb-4">
+                            <div class="card shadow-sm thread-card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h5 class="card-title">
+                                                <a href="{% url 'hirevision:thread_detail' thread.id %}" class="text-decoration-none">
+                                                    {{ thread.title }}
+                                                </a>
+                                            </h5>
+                                            <p class="card-text text-muted">
+                                                {{ thread.content|truncatewords:30 }}
+                                            </p>
+                                            
+                                            {% if thread.has_media %}
+                                                <div class="mb-2">
+                                                    {% if thread.image %}
+                                                        <span class="badge bg-info me-2">
+                                                            <i class="fas fa-image"></i> Image
+                                                        </span>
+                                                    {% endif %}
+                                                    {% if thread.article_url %}
+                                                        <span class="badge bg-warning">
+                                                            <i class="fas fa-link"></i> Article
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                            
+                                            <div class="d-flex align-items-center text-muted small">
+                                                <div class="rounded-circle user-avatar primary me-2" 
+                                                     style="width: 24px; height: 24px; font-size: 12px;">
+                                                    {{ thread.user.first_name|first|upper|default:thread.user.username|first|upper }}
+                                                </div>
+                                                <span>{{ thread.user.get_full_name|default:thread.user.username }}</span>
+                                                <span class="mx-2">•</span>
+                                                <span>{{ thread.created_at|timesince }} ago</span>
+                                                {% if thread.is_edited %}
+                                                    <span class="mx-2">•</span>
+                                                    <span class="text-muted">(edited)</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-4">
+                                            <div class="d-flex flex-column align-items-md-end align-items-start">
+                                                <div class="mb-2">
+                                                    <span class="badge bg-secondary">
+                                                        <i class="fas fa-comment"></i> {{ thread.comment_count }} comments
+                                                    </span>
+                                                </div>
+                                                
+                                                {% if thread.user == request.user %}
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{% url 'hirevision:edit_thread' thread.id %}" class="btn btn-outline-primary btn-sm">
+                                                            <i class="fas fa-edit"></i> Edit
+                                                        </a>
+                                                        <a href="{% url 'hirevision:delete_thread' thread.id %}" class="btn btn-outline-danger btn-sm">
+                                                            <i class="fas fa-trash"></i> Delete
+                                                        </a>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body py-5">
+                            <i class="fas fa-comments fa-4x text-muted mb-4"></i>
+                            <h3 class="text-muted mb-3">No threads yet</h3>
+                            <p class="text-muted mb-4">Be the first to start a discussion and connect with other professionals!</p>
+                            <a href="{% url 'hirevision:create_thread' %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-plus me-2"></i> Create Your First Thread
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

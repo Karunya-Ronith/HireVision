@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Thread - HireVision{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'hirevision:threads_list' %}">
+                            <i class="fas fa-comments"></i> Discussion Forum
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'hirevision:thread_detail' thread.id %}">
+                            {{ thread.title|truncatechars:30 }}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit</li>
+                </ol>
+            </nav>
+            
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-edit text-primary"></i>
+                        Edit Thread
+                    </h3>
+                </div>
+                
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label">
+                                <strong>Thread Title *</strong>
+                            </label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="text-danger small">{{ form.title.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.content.id_for_label }}" class="form-label">
+                                <strong>Content *</strong>
+                            </label>
+                            {{ form.content }}
+                            {% if form.content.errors %}
+                                <div class="text-danger small">{{ form.content.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.image.id_for_label }}" class="form-label">
+                                <strong>Image (Optional)</strong>
+                            </label>
+                            {% if thread.image %}
+                                <div class="mb-2">
+                                    <p class="text-muted small">Current image:</p>
+                                    <img src="{{ thread.image.url }}" class="img-fluid rounded" alt="Current image" style="max-height: 200px;">
+                                </div>
+                            {% endif %}
+                            {{ form.image }}
+                            {% if form.image.errors %}
+                                <div class="text-danger small">{{ form.image.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">Upload a new image to replace the current one. Max size: 10MB.</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.article_url.id_for_label }}" class="form-label">
+                                <strong>Article URL (Optional)</strong>
+                            </label>
+                            {{ form.article_url }}
+                            {% if form.article_url.errors %}
+                                <div class="text-danger small">{{ form.article_url.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'hirevision:thread_detail' thread.id %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

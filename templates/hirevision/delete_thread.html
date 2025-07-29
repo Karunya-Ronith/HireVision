@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Thread - HireVision{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'hirevision:threads_list' %}">
+                            <i class="fas fa-comments"></i> Discussion Forum
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'hirevision:thread_detail' thread.id %}">
+                            {{ thread.title|truncatechars:30 }}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Delete</li>
+                </ol>
+            </nav>
+            
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Delete Thread
+                    </h3>
+                </div>
+                
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Warning!
+                        </h5>
+                        <p class="mb-0">This action cannot be undone. All comments on this thread will also be deleted.</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Thread Details:</h5>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6>{{ thread.title }}</h6>
+                                <p class="text-muted mb-2">{{ thread.content|truncatewords:20 }}</p>
+                                <small class="text-muted">
+                                    Created by {{ thread.user.get_full_name|default:thread.user.username }} 
+                                    on {{ thread.created_at|date:"M d, Y" }}
+                                </small>
+                                {% if thread.comment_count > 0 %}
+                                    <br>
+                                    <small class="text-danger">
+                                        <i class="fas fa-comment"></i> {{ thread.comment_count }} comment{{ thread.comment_count|pluralize }} will be deleted
+                                    </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'hirevision:thread_detail' thread.id %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete Thread
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
