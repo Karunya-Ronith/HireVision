@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Conversation - HireVision{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-trash"></i> Delete Conversation</h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-exclamation-triangle fa-4x text-warning mb-3"></i>
+                        <h5>Are you sure you want to delete this conversation?</h5>
+                        <p class="text-muted">This action cannot be undone. All messages in this conversation will be permanently deleted.</p>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>Conversation with:</strong><br>
+                        {% for participant in conversation.participants.all %}
+                            {% if participant != request.user %}
+                                <div class="d-flex align-items-center justify-content-center mt-2">
+                                    <div class="user-avatar me-2">
+                                        {% if participant.profile_picture %}
+                                            <img src="{{ participant.profile_picture.url }}" alt="{{ participant.get_full_name }}" class="rounded-circle" width="30" height="30">
+                                        {% else %}
+                                            <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; background-color: #007bff; color: white; font-weight: bold; font-size: 12px;">
+                                                {{ participant.first_name|first|upper }}{{ participant.last_name|first|upper }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <span>{{ participant.get_full_name|default:participant.username }}</span>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{% url 'hirevision:messages_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete Conversation
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-placeholder {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+}
+</style>
+{% endblock %} 

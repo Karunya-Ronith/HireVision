@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+
+{% block title %}Conversation with {{ other_participant.get_full_name|default:other_participant.username }} - HireVision{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <a href="{% url 'hirevision:messages_list' %}" class="btn btn-outline-secondary me-3">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                    <div class="d-flex align-items-center">
+                        <div class="user-avatar me-3">
+                            {% if other_participant.profile_picture %}
+                                <img src="{{ other_participant.profile_picture.url }}" alt="{{ other_participant.get_full_name }}" class="rounded-circle" width="50" height="50">
+                            {% else %}
+                                <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background-color: #007bff; color: white; font-weight: bold;">
+                                    {{ other_participant.first_name|first|upper }}{{ other_participant.last_name|first|upper }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h4 class="mb-0">{{ other_participant.get_full_name|default:other_participant.username }}</h4>
+                            <small class="text-muted">@{{ other_participant.username }}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages Container -->
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    <div class="messages-container" id="messagesContainer" style="height: 500px; overflow-y: auto;">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="message-item {% if message.sender == request.user %}message-sent{% else %}message-received{% endif %} p-3">
+                                    <div class="d-flex {% if message.sender == request.user %}justify-content-end{% endif %}">
+                                        <div class="message-bubble {% if message.sender == request.user %}sent{% else %}received{% endif %}">
+                                            {% if message.sender != request.user %}
+                                                <div class="message-sender mb-1">
+                                                    <small class="text-muted">{{ message.sender.get_full_name|default:message.sender.username }}</small>
+                                                </div>
+                                            {% endif %}
+                                            
+                                            {% if message.image %}
+                                                <div class="message-image mb-2">
+                                                    <img src="{{ message.image.url }}" alt="Message image" class="img-fluid rounded" style="max-width: 300px;">
+                                                </div>
+                                            {% endif %}
+                                            
+                                            <div class="message-content">
+                                                {{ message.content|linebreaks }}
+                                            </div>
+                                            
+                                            <div class="message-time mt-1">
+                                                <small class="text-muted">
+                                                    {{ message.created_at|date:"M j, g:i A" }}
+                                                    {% if message.sender == request.user %}
+                                                        {% if message.is_read %}
+                                                            <i class="fas fa-check-double text-primary ms-1"></i>
+                                                        {% else %}
+                                                            <i class="fas fa-check text-muted ms-1"></i>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <div class="empty-state">
+                                    <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No Messages Yet</h5>
+                                    <p class="text-muted">Start the conversation by sending a message!</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Input -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="messageForm">
+                        {% csrf_token %}
+                        <div class="row align-items-end">
+                            <div class="col-md-9">
+                                <div class="mb-3">
+                                    <label for="{{ message_form.content.id_for_label }}" class="form-label">Message</label>
+                                    {{ message_form.content }}
+                                    {% if message_form.content.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in message_form.content.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <label for="{{ message_form.image.id_for_label }}" class="form-label">Image (optional)</label>
+                                    {{ message_form.image }}
+                                    {% if message_form.image.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in message_form.image.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Conversation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this conversation? This action cannot be undone.</p>
+                <p class="text-muted small">
+                    Conversation with: {{ other_participant.get_full_name|default:other_participant.username }}
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'hirevision:delete_conversation' conversation.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.messages-container {
+    background-color: #f8f9fa;
+}
+
+.message-item {
+    margin-bottom: 1rem;
+}
+
+.message-bubble {
+    max-width: 70%;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    position: relative;
+}
+
+.message-bubble.sent {
+    background-color: #007bff;
+    color: white;
+    border-bottom-right-radius: 0.25rem;
+}
+
+.message-bubble.received {
+    background-color: white;
+    color: #212529;
+    border: 1px solid #e9ecef;
+    border-bottom-left-radius: 0.25rem;
+}
+
+.message-image img {
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.message-content {
+    word-wrap: break-word;
+}
+
+.avatar-placeholder {
+    font-size: 18px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+}
+
+.empty-state {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    .message-bubble {
+        max-width: 85%;
+    }
+    
+    .messages-container {
+        height: 400px !important;
+    }
+    
+    .col-md-2, .col-md-1 {
+        margin-top: 1rem;
+    }
+}
+</style>
+
+<script>
+// Auto-scroll to bottom of messages
+document.addEventListener('DOMContentLoaded', function() {
+    const messagesContainer = document.getElementById('messagesContainer');
+    if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+});
+
+// Auto-hide alerts
+document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+        setTimeout(function() {
+            alert.style.transition = 'opacity 0.5s ease-in-out';
+            alert.style.opacity = '0';
+            setTimeout(function() {
+                alert.remove();
+            }, 500);
+        }, 5000);
+    });
+});
+
+// Form loading state
+document.getElementById('messageForm').addEventListener('submit', function() {
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalContent = submitBtn.innerHTML;
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    
+    // Re-enable after 10 seconds in case of error
+    setTimeout(function() {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalContent;
+    }, 10000);
+});
+</script>
+{% endblock %} 

@@ -273,6 +273,70 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--dark-color);
         }
+
+        /* Thread and Comment Styling */
+        .thread-content {
+            line-height: 1.6;
+            color: var(--dark-color);
+        }
+
+        .comment-content {
+            line-height: 1.5;
+            color: var(--dark-color);
+        }
+
+        .thread-card {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .thread-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+
+        .comment-item {
+            border-left: 3px solid var(--light-color);
+            padding-left: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .comment-item:hover {
+            border-left-color: var(--primary-color);
+        }
+
+        /* User Avatar Styling */
+        .user-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        .user-avatar.primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        }
+
+        .user-avatar.secondary {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #6b7280 100%);
+        }
+
+        /* Responsive improvements */
+        @media (max-width: 576px) {
+            .btn-group-sm .btn {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.75rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .thread-content, .comment-content {
+                font-size: 0.9rem;
+            }
+        }
     </style>
     
     {% block extra_css %}{% endblock %}
@@ -307,6 +371,16 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'hirevision:resume_builder' %}" data-requires-auth="true">
                             <i class="fas fa-file-alt me-1"></i>Resume Builder
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'hirevision:threads_list' %}" data-requires-auth="true">
+                            <i class="fas fa-comments me-1"></i>Discussion Forum
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'hirevision:messages_list' %}" data-requires-auth="true">
+                            <i class="fas fa-envelope me-1"></i>Messages
                         </a>
                     </li>
                     <li class="nav-item">
@@ -426,6 +500,66 @@
                     e.preventDefault();
                     const modal = new bootstrap.Modal(document.getElementById('authRequiredModal'));
                     modal.show();
+                }
+            });
+        });
+
+        // Auto-hide alerts after 5 seconds
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }, 5000);
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add loading states to forms
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function() {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                }
+            });
+        });
+
+        // Image preview for file inputs
+        const imageInputs = document.querySelectorAll('input[type="file"][accept*="image"]');
+        imageInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // Create preview if it doesn't exist
+                        let preview = input.parentNode.querySelector('.image-preview');
+                        if (!preview) {
+                            preview = document.createElement('div');
+                            preview.className = 'image-preview mt-2';
+                            input.parentNode.appendChild(preview);
+                        }
+                        preview.innerHTML = `
+                            <img src="${e.target.result}" class="img-fluid rounded" style="max-height: 150px;" alt="Preview">
+                            <small class="text-muted d-block mt-1">${file.name}</small>
+                        `;
+                    };
+                    reader.readAsDataURL(file);
                 }
             });
         });

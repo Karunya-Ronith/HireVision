@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}New Message - HireVision{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex align-items-center">
+                        <a href="{% url 'hirevision:messages_list' %}" class="btn btn-outline-light me-3">
+                            <i class="fas fa-arrow-left"></i>
+                        </a>
+                        <h4 class="mb-0"><i class="fas fa-plus"></i> New Message</h4>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="searchForm">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="{{ search_form.search_query.id_for_label }}" class="form-label">
+                                <i class="fas fa-search"></i> Search Users
+                            </label>
+                            {{ search_form.search_query }}
+                            <div class="form-text">
+                                Search by username, full name, or email address
+                            </div>
+                            {% if search_form.search_query.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in search_form.search_query.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </form>
+
+                    {% if search_query %}
+                        <hr class="my-4">
+                        <h5 class="mb-3">
+                            <i class="fas fa-users"></i> Search Results for "{{ search_query }}"
+                        </h5>
+                        
+                        {% if users %}
+                            <div class="row">
+                                {% for user in users %}
+                                    <div class="col-12 mb-3">
+                                        <div class="card user-card h-100 shadow-sm">
+                                            <div class="card-body">
+                                                <div class="row align-items-center">
+                                                    <div class="col-md-8">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="user-avatar me-3">
+                                                                {% if user.profile_picture %}
+                                                                    <img src="{{ user.profile_picture.url }}" alt="{{ user.get_full_name }}" class="rounded-circle" width="50" height="50">
+                                                                {% else %}
+                                                                    <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background-color: #007bff; color: white; font-weight: bold;">
+                                                                        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                                                                    </div>
+                                                                {% endif %}
+                                                            </div>
+                                                            <div class="flex-grow-1">
+                                                                <h6 class="mb-1">{{ user.get_full_name|default:user.username }}</h6>
+                                                                <p class="text-muted mb-1 small">@{{ user.username }}</p>
+                                                                {% if user.email %}
+                                                                    <p class="text-muted mb-0 small">{{ user.email }}</p>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4 text-end">
+                                                        <a href="{% url 'hirevision:start_conversation' user.id %}" class="btn btn-primary">
+                                                            <i class="fas fa-comment"></i> Message
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <div class="empty-state">
+                                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No Users Found</h5>
+                                    <p class="text-muted">Try searching with a different term.</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+
+                    <!-- Quick Actions -->
+                    <hr class="my-4">
+                    <h5 class="mb-3">
+                        <i class="fas fa-bolt"></i> Quick Actions
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card quick-action-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-threads fa-2x text-primary mb-3"></i>
+                                    <h6>Message from Threads</h6>
+                                    <p class="text-muted small">Find users from discussion threads</p>
+                                    <a href="{% url 'hirevision:threads_list' %}" class="btn btn-outline-primary btn-sm">
+                                        Browse Threads
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card quick-action-card h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-users fa-2x text-success mb-3"></i>
+                                    <h6>Recent Conversations</h6>
+                                    <p class="text-muted small">Continue existing conversations</p>
+                                    <a href="{% url 'hirevision:messages_list' %}" class="btn btn-outline-success btn-sm">
+                                        View Messages
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.user-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: 1px solid #e9ecef;
+}
+
+.user-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.avatar-placeholder {
+    font-size: 18px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+}
+
+.quick-action-card {
+    transition: transform 0.2s ease-in-out;
+    border: 1px solid #e9ecef;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-2px);
+}
+
+.empty-state {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    .user-card .card-body {
+        padding: 1rem;
+    }
+    
+    .col-md-4 {
+        margin-top: 1rem;
+    }
+}
+</style>
+
+<script>
+// Auto-hide alerts
+document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+        setTimeout(function() {
+            alert.style.transition = 'opacity 0.5s ease-in-out';
+            alert.style.opacity = '0';
+            setTimeout(function() {
+                alert.remove();
+            }, 500);
+        }, 5000);
+    });
+});
+
+// Form loading state
+document.getElementById('searchForm').addEventListener('submit', function() {
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalContent = submitBtn.innerHTML;
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+    
+    // Re-enable after 10 seconds in case of error
+    setTimeout(function() {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalContent;
+    }, 10000);
+});
+</script>
+{% endblock %} 

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import authenticate
-from .models import ResumeAnalysis, LearningPath, ResumeBuilder, User
+from .models import ResumeAnalysis, LearningPath, ResumeBuilder, User, Thread, Comment, Message, Conversation
 
 class UserSignUpForm(UserCreationForm):
     """Form for user registration"""
@@ -42,11 +42,11 @@ class UserSignUpForm(UserCreationForm):
         })
     )
     phone = forms.CharField(
-        required=False,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Phone Number (optional)'
-        })
+            'placeholder': '+1 (555) 123-4567'
+        }),
+        required=False
     )
     
     class Meta:
@@ -83,46 +83,46 @@ class UserLoginForm(AuthenticationForm):
             user = authenticate(username=email, password=password)
             if user is None:
                 raise forms.ValidationError("Invalid email or password.")
-            if not user.is_active:
-                raise forms.ValidationError("This account is inactive.")
-        
+            self.user_cache = user
         return self.cleaned_data
 
 class ResumeAnalysisForm(forms.ModelForm):
     """Form for resume analysis"""
+    
     class Meta:
         model = ResumeAnalysis
         fields = ['resume_file', 'job_description']
         exclude = ['user']  # User will be set automatically
         widgets = {
-            'job_description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 8,
-                'placeholder': 'Paste the job description here...'
-            }),
             'resume_file': forms.FileInput(attrs={
                 'class': 'form-control',
-                'accept': '.pdf,.docx,.doc'
+                'accept': '.pdf,.doc,.docx'
+            }),
+            'job_description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 6,
+                'placeholder': 'Paste the job description here...'
             })
         }
     
     def clean_resume_file(self):
         file = self.cleaned_data.get('resume_file')
         if file:
-            # Check file size (10MB limit)
-            if file.size > 10 * 1024 * 1024:
-                raise forms.ValidationError("File size must be under 10MB.")
+            # Check file size (5MB limit)
+            if file.size > 5 * 1024 * 1024:
+                raise forms.ValidationError("File size must be under 5MB.")
             
             # Check file extension
-            allowed_extensions = ['.pdf', '.docx', '.doc']
+            allowed_extensions = ['.pdf', '.doc', '.docx']
             file_extension = file.name.lower()
             if not any(file_extension.endswith(ext) for ext in allowed_extensions):
-                raise forms.ValidationError("Please upload a PDF, DOCX, or DOC file.")
+                raise forms.ValidationError("Only PDF, DOC, and DOCX files are allowed.")
         
         return file
 
 class LearningPathForm(forms.ModelForm):
     """Form for learning path analysis"""
+    
     class Meta:
         model = LearningPath
         fields = ['current_skills', 'dream_role']
@@ -135,12 +135,13 @@ class LearningPathForm(forms.ModelForm):
             }),
             'dream_role': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'e.g., Senior Software Engineer, Data Scientist, Product Manager...'
+                'placeholder': 'e.g., Senior Software Engineer, Data Scientist, Product Manager'
             })
         }
 
 class ResumeBuilderForm(forms.ModelForm):
     """Form for resume builder"""
+    
     class Meta:
         model = ResumeBuilder
         fields = [
@@ -250,4 +251,122 @@ class ResumeBuilderForm(forms.ModelForm):
                     json.loads(skills)
         except json.JSONDecodeError:
             raise forms.ValidationError("Skills must be in valid JSON format.")
-        return skills 
+        return skills
+
+class ThreadForm(forms.ModelForm):
+    """Form for creating and editing threads"""
+    
+    class Meta:
+        model = Thread
+        fields = ['title', 'content', 'image', 'article_url']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter thread title...'
+            }),
+            'content': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 6,
+                'placeholder': 'Share your thoughts, questions, or insights...'
+            }),
+            'image': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'article_url': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://example.com/article (optional)'
+            })
+        }
+    
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+        if image:
+            # Check file size (10MB limit)
+            if image.size > 10 * 1024 * 1024:
+                raise forms.ValidationError("Image size must be under 10MB.")
+            
+            # Check file extension
+            allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+            file_extension = image.name.lower()
+            if not any(file_extension.endswith(ext) for ext in allowed_extensions):
+                raise forms.ValidationError("Only JPG, PNG, GIF, and WebP images are allowed.")
+        
+        return image
+
+class CommentForm(forms.ModelForm):
+    """Form for creating and editing comments"""
+    
+    class Meta:
+        model = Comment
+        fields = ['content', 'image']
+        widgets = {
+            'content': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Write your comment...'
+            }),
+            'image': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            })
+        }
+    
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+        if image:
+            # Check file size (5MB limit for comments)
+            if image.size > 5 * 1024 * 1024:
+                raise forms.ValidationError("Image size must be under 5MB.")
+            
+            # Check file extension
+            allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+            file_extension = image.name.lower()
+            if not any(file_extension.endswith(ext) for ext in allowed_extensions):
+                raise forms.ValidationError("Only JPG, PNG, GIF, and WebP images are allowed.")
+        
+        return image
+
+class MessageForm(forms.ModelForm):
+    """Form for sending messages"""
+    
+    class Meta:
+        model = Message
+        fields = ['content', 'image']
+        widgets = {
+            'content': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Type your message...'
+            }),
+            'image': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            })
+        }
+    
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+        if image:
+            # Check file size (5MB limit for messages)
+            if image.size > 5 * 1024 * 1024:
+                raise forms.ValidationError("Image size must be under 5MB.")
+            
+            # Check file extension
+            allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+            file_extension = image.name.lower()
+            if not any(file_extension.endswith(ext) for ext in allowed_extensions):
+                raise forms.ValidationError("Only JPG, PNG, GIF, and WebP images are allowed.")
+        
+        return image
+
+class UserSearchForm(forms.Form):
+    """Form for searching users to message"""
+    search_query = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Search by username or full name...',
+            'id': 'user-search-input'
+        })
+    ) 
