@@ -155,3 +155,96 @@ class ResumeBuilder(models.Model):
     
     def __str__(self):
         return f"Resume - {self.name} ({self.created_at.strftime('%Y-%m-%d')})"
+
+class Thread(models.Model):
+    """Model for discussion forum threads"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='threads')
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    image = models.ImageField(upload_to='thread_images/', blank=True, null=True)
+    article_url = models.URLField(blank=True, null=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_edited = models.BooleanField(default=False)
+    
+    class Meta:
+        verbose_name_plural = "Threads"
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.title} by {self.user.username}"
+    
+    @property
+    def comment_count(self):
+        return self.comments.count()
+    
+    @property
+    def has_media(self):
+        return bool(self.image or self.article_url)
+
+class Comment(models.Model):
+    """Model for comments on threads"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    content = models.TextField()
+    image = models.ImageField(upload_to='comment_images/', blank=True, null=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_edited = models.BooleanField(default=False)
+    
+    class Meta:
+        verbose_name_plural = "Comments"
+        ordering = ['created_at']
+    
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.thread.title}"
+    
+    @property
+    def has_media(self):
+        return bool(self.image)
+
+class Conversation(models.Model):
+    """Model for conversations between two users"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    participants = models.ManyToManyField(User, related_name='conversations')
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name_plural = "Conversations"
+        ordering = ['-updated_at']
+    
+    def __str__(self):
+        participant_names = [user.username for user in self.participants.all()]
+        return f"Conversation between {' and '.join(participant_names)}"
+    
+    @property
+    def last_message(self):
+        return self.messages.order_by('-created_at').first()
+    
+    @property
+    def unread_count(self, user):
+        return self.messages.filter(is_read=False).exclude(sender=user).count()
+
+class Message(models.Model):
+    """Model for individual messages in conversations"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    content = models.TextField()
+    image = models.ImageField(upload_to='message_images/', blank=True, null=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    is_read = models.BooleanField(default=False)
+    
+    class Meta:
+        verbose_name_plural = "Messages"
+        ordering = ['created_at']
+    
+    def __str__(self):
+        return f"Message from {self.sender.username} at {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+    
+    @property
+    def has_media(self):
+        return bool(self.image)
