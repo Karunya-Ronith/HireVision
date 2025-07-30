@@ -224,7 +224,12 @@ class Conversation(models.Model):
     def last_message(self):
         return self.messages.order_by('-created_at').first()
     
+
     def get_unread_count(self, user):
+
+    @property
+    def unread_count(self, user):
+
         return self.messages.filter(is_read=False).exclude(sender=user).count()
 
 class Message(models.Model):
