@@ -457,9 +457,7 @@ def messages_list(request):
     
     # Get unread counts for each conversation
     for conversation in conversations:
-        conversation.unread_count = conversation.messages.filter(
-            is_read=False
-        ).exclude(sender=request.user).count()
+        conversation.unread_count = conversation.get_unread_count(request.user)
     
     return render(request, 'hirevision/messages_list.html', {'conversations': conversations})
 
@@ -471,7 +469,7 @@ def conversation_detail(request, conversation_id):
     # Mark messages as read
     conversation.messages.filter(is_read=False).exclude(sender=request.user).update(is_read=True)
     
-    messages = conversation.messages.all().select_related('sender').order_by('created_at')
+    conversation_messages = conversation.messages.all().select_related('sender').order_by('created_at')
     
     if request.method == 'POST':
         form = MessageForm(request.POST, request.FILES)
@@ -494,7 +492,7 @@ def conversation_detail(request, conversation_id):
     
     context = {
         'conversation': conversation,
-        'messages': messages,
+        'messages': conversation_messages,
         'message_form': form,
         'other_participant': other_participant
     }
