@@ -46,6 +46,9 @@ def process_resume_analysis_task(analysis_id: str):
             analysis.job_description
         )
         
+        logger.info(f"Result type: {type(result)}")
+        logger.info(f"Result content: {str(result)[:500]}...")
+        
         # Check if the result is an error message
         if isinstance(result, str) and result.startswith('## ❌'):
             logger.error(f"Resume analysis failed for analysis {analysis_id}: {result}")
@@ -54,9 +57,9 @@ def process_resume_analysis_task(analysis_id: str):
             analysis.save(update_fields=['task_status', 'task_error'])
             return
         
-        # Check if it's the OpenAI API key error - provide demo data
-        if isinstance(result, str) and "OpenAI API Key Not Configured" in result:
-            logger.info(f"Using demo data for analysis {analysis_id} (OpenAI API key not configured)")
+        # Check if it's the OpenRouter API key error - provide demo data
+        if isinstance(result, str) and ("OpenRouter API Key Not Configured" in result or "API key not configured" in result.lower()):
+            logger.info(f"Using demo data for analysis {analysis_id} (OpenRouter API key not configured)")
             # Demo data
             analysis.ats_score = 78
             analysis.score_explanation = "Demo analysis: Your resume shows good technical skills and relevant experience. The ATS score indicates a strong match for the position."
@@ -91,14 +94,24 @@ def process_resume_analysis_task(analysis_id: str):
             # Parse the result if it's structured
             if isinstance(result, dict):
                 logger.info(f"Processing structured result for analysis {analysis_id}")
-                analysis.ats_score = result.get('ats_score', 75)
+                # Ensure ats_score is an integer
+                ats_score = result.get('ats_score', 75)
+                if isinstance(ats_score, str):
+                    try:
+                        ats_score = int(ats_score)
+                    except (ValueError, TypeError):
+                        ats_score = 75
+                
+                analysis.ats_score = ats_score
                 analysis.score_explanation = result.get('score_explanation', 'Analysis completed successfully')
-                analysis.strengths = result.get('strengths', ["Strong technical skills", "Good experience"])
-                analysis.weaknesses = result.get('weaknesses', ["Could improve communication skills"])
-                analysis.recommendations = result.get('recommendations', ["Add more quantifiable achievements"])
-                analysis.skills_gap = result.get('skills_gap', ["Advanced Python", "Cloud computing"])
-                analysis.upskilling_suggestions = result.get('upskilling_suggestions', ["Take advanced Python course"])
-                analysis.overall_assessment = result.get('overall_assessment', result)
+                analysis.strengths = result.get('strengths', [])
+                analysis.weaknesses = result.get('weaknesses', [])
+                analysis.recommendations = result.get('recommendations', [])
+                analysis.skills_gap = result.get('skills_gap', [])
+                analysis.upskilling_suggestions = result.get('upskilling_suggestions', [])
+                analysis.overall_assessment = result.get('overall_assessment', 'Analysis completed successfully')
+                
+                logger.info(f"Saved analysis data: score={analysis.ats_score}, strengths={len(analysis.strengths)}, weaknesses={len(analysis.weaknesses)}")
             else:
                 logger.info(f"Processing fallback result for analysis {analysis_id}")
                 # Fallback for markdown string result
@@ -155,8 +168,8 @@ def process_learning_path_task(path_id: str):
             learning_path.save(update_fields=['task_status', 'task_error'])
             return
         
-        # Check if it's the OpenAI API key error - provide demo data
-        if isinstance(result, str) and "OpenAI API Key Not Configured" in result:
+        # Check if it's the OpenRouter API key error - provide demo data
+        if isinstance(result, str) and "OpenRouter API Key Not Configured" in result:
             # Demo data
             learning_path.role_analysis = "Demo analysis: Based on your current skills and the target role, here's a comprehensive learning path to help you achieve your career goals."
             learning_path.skills_gap = [
@@ -305,8 +318,8 @@ def process_resume_builder_task(resume_id: str):
             resume.save(update_fields=['task_status', 'task_error'])
             return
         
-        # Check if it's the OpenAI API key error - provide demo data
-        if isinstance(result, str) and "OpenAI API Key Not Configured" in result:
+        # Check if it's the OpenRouter API key error - provide demo data
+        if isinstance(result, str) and "OpenRouter API Key Not Configured" in result:
             # Demo data - save the resume with demo content
             resume.latex_content = "Demo LaTeX content for resume"
             

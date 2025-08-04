@@ -2,10 +2,13 @@ import os
 import time
 from openai import OpenAI
 from config import (
-    OPENAI_API_KEY,
-    OPENAI_MODEL,
-    OPENAI_TEMPERATURE,
-    OPENAI_MAX_TOKENS,
+    OPENROUTER_API_KEY,
+    OPENROUTER_BASE_URL,
+    OPENROUTER_MODEL,
+    OPENROUTER_TEMPERATURE,
+    OPENROUTER_MAX_TOKENS,
+    OPENROUTER_SITE_URL,
+    OPENROUTER_SITE_NAME,
     ERROR_MESSAGES,
 )
 from utils import (
@@ -40,23 +43,23 @@ def analyze_learning_path(current_skills, dream_role):
     logger.debug(f"Sanitized current skills length: {len(current_skills)}")
     logger.debug(f"Sanitized dream role length: {len(dream_role)}")
 
-    # Check if OpenAI API key is available
-    if not OPENAI_API_KEY or OPENAI_API_KEY == "your_openai_api_key_here":
-        logger.warning("OpenAI API key not configured, returning demo message")
+    # Check if OpenRouter API key is available
+    if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "your_openrouter_api_key_here":
+        logger.warning("OpenRouter API key not configured, returning demo message")
         return """
-## ⚠️ OpenAI API Key Not Configured
+## ⚠️ OpenRouter API Key Not Configured
 
 To get AI-powered learning path guidance, please:
 
-1. Get your OpenAI API key from: https://platform.openai.com/api-keys
+1. Get your OpenRouter API key from: https://openrouter.ai/keys
 2. Create a `.env` file in the project directory
-3. Add your API key: `OPENAI_API_KEY=your_actual_api_key_here`
+3. Add your API key: `OPENROUTER_API_KEY=your_actual_api_key_here`
 4. Restart the application
 """
 
     def make_api_call():
         """Make the actual API call with retry logic"""
-        logger.info("Making OpenAI API call for learning path analysis")
+        logger.info("Making OpenRouter API call for learning path analysis")
         
         # Create the enhanced analysis prompt with anti-hallucination instructions
         prompt = f"""
@@ -180,15 +183,23 @@ To get AI-powered learning path guidance, please:
         """
 
         logger.debug(f"Prompt length: {len(prompt)} characters")
-        logger.debug(f"Using model: {OPENAI_MODEL}, temperature: {OPENAI_TEMPERATURE}, max_tokens: {OPENAI_MAX_TOKENS}")
+        logger.debug(f"Using model: {OPENROUTER_MODEL}, temperature: {OPENROUTER_TEMPERATURE}, max_tokens: {OPENROUTER_MAX_TOKENS}")
 
-        # Call OpenAI API
-        client = OpenAI(api_key=OPENAI_API_KEY)
+        # Call OpenRouter API using the OpenAI-compatible client
+        client = OpenAI(
+            base_url=OPENROUTER_BASE_URL,
+            api_key=OPENROUTER_API_KEY,
+        )
         
         api_start_time = time.time()
         try:
             response = client.chat.completions.create(
-                model=OPENAI_MODEL,
+                extra_headers={
+                    "HTTP-Referer": OPENROUTER_SITE_URL,
+                    "X-Title": OPENROUTER_SITE_NAME,
+                },
+                extra_body={},
+                model=OPENROUTER_MODEL,
                 messages=[
                     {
                         "role": "system",
@@ -196,14 +207,14 @@ To get AI-powered learning path guidance, please:
                     },
                     {"role": "user", "content": prompt},
                 ],
-                temperature=OPENAI_TEMPERATURE,
-                max_tokens=OPENAI_MAX_TOKENS,
+                temperature=OPENROUTER_TEMPERATURE,
+                max_tokens=OPENROUTER_MAX_TOKENS,
             )
             
             api_duration = time.time() - api_start_time
-            logger.info(f"OpenAI API call successful in {api_duration:.3f}s")
-            log_api_call("OpenAI Learning Path Analysis", 
-                        request_data={"model": OPENAI_MODEL, "temperature": OPENAI_TEMPERATURE, "max_tokens": OPENAI_MAX_TOKENS},
+            logger.info(f"OpenRouter API call successful in {api_duration:.3f}s")
+            log_api_call("OpenRouter Learning Path Analysis", 
+                        request_data={"model": OPENROUTER_MODEL, "temperature": OPENROUTER_TEMPERATURE, "max_tokens": OPENROUTER_MAX_TOKENS},
                         response_data={"response_length": len(response.choices[0].message.content)},
                         success=True)
             
@@ -211,9 +222,9 @@ To get AI-powered learning path guidance, please:
             
         except Exception as e:
             api_duration = time.time() - api_start_time
-            logger.error(f"OpenAI API call failed after {api_duration:.3f}s: {str(e)}")
-            log_api_call("OpenAI Learning Path Analysis", 
-                        request_data={"model": OPENAI_MODEL, "temperature": OPENAI_TEMPERATURE, "max_tokens": OPENAI_MAX_TOKENS},
+            logger.error(f"OpenRouter API call failed after {api_duration:.3f}s: {str(e)}")
+            log_api_call("OpenRouter Learning Path Analysis", 
+                        request_data={"model": OPENROUTER_MODEL, "temperature": OPENROUTER_TEMPERATURE, "max_tokens": OPENROUTER_MAX_TOKENS},
                         success=False, error=str(e))
             raise
 

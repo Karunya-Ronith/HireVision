@@ -3,7 +3,15 @@ import re
 import time
 from typing import Dict, Any, List, Optional
 from openai import OpenAI
-from config import OPENAI_API_KEY, OPENAI_MODEL, OPENAI_TEMPERATURE, OPENAI_MAX_TOKENS
+from config import (
+    OPENROUTER_API_KEY,
+    OPENROUTER_BASE_URL,
+    OPENROUTER_MODEL,
+    OPENROUTER_TEMPERATURE,
+    OPENROUTER_MAX_TOKENS,
+    OPENROUTER_SITE_URL,
+    OPENROUTER_SITE_NAME,
+)
 from utils import retry_with_backoff, handle_api_error, sanitize_input
 from pdf_generator import generate_pdf_from_latex, get_sample_pdf_path
 from logging_config import get_logger, log_function_call, log_file_operation, log_performance

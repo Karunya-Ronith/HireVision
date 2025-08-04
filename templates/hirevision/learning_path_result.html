@@ -574,6 +574,138 @@
         font-weight: 600;
     }
 
+    /* Enhanced Loading Animation Styles */
+    .loading-animation {
+        position: relative;
+        display: inline-block;
+    }
+
+    .ai-roadmap {
+        position: relative;
+        display: inline-block;
+    }
+
+    .ai-roadmap i {
+        position: relative;
+        z-index: 3;
+        animation: roadmap-pulse 2s ease-in-out infinite;
+    }
+
+    .pulse-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80px;
+        height: 80px;
+        border: 3px solid var(--success-color);
+        border-radius: 50%;
+        opacity: 0;
+        animation: pulse 2s ease-out infinite;
+    }
+
+    .pulse-ring.delay-1 {
+        animation-delay: 0.5s;
+    }
+
+    .pulse-ring.delay-2 {
+        animation-delay: 1s;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 1;
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(2);
+            opacity: 0;
+        }
+    }
+
+    @keyframes roadmap-pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    /* Status Container Styles */
+    .status-container h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--dark-color);
+    }
+
+    .status-container p {
+        font-size: 1rem;
+        color: var(--secondary-color);
+        margin-bottom: 0;
+    }
+
+    /* Progress Container Styles */
+    .progress-container {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color);
+    }
+
+    .progress {
+        background-color: #e9ecef;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        transition: width 0.5s ease;
+    }
+
+    /* Loading Tips Styles */
+    .loading-tips {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .tip-card {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        border: 1px solid #ffc107;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+    }
+
+    .tip-card i {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .tip-card span {
+        font-weight: 500;
+        color: #856404;
+        line-height: 1.5;
+    }
+
+    /* Cancel Button Styles */
+    #cancel-analysis {
+        transition: all 0.3s ease;
+        border-radius: 20px;
+        padding: 0.5rem 1.5rem;
+    }
+
+    #cancel-analysis:hover {
+        background-color: var(--danger-color);
+        border-color: var(--danger-color);
+        color: white;
+        transform: translateY(-1px);
+    }
+
     @media (max-width: 768px) {
         .path-title {
             font-size: 2.5rem;
@@ -615,18 +747,50 @@
             <p class="path-subtitle" title="{{ learning_path.dream_role }}">AI-Generated Roadmap to "{{ learning_path.dream_role|truncatechars:300 }}"</p>
         </div>
 
-        <!-- Loading State -->
+        <!-- Enhanced Loading State -->
         <div id="loading-state"{% if learning_path.task_status == 'completed' %} style="display: none;"{% endif %}>
             <div class="text-center">
-                <div class="loading-spinner mb-4">
-                    <div class="spinner-border text-success" role="status" style="width: 3rem; height: 3rem;">
-                        <span class="visually-hidden">Loading...</span>
+                <!-- Animated Loading Icon -->
+                <div class="loading-animation mb-4">
+                    <div class="ai-roadmap">
+                        <i class="fas fa-road fa-3x text-success"></i>
+                        <div class="pulse-ring"></div>
+                        <div class="pulse-ring delay-1"></div>
+                        <div class="pulse-ring delay-2"></div>
                     </div>
                 </div>
-                <h3>Creating Your Learning Path...</h3>
-                <p class="text-muted">Please wait while our AI creates a personalized learning roadmap for your career goals. This usually takes 30-60 seconds.</p>
-                <div class="progress mt-3" style="max-width: 400px; margin: 0 auto;">
-                    <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                
+                <!-- Dynamic Status Messages -->
+                <div class="status-container mb-4">
+                    <h3 id="status-title">Analyzing Your Career Goals...</h3>
+                    <p id="status-description" class="text-muted">Understanding your current skills and target role</p>
+                </div>
+                
+                <!-- Progress Bar with Time Estimate -->
+                <div class="progress-container" style="max-width: 500px; margin: 0 auto;">
+                    <div class="progress mb-2" style="height: 8px; border-radius: 10px;">
+                        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 0%; border-radius: 10px; background: linear-gradient(90deg, var(--success-color) 0%, #059669 100%);"></div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted" id="progress-text">0% Complete</small>
+                        <small class="text-muted" id="time-estimate">Estimated: 45 seconds</small>
+                    </div>
+                </div>
+                
+                <!-- Loading Tips -->
+                <div class="loading-tips mt-4">
+                    <div class="tip-card">
+                        <i class="fas fa-lightbulb text-warning"></i>
+                        <span id="loading-tip">While you wait, think about your long-term career goals and the skills you want to develop.</span>
+                    </div>
+                </div>
+                
+                <!-- Cancel Option -->
+                <div class="mt-4">
+                    <button id="cancel-analysis" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-times me-2"></i>Cancel Analysis
+                    </button>
                 </div>
             </div>
         </div>
@@ -978,42 +1142,172 @@ document.addEventListener('DOMContentLoaded', function() {
     const pathId = '{{ learning_path.id }}';
     const taskStatus = '{{ learning_path.task_status }}';
     
-    // If task is not completed, start polling
+    // Progress tracking variables
+    let startTime = Date.now();
+    let pollCount = 0;
+    let progressInterval;
+    let tipInterval;
+    
+    // Status messages for different stages
+    const statusMessages = [
+        { title: 'Analyzing Your Career Goals...', description: 'Understanding your current skills and target role', progress: 10 },
+        { title: 'Processing Current Skills...', description: 'Analyzing your existing qualifications and experience', progress: 25 },
+        { title: 'Researching Role Requirements...', description: 'Gathering information about your target position', progress: 40 },
+        { title: 'Identifying Skills Gaps...', description: 'Comparing your skills with job requirements', progress: 60 },
+        { title: 'Creating Learning Phases...', description: 'Designing structured learning milestones', progress: 80 },
+        { title: 'Generating Career Advice...', description: 'Preparing personalized recommendations', progress: 90 },
+        { title: 'Finalizing Your Roadmap...', description: 'Completing your personalized learning path', progress: 95 }
+    ];
+    
+    // Loading tips to keep users engaged
+    const loadingTips = [
+        'While you wait, think about your long-term career goals and the skills you want to develop.',
+        'Did you know? Most successful career transitions involve both technical and soft skills.',
+        'Tip: Consider networking opportunities in your target industry while learning.',
+        'Remember to set realistic timelines for your learning journey.',
+        'Pro tip: Focus on skills that are in high demand in your target role.',
+        'Consider getting certifications that are recognized in your target industry.',
+        'Think about how your current experience can transfer to your new role.'
+    ];
+    
+    // If task is not completed, start enhanced polling
     if (taskStatus !== 'completed') {
+        startEnhancedPolling();
+        startProgressSimulation();
+        startTipRotation();
+    }
+    
+    // Cancel analysis button
+    document.getElementById('cancel-analysis').addEventListener('click', function() {
+        if (confirm('Are you sure you want to cancel this analysis? You will need to start over.')) {
+            window.location.href = '{% url "hirevision:learning_path_analyzer" %}';
+        }
+    });
+    
+    function startEnhancedPolling() {
         pollTaskStatus();
     }
     
+    function startProgressSimulation() {
+        let currentProgress = 0;
+        let currentStage = 0;
+        
+        progressInterval = setInterval(() => {
+            if (currentProgress < 95) {
+                currentProgress += Math.random() * 2;
+                updateProgress(currentProgress);
+                
+                // Update status message based on progress
+                if (currentProgress > statusMessages[currentStage].progress && currentStage < statusMessages.length - 1) {
+                    currentStage++;
+                    updateStatus(statusMessages[currentStage]);
+                }
+            }
+        }, 1000);
+    }
+    
+    function startTipRotation() {
+        let tipIndex = 0;
+        tipInterval = setInterval(() => {
+            document.getElementById('loading-tip').textContent = loadingTips[tipIndex];
+            tipIndex = (tipIndex + 1) % loadingTips.length;
+        }, 8000); // Change tip every 8 seconds
+    }
+    
+    function updateProgress(progress) {
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const timeEstimate = document.getElementById('time-estimate');
+        
+        progressBar.style.width = Math.min(progress, 95) + '%';
+        progressText.textContent = Math.round(progress) + '% Complete';
+        
+        // Calculate remaining time
+        const elapsed = (Date.now() - startTime) / 1000;
+        const estimatedTotal = 45; // 45 seconds total
+        const remaining = Math.max(0, estimatedTotal - elapsed);
+        timeEstimate.textContent = `Estimated: ${Math.round(remaining)} seconds`;
+    }
+    
+    function updateStatus(status) {
+        document.getElementById('status-title').textContent = status.title;
+        document.getElementById('status-description').textContent = status.description;
+        
+        // Add fade effect
+        const title = document.getElementById('status-title');
+        const description = document.getElementById('status-description');
+        
+        title.style.opacity = '0';
+        description.style.opacity = '0';
+        
+        setTimeout(() => {
+            title.style.opacity = '1';
+            description.style.opacity = '1';
+        }, 200);
+    }
+    
     function pollTaskStatus() {
+        pollCount++;
+        
         fetch(`/api/learning-path/${pathId}/status/`)
             .then(response => response.json())
             .then(data => {
                 console.log('Task status:', data);
                 
                 if (data.status === 'completed') {
-                    if (data.has_results) {
-                        // Task completed successfully, reload page to show results
-                        window.location.reload();
-                    } else {
-                        showError('Learning path completed but no results found. Please try again.');
-                    }
+                    clearInterval(progressInterval);
+                    clearInterval(tipInterval);
+                    updateProgress(100);
+                    updateStatus({ title: 'Learning Path Complete!', description: 'Your personalized roadmap is ready' });
+                    
+                    setTimeout(() => {
+                        if (data.has_results) {
+                            // Task completed successfully, reload page to show results
+                            window.location.reload();
+                        } else {
+                            showError('Learning path completed but no results found. Please try again.');
+                        }
+                    }, 1500);
                 } else if (data.status === 'failed') {
+                    clearInterval(progressInterval);
+                    clearInterval(tipInterval);
                     showError(data.error || 'Learning path generation failed. Please try again.');
                 } else if (data.status === 'running' || data.status === 'pending') {
-                    // Continue polling
-                    setTimeout(pollTaskStatus, 3000); // Poll every 3 seconds
+                    // Continue polling with exponential backoff
+                    const delay = Math.min(3000 + (pollCount * 500), 10000); // Max 10 seconds
+                    setTimeout(pollTaskStatus, delay);
                 }
             })
             .catch(error => {
                 console.error('Error checking task status:', error);
-                showError('Unable to check learning path status. Please refresh the page.');
+                if (pollCount < 5) {
+                    // Retry a few times before showing error
+                    setTimeout(pollTaskStatus, 5000);
+                } else {
+                    showError('Unable to check learning path status. Please refresh the page or try again.');
+                }
             });
     }
     
     function showError(message) {
+        clearInterval(progressInterval);
+        clearInterval(tipInterval);
         loadingState.style.display = 'none';
         document.getElementById('error-message').textContent = message;
         errorState.style.display = 'block';
     }
+    
+    // Add smooth transitions
+    const style = document.createElement('style');
+    style.textContent = `
+        #status-title, #status-description {
+            transition: opacity 0.3s ease;
+        }
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+    `;
+    document.head.appendChild(style);
 });
 </script>
 {% endblock %} 
