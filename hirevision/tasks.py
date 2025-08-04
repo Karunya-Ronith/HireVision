@@ -2,6 +2,7 @@ import os
 import django
 import dramatiq
 import json
+import time
 from typing import Dict, Any
 
 # Setup Django before importing models
@@ -15,18 +16,31 @@ from learning_path_analyzer import process_learning_path_analysis
 from resume_builder import process_resume_builder
 from pdf_generator import generate_pdf_from_latex, get_sample_pdf_path
 
+# Import logging
+from logging_config import get_logger, log_performance
+
+# Initialize logger
+logger = get_logger(__name__)
+
 
 @dramatiq.actor(max_retries=3, min_backoff=1000, max_backoff=30000)
 def process_resume_analysis_task(analysis_id: str):
     """
     Async task to process resume analysis
     """
+    start_time = time.time()
+    logger.info(f"Starting resume analysis task for analysis ID: {analysis_id}")
+    
     try:
         analysis = ResumeAnalysis.objects.get(id=analysis_id)
+        logger.info(f"Found analysis record: {analysis_id}, user: {analysis.user.id if analysis.user else 'None'}")
+        
         analysis.task_status = 'running'
         analysis.save(update_fields=['task_status'])
+        logger.debug(f"Updated task status to 'running' for analysis: {analysis_id}")
         
         # Process the resume analysis
+        logger.info(f"Processing resume analysis for file: {analysis.resume_file.path}")
         result = process_resume_analysis(
             analysis.resume_file.path,
             analysis.job_description
@@ -34,6 +48,7 @@ def process_resume_analysis_task(analysis_id: str):
         
         # Check if the result is an error message
         if isinstance(result, str) and result.startswith('## ❌'):
+            logger.error(f"Resume analysis failed for analysis {analysis_id}: {result}")
             analysis.task_status = 'failed'
             analysis.task_error = result
             analysis.save(update_fields=['task_status', 'task_error'])
@@ -41,6 +56,7 @@ def process_resume_analysis_task(analysis_id: str):
         
         # Check if it's the OpenAI API key error - provide demo data
         if isinstance(result, str) and "OpenAI API Key Not Configured" in result:
+            logger.info(f"Using demo data for analysis {analysis_id} (OpenAI API key not configured)")
             # Demo data
             analysis.ats_score = 78
             analysis.score_explanation = "Demo analysis: Your resume shows good technical skills and relevant experience. The ATS score indicates a strong match for the position."
@@ -74,6 +90,7 @@ def process_resume_analysis_task(analysis_id: str):
         else:
             # Parse the result if it's structured
             if isinstance(result, dict):
+                logger.info(f"Processing structured result for analysis {analysis_id}")
                 analysis.ats_score = result.get('ats_score', 75)
                 analysis.score_explanation = result.get('score_explanation', 'Analysis completed successfully')
                 analysis.strengths = result.get('strengths', ["Strong technical skills", "Good experience"])
@@ -83,6 +100,7 @@ def process_resume_analysis_task(analysis_id: str):
                 analysis.upskilling_suggestions = result.get('upskilling_suggestions', ["Take advanced Python course"])
                 analysis.overall_assessment = result.get('overall_assessment', result)
             else:
+                logger.info(f"Processing fallback result for analysis {analysis_id}")
                 # Fallback for markdown string result
                 analysis.overall_assessment = result[:500] + "..." if len(result) > 500 else result
                 analysis.ats_score = 75
@@ -95,18 +113,23 @@ def process_resume_analysis_task(analysis_id: str):
         
         analysis.task_status = 'completed'
         analysis.save()
+        logger.info(f"Resume analysis task completed successfully for analysis {analysis_id}")
+        
+        duration = time.time() - start_time
+        log_performance("Resume analysis task", duration, f"Completed analysis {analysis_id} with score {analysis.ats_score}")
         
     except ResumeAnalysis.DoesNotExist:
-        print(f"ResumeAnalysis with id {analysis_id} not found")
+        logger.error(f"ResumeAnalysis with id {analysis_id} not found")
     except Exception as e:
+        logger.error(f"Error processing resume analysis task for {analysis_id}: {str(e)}", exc_info=True)
         try:
             analysis = ResumeAnalysis.objects.get(id=analysis_id)
             analysis.task_status = 'failed'
             analysis.task_error = str(e)
             analysis.save(update_fields=['task_status', 'task_error'])
-        except:
-            pass
-        print(f"Error processing resume analysis task: {e}")
+            logger.info(f"Updated analysis {analysis_id} status to 'failed'")
+        except Exception as save_error:
+            logger.error(f"Failed to update analysis {analysis_id} status: {str(save_error)}")
 
 
 @dramatiq.actor(max_retries=3, min_backoff=1000, max_backoff=30000)

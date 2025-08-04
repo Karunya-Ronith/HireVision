@@ -1,48 +1,79 @@
 import os
 import re
+import time
 from typing import Dict, Any, List, Optional
 from openai import OpenAI
 from config import OPENAI_API_KEY, OPENAI_MODEL, OPENAI_TEMPERATURE, OPENAI_MAX_TOKENS
 from utils import retry_with_backoff, handle_api_error, sanitize_input
 from pdf_generator import generate_pdf_from_latex, get_sample_pdf_path
+from logging_config import get_logger, log_function_call, log_file_operation, log_performance
+
+# Initialize logger
+logger = get_logger(__name__)
 
 
+@log_function_call
 def validate_resume_data(data: Dict[str, Any]) -> tuple[bool, str]:
     """Validate the resume data provided by user"""
+    logger.info("Validating resume data")
+    logger.debug(f"Data keys: {list(data.keys())}")
+    
     required_fields = ["name", "education", "projects", "skills"]
 
     for field in required_fields:
         if not data.get(field):
+            logger.error(f"Missing required field: {field}")
             return False, f"Missing required field: {field}"
 
     # Validate name
-    if len(data["name"].strip()) < 2:
+    name_length = len(data["name"].strip())
+    logger.debug(f"Name length: {name_length}")
+    if name_length < 2:
+        logger.error(f"Name too short: {name_length} characters")
         return False, "Name must be at least 2 characters long"
 
     # Validate education
-    if not isinstance(data["education"], list) or len(data["education"]) == 0:
+    education_count = len(data["education"]) if isinstance(data["education"], list) else 0
+    logger.debug(f"Education entries: {education_count}")
+    if not isinstance(data["education"], list) or education_count == 0:
+        logger.error("Education must be a list with at least one entry")
         return False, "Education must be a list with at least one entry"
 
     # Validate projects
-    if not isinstance(data["projects"], list) or len(data["projects"]) == 0:
+    projects_count = len(data["projects"]) if isinstance(data["projects"], list) else 0
+    logger.debug(f"Project entries: {projects_count}")
+    if not isinstance(data["projects"], list) or projects_count == 0:
+        logger.error("Projects must be a list with at least one entry")
         return False, "Projects must be a list with at least one entry"
 
     # Validate skills
+    skills_count = len(data["skills"]) if isinstance(data["skills"], dict) else 0
+    logger.debug(f"Skills categories: {skills_count}")
     if not isinstance(data["skills"], dict) or not data["skills"]:
+        logger.error("Skills must be provided")
         return False, "Skills must be provided"
 
+    logger.info("Resume data validation successful")
     return True, ""
 
 
+@log_function_call
 def generate_latex_resume(data: Dict[str, Any]) -> str:
     """Generate LaTeX resume from user data"""
+    start_time = time.time()
+    logger.info("Starting LaTeX resume generation")
+    logger.debug(f"Data keys: {list(data.keys())}")
 
     # Validate data first
     is_valid, error_msg = validate_resume_data(data)
     if not is_valid:
+        logger.error(f"Data validation failed: {error_msg}")
         return f"Error: {error_msg}"
 
+    logger.info("Data validation successful, proceeding with LaTeX generation")
+
     # Sanitize inputs
+    logger.debug("Sanitizing input data")
     name = sanitize_input(data["name"])
     email = sanitize_input(data.get("email", ""))
     phone = sanitize_input(data.get("phone", ""))
@@ -50,27 +81,38 @@ def generate_latex_resume(data: Dict[str, Any]) -> str:
     github = sanitize_input(data.get("github", ""))
 
     # Generate LaTeX content
+    logger.info("Generating LaTeX content sections")
     latex_content = generate_latex_header()
     latex_content += generate_heading_section(name, email, phone, linkedin, github)
     latex_content += generate_education_section(data["education"])
 
     if data.get("experience"):
+        logger.debug("Adding experience section")
         latex_content += generate_experience_section(data["experience"])
 
     latex_content += generate_projects_section(data["projects"])
     latex_content += generate_skills_section(data["skills"])
 
     if data.get("research_papers"):
+        logger.debug("Adding research papers section")
         latex_content += generate_research_section(data["research_papers"])
 
     if data.get("achievements"):
+        logger.debug("Adding achievements section")
         latex_content += generate_achievements_section(data["achievements"])
 
     if data.get("others"):
+        logger.debug("Adding others section")
         latex_content += generate_others_section(data["others"])
 
     latex_content += generate_latex_footer()
 
+    latex_length = len(latex_content)
+    logger.info(f"LaTeX resume generation completed. Content length: {latex_length} characters")
+    
+    duration = time.time() - start_time
+    log_performance("LaTeX resume generation", duration, f"Generated {latex_length} characters of LaTeX content")
+    
     return latex_content
 
 
@@ -363,6 +405,7 @@ def generate_latex_footer() -> str:
     return "\n%-------------------------------------------\n\\end{document}"
 
 
+@log_function_call
 def process_resume_builder(
     name,
     email,
@@ -378,6 +421,10 @@ def process_resume_builder(
     others,
 ):
     """Main function to process resume building with error handling"""
+    start_time = time.time()
+    logger.info("Starting resume builder process")
+    logger.debug(f"Name: {name}, Email: {email}")
+    
     try:
         import json
 
@@ -391,65 +438,83 @@ def process_resume_builder(
         }
 
         # Parse education
+        logger.info("Parsing education data")
         try:
             if education and education.strip():
                 user_data["education"] = json.loads(education)
+                logger.debug(f"Education entries: {len(user_data['education'])}")
             else:
+                logger.error("Education is required but not provided")
                 return (
                     "## ❌ Error\n\nEducation is required. Please provide at least one education entry.",
                     None,
                 )
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON format in Education field: {e}")
             return (
                 "## ❌ Error\n\nInvalid JSON format in Education field. Please check the format and try again.",
                 None,
             )
 
         # Parse experience (optional)
+        logger.info("Parsing experience data")
         try:
             if experience and experience.strip():
                 user_data["experience"] = json.loads(experience)
-        except json.JSONDecodeError:
+                logger.debug(f"Experience entries: {len(user_data['experience'])}")
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON format in Experience field: {e}")
             return (
                 "## ❌ Error\n\nInvalid JSON format in Experience field. Please check the format and try again.",
                 None,
             )
 
         # Parse projects
+        logger.info("Parsing projects data")
         try:
             if projects and projects.strip():
                 user_data["projects"] = json.loads(projects)
+                logger.debug(f"Project entries: {len(user_data['projects'])}")
             else:
+                logger.error("Projects are required but not provided")
                 return (
                     "## ❌ Error\n\nProjects are required. Please provide at least one project.",
                     None,
                 )
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON format in Projects field: {e}")
             return (
                 "## ❌ Error\n\nInvalid JSON format in Projects field. Please check the format and try again.",
                 None,
             )
 
         # Parse skills
+        logger.info("Parsing skills data")
         try:
             if skills and skills.strip():
                 user_data["skills"] = json.loads(skills)
+                logger.debug(f"Skills categories: {len(user_data['skills'])}")
             else:
+                logger.error("Skills are required but not provided")
                 return (
                     "## ❌ Error\n\nSkills are required. Please provide your skills.",
                     None,
                 )
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON format in Skills field: {e}")
             return (
                 "## ❌ Error\n\nInvalid JSON format in Skills field. Please check the format and try again.",
                 None,
             )
 
         # Parse optional sections
+        logger.info("Parsing optional sections")
         try:
             if research_papers and research_papers.strip():
                 user_data["research_papers"] = json.loads(research_papers)
-        except json.JSONDecodeError:
+                logger.debug(f"Research papers: {len(user_data['research_papers'])}")
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON format in Research Papers field: {e}")
             return (
                 "## ❌ Error\n\nInvalid JSON format in Research Papers field. Please check the format and try again.",
                 None,
@@ -458,7 +523,9 @@ def process_resume_builder(
         try:
             if achievements and achievements.strip():
                 user_data["achievements"] = json.loads(achievements)
-        except json.JSONDecodeError:
+                logger.debug(f"Achievements: {len(user_data['achievements'])}")
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON format in Achievements field: {e}")
             return (
                 "## ❌ Error\n\nInvalid JSON format in Achievements field. Please check the format and try again.",
                 None,
@@ -467,25 +534,42 @@ def process_resume_builder(
         try:
             if others and others.strip():
                 user_data["others"] = json.loads(others)
-        except json.JSONDecodeError:
+                logger.debug(f"Others: {len(user_data['others'])}")
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON format in Others field: {e}")
             return (
                 "## ❌ Error\n\nInvalid JSON format in Others field. Please check the format and try again.",
                 None,
             )
 
         # Generate LaTeX resume
+        logger.info("Generating LaTeX resume")
         latex_content = generate_latex_resume(user_data)
 
         if latex_content.startswith("Error:"):
+            logger.error(f"LaTeX generation failed: {latex_content}")
             return f"## ❌ Resume Generation Error\n\n{latex_content}", None
 
         # Generate PDF
+        logger.info("Generating PDF from LaTeX")
         pdf_path = generate_pdf_from_latex(latex_content)
+        
+        if pdf_path:
+            logger.info(f"PDF generated successfully: {pdf_path}")
+            log_file_operation("PDF generation", pdf_path, success=True)
+        else:
+            logger.warning("PDF generation failed, returning LaTeX content only")
+
+        duration = time.time() - start_time
+        logger.info(f"Resume builder process completed successfully in {duration:.3f}s")
+        log_performance("Complete resume builder process", duration, f"Generated resume for {name}")
 
         # Return both LaTeX content and PDF path
         return latex_content, pdf_path
 
     except Exception as e:
+        duration = time.time() - start_time
+        logger.error(f"Resume builder process failed after {duration:.3f}s: {str(e)}", exc_info=True)
         error_message = handle_api_error(e)
         return (
             f"## ❌ Unexpected Error\n\n{error_message}\n\nPlease try again or contact support if the issue persists.",
