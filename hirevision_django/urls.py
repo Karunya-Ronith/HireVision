@@ -19,12 +19,28 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from logging_config import get_logger
+
+# Initialize logger for project URLs
+logger = get_logger('project_urls')
+
+# Log URL pattern registration
+logger.info("Registering HireVision Django project URL patterns")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("hirevision.urls")),
 ]
 
+logger.info(f"Registered {len(urlpatterns)} main URL patterns for Django project")
+logger.debug("URL patterns include: admin interface and HireVision app")
+
 # Serve media files during development
 if settings.DEBUG:
+    logger.info("Development mode detected - adding media file serving")
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    logger.debug(f"Media URL: {settings.MEDIA_URL}, Media Root: {settings.MEDIA_ROOT}")
+else:
+    logger.info("Production mode detected - media files should be served by web server")
+
+logger.info("URL configuration completed successfully")

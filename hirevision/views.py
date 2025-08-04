@@ -11,6 +11,7 @@ from django.http import Http404
 from django.db.models import Q
 import json
 import os
+import time
 
 from .forms import ResumeAnalysisForm, LearningPathForm, ResumeBuilderForm, UserSignUpForm, UserLoginForm, ThreadForm, CommentForm, MessageForm, UserSearchForm
 from .models import ResumeAnalysis, LearningPath, ResumeBuilder, User, Thread, Comment, Message, Conversation
@@ -22,22 +23,51 @@ from learning_path_analyzer import process_learning_path_analysis
 from resume_builder import process_resume_builder
 from pdf_generator import get_sample_pdf_path, generate_pdf_from_latex
 
+# Import logging
+from logging_config import get_logger, log_user_action, log_performance
+
+# Initialize logger
+logger = get_logger(__name__)
+
 def home(request):
     """Home page view"""
+    start_time = time.time()
+    user_id = request.user.id if request.user.is_authenticated else 'anonymous'
+    logger.info(f"Home page accessed by user: {user_id}")
+    
     if request.user.is_authenticated:
         # Show dashboard for logged-in users
+        logger.debug(f"Rendering dashboard for authenticated user: {user_id}")
+        log_user_action(str(user_id), "view_dashboard", "User accessed dashboard")
+        
+        duration = time.time() - start_time
+        log_performance("Home page (dashboard)", duration, f"Dashboard rendered for user {user_id}")
+        
         return render(request, 'hirevision/dashboard.html')
     else:
         # Show landing page for non-logged-in users
+        logger.debug("Rendering landing page for anonymous user")
+        log_user_action('anonymous', "view_landing", "Anonymous user accessed landing page")
+        
+        duration = time.time() - start_time
+        log_performance("Home page (landing)", duration, "Landing page rendered for anonymous user")
+        
         return render(request, 'hirevision/landing.html')
 
 @login_required
 def resume_analyzer(request):
     """Resume analyzer view with async processing"""
+    start_time = time.time()
+    user_id = request.user.id
+    logger.info(f"Resume analyzer accessed by user: {user_id}")
+    
     if request.method == 'POST':
+        logger.info(f"Resume analysis form submitted by user: {user_id}")
         form = ResumeAnalysisForm(request.POST, request.FILES)
         if form.is_valid():
             try:
+                logger.debug("Form validation successful, processing resume analysis")
+                
                 # Save the form to get the model instance
                 analysis = form.save(commit=False)
                 
@@ -47,34 +77,68 @@ def resume_analyzer(request):
                 
                 # Save the file first so it exists on disk
                 analysis.save()
+                logger.info(f"Resume analysis record created with ID: {analysis.id}")
                 
                 # Start async processing
+                logger.info(f"Starting async task for analysis ID: {analysis.id}")
                 task = process_resume_analysis_task.send(str(analysis.id))
                 analysis.task_id = task.message_id
                 analysis.task_status = 'pending'
                 analysis.save(update_fields=['task_id', 'task_status'])
                 
+                log_user_action(str(user_id), "start_resume_analysis", f"Started analysis for file: {analysis.resume_file.name}")
+                
                 messages.success(request, "Resume analysis started! Your analysis is being processed in the background.")
+                
+                duration = time.time() - start_time
+                log_performance("Resume analyzer POST", duration, f"Analysis started for user {user_id}, analysis ID: {analysis.id}")
+                
                 return redirect('hirevision:resume_analysis_result', analysis_id=analysis.id)
                 
             except Exception as e:
+                logger.error(f"Error in resume analyzer for user {user_id}: {str(e)}", exc_info=True)
+                log_user_action(str(user_id), "resume_analysis_error", f"Error: {str(e)}", success=False)
                 messages.error(request, f"An error occurred: {str(e)}")
+        else:
+            logger.warning(f"Form validation failed for user {user_id}")
+            log_user_action(str(user_id), "resume_analysis_validation_failed", "Form validation failed", success=False)
     else:
+        logger.debug(f"Resume analyzer form displayed for user: {user_id}")
         form = ResumeAnalysisForm()
+    
+    duration = time.time() - start_time
+    log_performance("Resume analyzer", duration, f"Resume analyzer page rendered for user {user_id}")
     
     return render(request, 'hirevision/resume_analyzer.html', {'form': form})
 
 @login_required
 def resume_analysis_result(request, analysis_id):
     """Display resume analysis result"""
+    start_time = time.time()
+    user_id = request.user.id
+    logger.info(f"Resume analysis result accessed by user: {user_id}, analysis ID: {analysis_id}")
+    
     try:
         analysis = ResumeAnalysis.objects.get(id=analysis_id)
+        logger.debug(f"Analysis found: {analysis_id}, status: {analysis.task_status}")
+        
         # Check if user has permission to view this analysis
         if request.user.is_authenticated and analysis.user and analysis.user != request.user:
+            logger.warning(f"Permission denied: user {user_id} tried to access analysis {analysis_id} owned by user {analysis.user.id}")
+            log_user_action(str(user_id), "unauthorized_access", f"Tried to access analysis {analysis_id}", success=False)
             messages.error(request, "You don't have permission to view this analysis.")
             return redirect('hirevision:resume_analyzer')
+        
+        log_user_action(str(user_id), "view_resume_analysis", f"Viewed analysis result: {analysis_id}")
+        
+        duration = time.time() - start_time
+        log_performance("Resume analysis result", duration, f"Analysis result displayed for user {user_id}, analysis {analysis_id}")
+        
         return render(request, 'hirevision/resume_analysis_result.html', {'analysis': analysis})
+        
     except ResumeAnalysis.DoesNotExist:
+        logger.error(f"Analysis not found: {analysis_id} for user: {user_id}")
+        log_user_action(str(user_id), "analysis_not_found", f"Tried to access non-existent analysis: {analysis_id}", success=False)
         messages.error(request, "Analysis not found.")
         return redirect('hirevision:resume_analyzer')
 

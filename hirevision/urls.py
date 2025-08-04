@@ -1,7 +1,14 @@
 from django.urls import path
 from . import views
+from logging_config import get_logger
+
+# Initialize logger for URLs
+logger = get_logger('urls')
 
 app_name = 'hirevision'
+
+# Log URL pattern registration
+logger.info("Registering HireVision URL patterns")
 
 urlpatterns = [
     # Main pages
@@ -47,4 +54,7 @@ urlpatterns = [
     path('messages/start/<uuid:user_id>/', views.start_conversation, name='start_conversation'),
     path('messages/from-thread/<uuid:thread_id>/<uuid:user_id>/', views.message_from_thread, name='message_from_thread'),
     path('messages/search-users/', views.search_users_ajax, name='search_users_ajax'),
-] 
+]
+
+logger.info(f"Registered {len(urlpatterns)} URL patterns for HireVision app")
+logger.debug("URL patterns include: main pages, resume analysis, learning path, resume builder, threads, comments, and messaging") 

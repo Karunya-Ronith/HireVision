@@ -3,6 +3,11 @@ from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 import json
 import uuid
+import time
+from logging_config import get_logger, log_function_call, log_performance
+
+# Initialize logger for models
+logger = get_logger('models')
 
 class User(AbstractUser):
     """Custom User model with additional fields"""
@@ -24,11 +29,17 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['username']
     
     def __str__(self):
+        logger.debug(f"User string representation called for user ID: {self.id}")
         return self.email
     
+    @log_function_call
     def save(self, *args, **kwargs):
+        start_time = time.time()
+        logger.info(f"Saving user with email: {self.email}")
+        
         # Ensure username is unique
         if not self.username:
+            logger.debug(f"Generating username for user with email: {self.email}")
             # Generate a unique username based on email if not provided
             base_username = self.email.split('@')[0]
             username = base_username
@@ -37,7 +48,17 @@ class User(AbstractUser):
                 username = f"{base_username}{counter}"
                 counter += 1
             self.username = username
-        super().save(*args, **kwargs)
+            logger.info(f"Generated username: {username} for user: {self.email}")
+        
+        try:
+            result = super().save(*args, **kwargs)
+            duration = time.time() - start_time
+            log_performance("User save operation", duration, f"User: {self.email}")
+            logger.info(f"User saved successfully: {self.email}")
+            return result
+        except Exception as e:
+            logger.error(f"Failed to save user {self.email}: {str(e)}", exc_info=True)
+            raise
 
 class ResumeAnalysis(models.Model):
     """Model to store resume analysis results"""
@@ -75,7 +96,25 @@ class ResumeAnalysis(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
+        user_info = f"User: {self.user.email}" if self.user else "Anonymous"
+        logger.debug(f"ResumeAnalysis string representation called for ID: {self.id}, {user_info}")
         return f"Resume Analysis - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+    
+    @log_function_call
+    def save(self, *args, **kwargs):
+        start_time = time.time()
+        user_info = f"User: {self.user.email}" if self.user else "Anonymous"
+        logger.info(f"Saving ResumeAnalysis for {user_info}, task_status: {self.task_status}")
+        
+        try:
+            result = super().save(*args, **kwargs)
+            duration = time.time() - start_time
+            log_performance("ResumeAnalysis save operation", duration, f"User: {user_info}")
+            logger.info(f"ResumeAnalysis saved successfully for {user_info}")
+            return result
+        except Exception as e:
+            logger.error(f"Failed to save ResumeAnalysis for {user_info}: {str(e)}", exc_info=True)
+            raise
 
 class LearningPath(models.Model):
     """Model to store learning path analysis results"""
@@ -83,7 +122,7 @@ class LearningPath(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     current_skills = models.TextField()
-    dream_role = models.CharField(max_length=200)
+    dream_role = models.CharField(max_length=500)
     
     # Task tracking fields
     task_id = models.CharField(max_length=255, null=True, blank=True)
@@ -112,7 +151,25 @@ class LearningPath(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
+        user_info = f"User: {self.user.email}" if self.user else "Anonymous"
+        logger.debug(f"LearningPath string representation called for ID: {self.id}, {user_info}")
         return f"Learning Path - {self.dream_role} ({self.created_at.strftime('%Y-%m-%d')})"
+    
+    @log_function_call
+    def save(self, *args, **kwargs):
+        start_time = time.time()
+        user_info = f"User: {self.user.email}" if self.user else "Anonymous"
+        logger.info(f"Saving LearningPath for {user_info}, dream_role: {self.dream_role}, task_status: {self.task_status}")
+        
+        try:
+            result = super().save(*args, **kwargs)
+            duration = time.time() - start_time
+            log_performance("LearningPath save operation", duration, f"User: {user_info}, Role: {self.dream_role}")
+            logger.info(f"LearningPath saved successfully for {user_info}")
+            return result
+        except Exception as e:
+            logger.error(f"Failed to save LearningPath for {user_info}: {str(e)}", exc_info=True)
+            raise
 
 class ResumeBuilder(models.Model):
     """Model to store resume builder data"""
@@ -154,7 +211,25 @@ class ResumeBuilder(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
+        user_info = f"User: {self.user.email}" if self.user else "Anonymous"
+        logger.debug(f"ResumeBuilder string representation called for ID: {self.id}, {user_info}")
         return f"Resume - {self.name} ({self.created_at.strftime('%Y-%m-%d')})"
+    
+    @log_function_call
+    def save(self, *args, **kwargs):
+        start_time = time.time()
+        user_info = f"User: {self.user.email}" if self.user else "Anonymous"
+        logger.info(f"Saving ResumeBuilder for {user_info}, name: {self.name}, task_status: {self.task_status}")
+        
+        try:
+            result = super().save(*args, **kwargs)
+            duration = time.time() - start_time
+            log_performance("ResumeBuilder save operation", duration, f"User: {user_info}, Name: {self.name}")
+            logger.info(f"ResumeBuilder saved successfully for {user_info}")
+            return result
+        except Exception as e:
+            logger.error(f"Failed to save ResumeBuilder for {user_info}: {str(e)}", exc_info=True)
+            raise
 
 class Thread(models.Model):
     """Model for discussion forum threads"""
@@ -173,15 +248,35 @@ class Thread(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
+        logger.debug(f"Thread string representation called for ID: {self.id}, User: {self.user.email}")
         return f"{self.title} by {self.user.username}"
     
     @property
     def comment_count(self):
-        return self.comments.count()
+        count = self.comments.count()
+        logger.debug(f"Comment count calculated for thread {self.id}: {count}")
+        return count
     
     @property
     def has_media(self):
-        return bool(self.image or self.article_url)
+        has_media = bool(self.image or self.article_url)
+        logger.debug(f"Has media check for thread {self.id}: {has_media}")
+        return has_media
+    
+    @log_function_call
+    def save(self, *args, **kwargs):
+        start_time = time.time()
+        logger.info(f"Saving Thread by user: {self.user.email}, title: {self.title}")
+        
+        try:
+            result = super().save(*args, **kwargs)
+            duration = time.time() - start_time
+            log_performance("Thread save operation", duration, f"User: {self.user.email}, Title: {self.title}")
+            logger.info(f"Thread saved successfully by {self.user.email}")
+            return result
+        except Exception as e:
+            logger.error(f"Failed to save Thread by {self.user.email}: {str(e)}", exc_info=True)
+            raise
 
 class Comment(models.Model):
     """Model for comments on threads"""
@@ -199,11 +294,29 @@ class Comment(models.Model):
         ordering = ['created_at']
     
     def __str__(self):
+        logger.debug(f"Comment string representation called for ID: {self.id}, User: {self.user.email}")
         return f"Comment by {self.user.username} on {self.thread.title}"
     
     @property
     def has_media(self):
-        return bool(self.image)
+        has_media = bool(self.image)
+        logger.debug(f"Has media check for comment {self.id}: {has_media}")
+        return has_media
+    
+    @log_function_call
+    def save(self, *args, **kwargs):
+        start_time = time.time()
+        logger.info(f"Saving Comment by user: {self.user.email}, thread: {self.thread.title}")
+        
+        try:
+            result = super().save(*args, **kwargs)
+            duration = time.time() - start_time
+            log_performance("Comment save operation", duration, f"User: {self.user.email}, Thread: {self.thread.title}")
+            logger.info(f"Comment saved successfully by {self.user.email}")
+            return result
+        except Exception as e:
+            logger.error(f"Failed to save Comment by {self.user.email}: {str(e)}", exc_info=True)
+            raise
 
 class Conversation(models.Model):
     """Model for conversations between two users"""
@@ -218,15 +331,36 @@ class Conversation(models.Model):
     
     def __str__(self):
         participant_names = [user.username for user in self.participants.all()]
+        logger.debug(f"Conversation string representation called for ID: {self.id}, Participants: {participant_names}")
         return f"Conversation between {' and '.join(participant_names)}"
     
     @property
     def last_message(self):
-        return self.messages.order_by('-created_at').first()
+        last_msg = self.messages.order_by('-created_at').first()
+        logger.debug(f"Last message retrieved for conversation {self.id}: {last_msg.id if last_msg else 'None'}")
+        return last_msg
     
     @property
     def unread_count(self, user):
-        return self.messages.filter(is_read=False).exclude(sender=user).count()
+        count = self.messages.filter(is_read=False).exclude(sender=user).count()
+        logger.debug(f"Unread count calculated for conversation {self.id}, user {user.email}: {count}")
+        return count
+    
+    @log_function_call
+    def save(self, *args, **kwargs):
+        start_time = time.time()
+        participant_names = [user.username for user in self.participants.all()]
+        logger.info(f"Saving Conversation between: {participant_names}")
+        
+        try:
+            result = super().save(*args, **kwargs)
+            duration = time.time() - start_time
+            log_performance("Conversation save operation", duration, f"Participants: {participant_names}")
+            logger.info(f"Conversation saved successfully")
+            return result
+        except Exception as e:
+            logger.error(f"Failed to save Conversation: {str(e)}", exc_info=True)
+            raise
 
 class Message(models.Model):
     """Model for individual messages in conversations"""
@@ -243,8 +377,26 @@ class Message(models.Model):
         ordering = ['created_at']
     
     def __str__(self):
+        logger.debug(f"Message string representation called for ID: {self.id}, Sender: {self.sender.email}")
         return f"Message from {self.sender.username} at {self.created_at.strftime('%Y-%m-%d %H:%M')}"
     
     @property
     def has_media(self):
-        return bool(self.image)
+        has_media = bool(self.image)
+        logger.debug(f"Has media check for message {self.id}: {has_media}")
+        return has_media
+    
+    @log_function_call
+    def save(self, *args, **kwargs):
+        start_time = time.time()
+        logger.info(f"Saving Message from user: {self.sender.email}, conversation: {self.conversation.id}")
+        
+        try:
+            result = super().save(*args, **kwargs)
+            duration = time.time() - start_time
+            log_performance("Message save operation", duration, f"Sender: {self.sender.email}, Conversation: {self.conversation.id}")
+            logger.info(f"Message saved successfully from {self.sender.email}")
+            return result
+        except Exception as e:
+            logger.error(f"Failed to save Message from {self.sender.email}: {str(e)}", exc_info=True)
+            raise

@@ -1,4 +1,5 @@
 import os
+import time
 from openai import OpenAI
 from config import (
     OPENAI_API_KEY,
@@ -14,19 +15,34 @@ from utils import (
     sanitize_input,
     extract_json_from_text,
 )
+from logging_config import get_logger, log_function_call, log_api_call, log_performance
+
+# Initialize logger
+logger = get_logger(__name__)
 
 
+@log_function_call
 def analyze_learning_path(current_skills, dream_role):
     """Analyze current skills against dream role and provide detailed learning path with enhanced error handling"""
+    start_time = time.time()
+    logger.info("Starting learning path analysis")
+    logger.debug(f"Current skills length: {len(current_skills) if current_skills else 0}")
+    logger.debug(f"Dream role length: {len(dream_role) if dream_role else 0}")
+    
     if not current_skills or not dream_role:
+        logger.warning("Missing current skills or dream role")
         return "Please provide both your current skills and dream role."
 
     # Sanitize inputs
+    logger.debug("Sanitizing inputs")
     current_skills = sanitize_input(current_skills)
     dream_role = sanitize_input(dream_role)
+    logger.debug(f"Sanitized current skills length: {len(current_skills)}")
+    logger.debug(f"Sanitized dream role length: {len(dream_role)}")
 
     # Check if OpenAI API key is available
     if not OPENAI_API_KEY or OPENAI_API_KEY == "your_openai_api_key_here":
+        logger.warning("OpenAI API key not configured, returning demo message")
         return """
 ## ⚠️ OpenAI API Key Not Configured
 
@@ -40,6 +56,8 @@ To get AI-powered learning path guidance, please:
 
     def make_api_call():
         """Make the actual API call with retry logic"""
+        logger.info("Making OpenAI API call for learning path analysis")
+        
         # Create the enhanced analysis prompt with anti-hallucination instructions
         prompt = f"""
         You are an expert career coach and learning path specialist with 15+ years of experience in career development.
@@ -161,35 +179,63 @@ To get AI-powered learning path guidance, please:
         - Industry-specific recommendations
         """
 
+        logger.debug(f"Prompt length: {len(prompt)} characters")
+        logger.debug(f"Using model: {OPENAI_MODEL}, temperature: {OPENAI_TEMPERATURE}, max_tokens: {OPENAI_MAX_TOKENS}")
+
         # Call OpenAI API
         client = OpenAI(api_key=OPENAI_API_KEY)
-        response = client.chat.completions.create(
-            model=OPENAI_MODEL,
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are an expert career coach and learning path specialist. Provide detailed, actionable learning paths with verified resources only. Never hallucinate or invent fake links.",
-                },
-                {"role": "user", "content": prompt},
-            ],
-            temperature=OPENAI_TEMPERATURE,
-            max_tokens=OPENAI_MAX_TOKENS,
-        )
-
-        return response.choices[0].message.content
+        
+        api_start_time = time.time()
+        try:
+            response = client.chat.completions.create(
+                model=OPENAI_MODEL,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an expert career coach and learning path specialist. Provide detailed, actionable learning paths with verified resources only. Never hallucinate or invent fake links.",
+                    },
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=OPENAI_TEMPERATURE,
+                max_tokens=OPENAI_MAX_TOKENS,
+            )
+            
+            api_duration = time.time() - api_start_time
+            logger.info(f"OpenAI API call successful in {api_duration:.3f}s")
+            log_api_call("OpenAI Learning Path Analysis", 
+                        request_data={"model": OPENAI_MODEL, "temperature": OPENAI_TEMPERATURE, "max_tokens": OPENAI_MAX_TOKENS},
+                        response_data={"response_length": len(response.choices[0].message.content)},
+                        success=True)
+            
+            return response.choices[0].message.content
+            
+        except Exception as e:
+            api_duration = time.time() - api_start_time
+            logger.error(f"OpenAI API call failed after {api_duration:.3f}s: {str(e)}")
+            log_api_call("OpenAI Learning Path Analysis", 
+                        request_data={"model": OPENAI_MODEL, "temperature": OPENAI_TEMPERATURE, "max_tokens": OPENAI_MAX_TOKENS},
+                        success=False, error=str(e))
+            raise
 
     try:
         # Use retry logic for API calls
+        logger.info("Starting retry logic for API calls")
         analysis_text = retry_with_backoff(make_api_call)
 
         if not analysis_text:
+            logger.error("Failed to get response from AI service after multiple attempts")
             return create_error_analysis(
                 "Failed to get response from AI service after multiple attempts"
             )
 
+        logger.info(f"Received analysis text of length: {len(analysis_text)}")
+        logger.debug(f"Analysis text preview: {analysis_text[:200]}...")
+
         # Try to extract JSON from the response
+        logger.debug("Attempting to extract JSON from response")
         analysis = extract_json_from_text(analysis_text)
         if analysis is None:
+            logger.warning("No JSON found in response, creating fallback analysis")
             # If no JSON found, create a structured response
             analysis = {
                 "role_analysis": analysis_text,
@@ -200,10 +246,17 @@ To get AI-powered learning path guidance, please:
                 "career_advice": analysis_text,
                 "networking_tips": ["Refer to the analysis"],
             }
+        else:
+            logger.info("Successfully extracted JSON from response")
 
+        duration = time.time() - start_time
+        log_performance("Learning path analysis", duration, f"Analysis completed with {len(analysis_text)} characters")
+        
         return analysis
 
     except Exception as e:
+        duration = time.time() - start_time
+        logger.error(f"Learning path analysis failed after {duration:.3f}s: {str(e)}", exc_info=True)
         error_message = handle_api_error(e)
         return create_error_analysis(error_message)
 
@@ -299,25 +352,48 @@ def format_learning_path_output(analysis):
     return output
 
 
+@log_function_call
 def process_learning_path_analysis(current_skills, dream_role):
     """Main function to process learning path analysis with comprehensive error handling"""
+    start_time = time.time()
+    logger.info("Starting learning path analysis process")
+    logger.debug(f"Current skills length: {len(current_skills) if current_skills else 0}")
+    logger.debug(f"Dream role length: {len(dream_role) if dream_role else 0}")
+    
     try:
         if not current_skills or not dream_role:
+            logger.warning("Missing current skills or dream role")
             return "## ❌ Input Error\n\nPlease provide both your current skills and dream role."
 
         # Check if inputs are meaningful
-        if len(current_skills.strip()) < 10:
+        skills_length = len(current_skills.strip())
+        role_length = len(dream_role.strip())
+        logger.debug(f"Skills length: {skills_length}, Role length: {role_length}")
+        
+        if skills_length < 10:
+            logger.warning(f"Skills information too short: {skills_length} characters")
             return "## ❌ Insufficient Skills Information\n\nPlease provide more detailed information about your current skills and experience."
 
-        if len(dream_role.strip()) < 10:
+        if role_length < 10:
+            logger.warning(f"Role information too short: {role_length} characters")
             return "## ❌ Insufficient Role Information\n\nPlease provide more detailed information about your dream role."
 
         # Analyze learning path
+        logger.info("Starting learning path analysis")
         analysis = analyze_learning_path(current_skills, dream_role)
 
         # Format the output
-        return format_learning_path_output(analysis)
+        logger.info("Formatting learning path output")
+        formatted_output = format_learning_path_output(analysis)
+        
+        duration = time.time() - start_time
+        logger.info(f"Learning path analysis process completed successfully in {duration:.3f}s")
+        log_performance("Complete learning path analysis process", duration, f"Processed {skills_length} characters of skills and {role_length} characters of role")
+        
+        return formatted_output
 
     except Exception as e:
+        duration = time.time() - start_time
+        logger.error(f"Learning path analysis process failed after {duration:.3f}s: {str(e)}", exc_info=True)
         error_message = handle_api_error(e)
         return f"## ❌ Unexpected Error\n\n{error_message}\n\nPlease try again or contact support if the issue persists."

@@ -2,6 +2,12 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import authenticate
 from .models import ResumeAnalysis, LearningPath, ResumeBuilder, User, Thread, Comment, Message, Conversation
+import time
+import json
+from logging_config import get_logger, log_function_call, log_performance
+
+# Initialize logger for forms
+logger = get_logger('forms')
 
 class UserSignUpForm(UserCreationForm):
     """Form for user registration"""
@@ -53,10 +59,19 @@ class UserSignUpForm(UserCreationForm):
         model = User
         fields = ['username', 'email', 'first_name', 'last_name', 'phone', 'password1', 'password2']
     
+    @log_function_call
     def clean_email(self):
+        start_time = time.time()
         email = self.cleaned_data.get('email')
+        logger.info(f"Validating email: {email}")
+        
         if User.objects.filter(email=email).exists():
+            logger.warning(f"Email already registered: {email}")
             raise forms.ValidationError("This email is already registered.")
+        
+        duration = time.time() - start_time
+        log_performance("Email validation", duration, f"Email: {email}")
+        logger.info(f"Email validation successful: {email}")
         return email
 
 class UserLoginForm(AuthenticationForm):
@@ -74,16 +89,27 @@ class UserLoginForm(AuthenticationForm):
         })
     )
     
+    @log_function_call
     def clean(self):
+        start_time = time.time()
         email = self.cleaned_data.get('username')
         password = self.cleaned_data.get('password')
+        
+        logger.info(f"Validating login credentials for email: {email}")
         
         if email and password:
             # Try to authenticate with email
             user = authenticate(username=email, password=password)
             if user is None:
+                logger.warning(f"Invalid login attempt for email: {email}")
                 raise forms.ValidationError("Invalid email or password.")
             self.user_cache = user
+            logger.info(f"Login validation successful for user: {email}")
+        else:
+            logger.warning("Login validation failed: missing email or password")
+        
+        duration = time.time() - start_time
+        log_performance("Login validation", duration, f"Email: {email}")
         return self.cleaned_data
 
 class ResumeAnalysisForm(forms.ModelForm):
@@ -105,19 +131,32 @@ class ResumeAnalysisForm(forms.ModelForm):
             })
         }
     
+    @log_function_call
     def clean_resume_file(self):
+        start_time = time.time()
         file = self.cleaned_data.get('resume_file')
+        
         if file:
+            logger.info(f"Validating resume file: {file.name}, size: {file.size} bytes")
+            
             # Check file size (5MB limit)
             if file.size > 5 * 1024 * 1024:
+                logger.warning(f"Resume file too large: {file.name}, size: {file.size} bytes")
                 raise forms.ValidationError("File size must be under 5MB.")
             
             # Check file extension
             allowed_extensions = ['.pdf', '.doc', '.docx']
             file_extension = file.name.lower()
             if not any(file_extension.endswith(ext) for ext in allowed_extensions):
+                logger.warning(f"Invalid file extension for resume: {file.name}")
                 raise forms.ValidationError("Only PDF, DOC, and DOCX files are allowed.")
+            
+            logger.info(f"Resume file validation successful: {file.name}")
+        else:
+            logger.warning("No resume file provided")
         
+        duration = time.time() - start_time
+        log_performance("Resume file validation", duration, f"File: {file.name if file else 'None'}")
         return file
 
 class LearningPathForm(forms.ModelForm):
@@ -138,6 +177,29 @@ class LearningPathForm(forms.ModelForm):
                 'placeholder': 'e.g., Senior Software Engineer, Data Scientist, Product Manager'
             })
         }
+    
+    @log_function_call
+    def clean(self):
+        start_time = time.time()
+        cleaned_data = super().clean()
+        current_skills = cleaned_data.get('current_skills')
+        dream_role = cleaned_data.get('dream_role')
+        
+        logger.info(f"Validating learning path form - Dream role: {dream_role}")
+        logger.debug(f"Current skills length: {len(current_skills) if current_skills else 0} characters")
+        
+        if not current_skills or len(current_skills.strip()) < 10:
+            logger.warning("Learning path validation failed: insufficient current skills description")
+            raise forms.ValidationError("Please provide a detailed description of your current skills.")
+        
+        if not dream_role or len(dream_role.strip()) < 3:
+            logger.warning("Learning path validation failed: insufficient dream role description")
+            raise forms.ValidationError("Please provide a valid dream role.")
+        
+        duration = time.time() - start_time
+        log_performance("Learning path form validation", duration, f"Dream role: {dream_role}")
+        logger.info(f"Learning path form validation successful")
+        return cleaned_data
 
 class ResumeBuilderForm(forms.ModelForm):
     """Form for resume builder"""
@@ -208,49 +270,81 @@ class ResumeBuilderForm(forms.ModelForm):
             })
         }
     
+    @log_function_call
     def clean_education(self):
+        start_time = time.time()
         education = self.cleaned_data.get('education')
+        logger.info("Validating education JSON format")
+        
         try:
             if education:
                 # Try to parse as JSON, if it's a string
                 if isinstance(education, str):
-                    import json
                     json.loads(education)
-        except json.JSONDecodeError:
+                    logger.info("Education JSON validation successful")
+        except json.JSONDecodeError as e:
+            logger.error(f"Education JSON validation failed: {str(e)}")
             raise forms.ValidationError("Education must be in valid JSON format.")
+        
+        duration = time.time() - start_time
+        log_performance("Education JSON validation", duration)
         return education
     
+    @log_function_call
     def clean_experience(self):
+        start_time = time.time()
         experience = self.cleaned_data.get('experience')
+        logger.info("Validating experience JSON format")
+        
         try:
             if experience:
                 if isinstance(experience, str):
-                    import json
                     json.loads(experience)
-        except json.JSONDecodeError:
+                    logger.info("Experience JSON validation successful")
+        except json.JSONDecodeError as e:
+            logger.error(f"Experience JSON validation failed: {str(e)}")
             raise forms.ValidationError("Experience must be in valid JSON format.")
+        
+        duration = time.time() - start_time
+        log_performance("Experience JSON validation", duration)
         return experience
     
+    @log_function_call
     def clean_projects(self):
+        start_time = time.time()
         projects = self.cleaned_data.get('projects')
+        logger.info("Validating projects JSON format")
+        
         try:
             if projects:
                 if isinstance(projects, str):
-                    import json
                     json.loads(projects)
-        except json.JSONDecodeError:
+                    logger.info("Projects JSON validation successful")
+        except json.JSONDecodeError as e:
+            logger.error(f"Projects JSON validation failed: {str(e)}")
             raise forms.ValidationError("Projects must be in valid JSON format.")
+        
+        duration = time.time() - start_time
+        log_performance("Projects JSON validation", duration)
         return projects
     
+    @log_function_call
     def clean_skills(self):
+        start_time = time.time()
         skills = self.cleaned_data.get('skills')
+        logger.info("Validating skills JSON format")
+        
         try:
             if skills:
                 if isinstance(skills, str):
-                    import json
                     json.loads(skills)
-        except json.JSONDecodeError:
+                    logger.info("Skills JSON validation successful")
+        except json.JSONDecodeError as e:
+            logger.error(f"Skills JSON validation failed: {str(e)}")
             raise forms.ValidationError("Skills must be in valid JSON format.")
+        
+        duration = time.time() - start_time
+        log_performance("Skills JSON validation", duration)
         return skills
 
 class ThreadForm(forms.ModelForm):
@@ -279,20 +373,56 @@ class ThreadForm(forms.ModelForm):
             })
         }
     
+    @log_function_call
     def clean_image(self):
+        start_time = time.time()
         image = self.cleaned_data.get('image')
+        
         if image:
+            logger.info(f"Validating thread image: {image.name}, size: {image.size} bytes")
+            
             # Check file size (10MB limit)
             if image.size > 10 * 1024 * 1024:
+                logger.warning(f"Thread image too large: {image.name}, size: {image.size} bytes")
                 raise forms.ValidationError("Image size must be under 10MB.")
             
             # Check file extension
             allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
             file_extension = image.name.lower()
             if not any(file_extension.endswith(ext) for ext in allowed_extensions):
+                logger.warning(f"Invalid file extension for thread image: {image.name}")
                 raise forms.ValidationError("Only JPG, PNG, GIF, and WebP images are allowed.")
+            
+            logger.info(f"Thread image validation successful: {image.name}")
+        else:
+            logger.debug("No thread image provided")
         
+        duration = time.time() - start_time
+        log_performance("Thread image validation", duration, f"Image: {image.name if image else 'None'}")
         return image
+    
+    @log_function_call
+    def clean(self):
+        start_time = time.time()
+        cleaned_data = super().clean()
+        title = cleaned_data.get('title')
+        content = cleaned_data.get('content')
+        
+        logger.info(f"Validating thread form - Title: {title}")
+        logger.debug(f"Content length: {len(content) if content else 0} characters")
+        
+        if not title or len(title.strip()) < 3:
+            logger.warning("Thread validation failed: insufficient title")
+            raise forms.ValidationError("Please provide a valid thread title.")
+        
+        if not content or len(content.strip()) < 10:
+            logger.warning("Thread validation failed: insufficient content")
+            raise forms.ValidationError("Please provide meaningful content for your thread.")
+        
+        duration = time.time() - start_time
+        log_performance("Thread form validation", duration, f"Title: {title}")
+        logger.info(f"Thread form validation successful")
+        return cleaned_data
 
 class CommentForm(forms.ModelForm):
     """Form for creating and editing comments"""
@@ -312,20 +442,51 @@ class CommentForm(forms.ModelForm):
             })
         }
     
+    @log_function_call
     def clean_image(self):
+        start_time = time.time()
         image = self.cleaned_data.get('image')
+        
         if image:
+            logger.info(f"Validating comment image: {image.name}, size: {image.size} bytes")
+            
             # Check file size (5MB limit for comments)
             if image.size > 5 * 1024 * 1024:
+                logger.warning(f"Comment image too large: {image.name}, size: {image.size} bytes")
                 raise forms.ValidationError("Image size must be under 5MB.")
             
             # Check file extension
             allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
             file_extension = image.name.lower()
             if not any(file_extension.endswith(ext) for ext in allowed_extensions):
+                logger.warning(f"Invalid file extension for comment image: {image.name}")
                 raise forms.ValidationError("Only JPG, PNG, GIF, and WebP images are allowed.")
+            
+            logger.info(f"Comment image validation successful: {image.name}")
+        else:
+            logger.debug("No comment image provided")
         
+        duration = time.time() - start_time
+        log_performance("Comment image validation", duration, f"Image: {image.name if image else 'None'}")
         return image
+    
+    @log_function_call
+    def clean(self):
+        start_time = time.time()
+        cleaned_data = super().clean()
+        content = cleaned_data.get('content')
+        
+        logger.info("Validating comment form")
+        logger.debug(f"Content length: {len(content) if content else 0} characters")
+        
+        if not content or len(content.strip()) < 1:
+            logger.warning("Comment validation failed: empty content")
+            raise forms.ValidationError("Please provide content for your comment.")
+        
+        duration = time.time() - start_time
+        log_performance("Comment form validation", duration)
+        logger.info(f"Comment form validation successful")
+        return cleaned_data
 
 class MessageForm(forms.ModelForm):
     """Form for sending messages"""
@@ -345,20 +506,51 @@ class MessageForm(forms.ModelForm):
             })
         }
     
+    @log_function_call
     def clean_image(self):
+        start_time = time.time()
         image = self.cleaned_data.get('image')
+        
         if image:
+            logger.info(f"Validating message image: {image.name}, size: {image.size} bytes")
+            
             # Check file size (5MB limit for messages)
             if image.size > 5 * 1024 * 1024:
+                logger.warning(f"Message image too large: {image.name}, size: {image.size} bytes")
                 raise forms.ValidationError("Image size must be under 5MB.")
             
             # Check file extension
             allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
             file_extension = image.name.lower()
             if not any(file_extension.endswith(ext) for ext in allowed_extensions):
+                logger.warning(f"Invalid file extension for message image: {image.name}")
                 raise forms.ValidationError("Only JPG, PNG, GIF, and WebP images are allowed.")
+            
+            logger.info(f"Message image validation successful: {image.name}")
+        else:
+            logger.debug("No message image provided")
         
+        duration = time.time() - start_time
+        log_performance("Message image validation", duration, f"Image: {image.name if image else 'None'}")
         return image
+    
+    @log_function_call
+    def clean(self):
+        start_time = time.time()
+        cleaned_data = super().clean()
+        content = cleaned_data.get('content')
+        
+        logger.info("Validating message form")
+        logger.debug(f"Content length: {len(content) if content else 0} characters")
+        
+        if not content or len(content.strip()) < 1:
+            logger.warning("Message validation failed: empty content")
+            raise forms.ValidationError("Please provide content for your message.")
+        
+        duration = time.time() - start_time
+        log_performance("Message form validation", duration)
+        logger.info(f"Message form validation successful")
+        return cleaned_data
 
 class UserSearchForm(forms.Form):
     """Form for searching users to message"""
@@ -369,4 +561,20 @@ class UserSearchForm(forms.Form):
             'placeholder': 'Search by username or full name...',
             'id': 'user-search-input'
         })
-    ) 
+    )
+    
+    @log_function_call
+    def clean_search_query(self):
+        start_time = time.time()
+        search_query = self.cleaned_data.get('search_query')
+        
+        logger.info(f"Validating user search query: {search_query}")
+        
+        if not search_query or len(search_query.strip()) < 2:
+            logger.warning("User search validation failed: query too short")
+            raise forms.ValidationError("Search query must be at least 2 characters long.")
+        
+        duration = time.time() - start_time
+        log_performance("User search validation", duration, f"Query: {search_query}")
+        logger.info(f"User search validation successful")
+        return search_query.strip() 

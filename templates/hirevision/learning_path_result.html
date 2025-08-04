@@ -33,6 +33,9 @@
         max-width: 800px;
         margin: 0 auto;
         line-height: 1.6;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
     }
 
     .path-card {
@@ -609,7 +612,7 @@
         <!-- Header -->
         <div class="path-header">
             <h1 class="path-title">Your Learning Path</h1>
-            <p class="path-subtitle">AI-Generated Roadmap to "{{ learning_path.dream_role }}"</p>
+            <p class="path-subtitle" title="{{ learning_path.dream_role }}">AI-Generated Roadmap to "{{ learning_path.dream_role|truncatechars:300 }}"</p>
         </div>
 
         <!-- Loading State -->
@@ -944,7 +947,7 @@
                             </div>
                             <div class="detail-item">
                                 <div class="detail-label">Target Role</div>
-                                <div class="detail-value">{{ learning_path.dream_role|truncatechars:25 }}</div>
+                                <div class="detail-value" title="{{ learning_path.dream_role }}">{{ learning_path.dream_role|truncatechars:50 }}</div>
                             </div>
                             <div class="detail-item">
                                 <div class="detail-label">Skills Input</div>
