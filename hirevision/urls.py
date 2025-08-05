@@ -23,6 +23,11 @@ urlpatterns = [
     path('resume-analysis/<uuid:analysis_id>/', views.resume_analysis_result, name='resume_analysis_result'),
     path('check-resume-status/<uuid:analysis_id>/', views.check_resume_analysis_status, name='check_resume_analysis_status'),
     
+    # API endpoints for status checking (frontend compatibility)
+    path('api/resume-analysis/<uuid:analysis_id>/status/', views.check_resume_analysis_status, name='api_resume_analysis_status'),
+    path('api/learning-path/<uuid:path_id>/status/', views.check_learning_path_status, name='api_learning_path_status'),
+    path('api/resume-builder/<uuid:resume_id>/status/', views.check_resume_builder_status, name='api_resume_builder_status'),
+    
     # Learning Path
     path('learning-path/', views.learning_path_analyzer, name='learning_path_analyzer'),
     path('learning-path/<uuid:path_id>/', views.learning_path_result, name='learning_path_result'),
@@ -57,4 +62,4 @@ urlpatterns = [
 ]
 
 logger.info(f"Registered {len(urlpatterns)} URL patterns for HireVision app")
-logger.debug("URL patterns include: main pages, resume analysis, learning path, resume builder, threads, comments, and messaging") 
+logger.debug("URL patterns include: main pages, resume analysis, learning path, resume builder, threads, comments, messaging, and API endpoints") 

@@ -3,10 +3,13 @@ import os
 import time
 from openai import OpenAI
 from config import (
-    OPENAI_API_KEY,
-    OPENAI_MODEL,
-    OPENAI_TEMPERATURE,
-    OPENAI_MAX_TOKENS,
+    OPENROUTER_API_KEY,
+    OPENROUTER_BASE_URL,
+    OPENROUTER_MODEL,
+    OPENROUTER_TEMPERATURE,
+    OPENROUTER_MAX_TOKENS,
+    OPENROUTER_SITE_URL,
+    OPENROUTER_SITE_NAME,
     ERROR_MESSAGES,
 )
 from utils import (
@@ -116,17 +119,20 @@ def analyze_resume(resume_text, job_description):
     logger.debug(f"Sanitized resume text length: {len(resume_text)}")
     logger.debug(f"Sanitized job description length: {len(job_description)}")
 
-    # Check if OpenAI API key is available
-    if not OPENAI_API_KEY or OPENAI_API_KEY == "your_openai_api_key_here":
-        logger.warning("OpenAI API key not configured, returning demo message")
+                # Check if OpenRouter API key is available
+    logger.info(f"OpenRouter API key configured: {bool(OPENROUTER_API_KEY)}")
+    logger.info(f"OpenRouter API key starts with: {OPENROUTER_API_KEY[:10] if OPENROUTER_API_KEY else 'None'}...")
+    
+    if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "your_openrouter_api_key_here":
+        logger.warning("OpenRouter API key not configured, returning demo message")
         return """
-## ⚠️ OpenAI API Key Not Configured
+## ⚠️ OpenRouter API Key Not Configured
 
 To get full AI-powered analysis, please:
 
-1. Get your OpenAI API key from: https://platform.openai.com/api-keys
+1. Get your OpenRouter API key from: https://openrouter.ai/keys
 2. Create a `.env` file in the project directory
-3. Add your API key: `OPENAI_API_KEY=your_actual_api_key_here`
+3. Add your API key: `OPENROUTER_API_KEY=your_actual_api_key_here`
 4. Restart the application
 
 **For now, you can use the demo version by running:**
@@ -139,7 +145,7 @@ This will show you the interface without requiring an API key.
 
     def make_api_call():
         """Make the actual API call with retry logic"""
-        logger.info("Making OpenAI API call for resume analysis")
+        logger.info("Making OpenRouter API call for resume analysis")
         
         # Create the enhanced analysis prompt for top 1% HR manager
         prompt = f"""
@@ -187,15 +193,23 @@ This will show you the interface without requiring an API key.
         """
 
         logger.debug(f"Prompt length: {len(prompt)} characters")
-        logger.debug(f"Using model: {OPENAI_MODEL}, temperature: {OPENAI_TEMPERATURE}, max_tokens: {OPENAI_MAX_TOKENS}")
+        logger.debug(f"Using model: {OPENROUTER_MODEL}, temperature: {OPENROUTER_TEMPERATURE}, max_tokens: {OPENROUTER_MAX_TOKENS}")
 
-        # Call OpenAI API using the newer syntax
-        client = OpenAI(api_key=OPENAI_API_KEY)
+        # Call OpenRouter API using the OpenAI-compatible client
+        client = OpenAI(
+            base_url=OPENROUTER_BASE_URL,
+            api_key=OPENROUTER_API_KEY,
+        )
         
         api_start_time = time.time()
         try:
             response = client.chat.completions.create(
-                model=OPENAI_MODEL,
+                extra_headers={
+                    "HTTP-Referer": OPENROUTER_SITE_URL,
+                    "X-Title": OPENROUTER_SITE_NAME,
+                },
+                extra_body={},
+                model=OPENROUTER_MODEL,
                 messages=[
                     {
                         "role": "system",
@@ -203,14 +217,14 @@ This will show you the interface without requiring an API key.
                     },
                     {"role": "user", "content": prompt},
                 ],
-                temperature=OPENAI_TEMPERATURE,
-                max_tokens=OPENAI_MAX_TOKENS,
+                temperature=OPENROUTER_TEMPERATURE,
+                max_tokens=OPENROUTER_MAX_TOKENS,
             )
             
             api_duration = time.time() - api_start_time
-            logger.info(f"OpenAI API call successful in {api_duration:.3f}s")
-            log_api_call("OpenAI Chat Completions", 
-                        request_data={"model": OPENAI_MODEL, "temperature": OPENAI_TEMPERATURE, "max_tokens": OPENAI_MAX_TOKENS},
+            logger.info(f"OpenRouter API call successful in {api_duration:.3f}s")
+            log_api_call("OpenRouter Chat Completions", 
+                        request_data={"model": OPENROUTER_MODEL, "temperature": OPENROUTER_TEMPERATURE, "max_tokens": OPENROUTER_MAX_TOKENS},
                         response_data={"response_length": len(response.choices[0].message.content)},
                         success=True)
             
@@ -218,9 +232,9 @@ This will show you the interface without requiring an API key.
             
         except Exception as e:
             api_duration = time.time() - api_start_time
-            logger.error(f"OpenAI API call failed after {api_duration:.3f}s: {str(e)}")
-            log_api_call("OpenAI Chat Completions", 
-                        request_data={"model": OPENAI_MODEL, "temperature": OPENAI_TEMPERATURE, "max_tokens": OPENAI_MAX_TOKENS},
+            logger.error(f"OpenRouter API call failed after {api_duration:.3f}s: {str(e)}")
+            log_api_call("OpenRouter Chat Completions", 
+                        request_data={"model": OPENROUTER_MODEL, "temperature": OPENROUTER_TEMPERATURE, "max_tokens": OPENROUTER_MAX_TOKENS},
                         success=False, error=str(e))
             raise
 
@@ -240,6 +254,7 @@ This will show you the interface without requiring an API key.
 
         # Try to extract JSON from the response
         logger.debug("Attempting to extract JSON from response")
+        logger.debug(f"Raw API response: {analysis_text[:500]}...")
         analysis = extract_json_from_text(analysis_text)
         if analysis is None:
             logger.warning("No JSON found in response, creating fallback analysis")
@@ -247,6 +262,9 @@ This will show you the interface without requiring an API key.
             analysis = create_fallback_analysis(analysis_text)
         else:
             logger.info("Successfully extracted JSON from response")
+            logger.debug(f"Extracted analysis keys: {list(analysis.keys())}")
+            logger.debug(f"ATS Score: {analysis.get('ats_score')}")
+            logger.debug(f"Strengths count: {len(analysis.get('strengths', []))}")
 
         duration = time.time() - start_time
         log_performance("Resume analysis", duration, f"Analysis completed with {len(analysis_text)} characters")
@@ -296,16 +314,12 @@ def process_resume_analysis(pdf_file, job_description):
         # Analyze resume
         logger.info("Starting resume analysis")
         analysis = analyze_resume(resume_text, job_description)
-
-        # Format the output using utility function
-        logger.info("Formatting analysis output")
-        formatted_output = format_analysis_output(analysis)
         
         duration = time.time() - start_time
         logger.info(f"Resume analysis process completed successfully in {duration:.3f}s")
         log_performance("Complete resume analysis process", duration, f"Processed {text_length} characters of resume text")
         
-        return formatted_output
+        return analysis
 
     except Exception as e:
         duration = time.time() - start_time

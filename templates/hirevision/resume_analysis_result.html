@@ -403,6 +403,208 @@
         opacity: 0.5;
     }
 
+    /* Enhanced Loading Animation Styles */
+    .loading-animation {
+        position: relative;
+        display: inline-block;
+    }
+
+    .ai-brain {
+        position: relative;
+        display: inline-block;
+    }
+
+    .ai-brain i {
+        position: relative;
+        z-index: 3;
+        animation: brain-pulse 2s ease-in-out infinite;
+    }
+
+    .pulse-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80px;
+        height: 80px;
+        border: 3px solid var(--primary-color);
+        border-radius: 50%;
+        opacity: 0;
+        animation: pulse 2s ease-out infinite;
+    }
+
+    .pulse-ring.delay-1 {
+        animation-delay: 0.5s;
+    }
+
+    .pulse-ring.delay-2 {
+        animation-delay: 1s;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 1;
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(2);
+            opacity: 0;
+        }
+    }
+
+    @keyframes brain-pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    /* Status Container Styles */
+    .status-container h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--dark-color);
+    }
+
+    .status-container p {
+        font-size: 1rem;
+        color: var(--secondary-color);
+        margin-bottom: 0;
+    }
+
+    /* Progress Container Styles */
+    .progress-container {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color);
+    }
+
+    .progress {
+        background-color: #e9ecef;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%);
+        transition: width 0.5s ease;
+    }
+
+    /* Loading Tips Styles */
+    .loading-tips {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .tip-card {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        border: 1px solid #ffc107;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+    }
+
+    .tip-card i {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .tip-card span {
+        font-weight: 500;
+        color: #856404;
+        line-height: 1.5;
+    }
+
+    /* Cancel Button Styles */
+    #cancel-analysis {
+        transition: all 0.3s ease;
+        border-radius: 20px;
+        padding: 0.5rem 1.5rem;
+    }
+
+    #cancel-analysis:hover {
+        background-color: var(--danger-color);
+        border-color: var(--danger-color);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    /* Enhanced Error State Styles */
+    .error-container {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .error-icon {
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    .error-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--danger-color);
+    }
+
+    .error-description {
+        font-size: 1.1rem;
+        color: var(--secondary-color);
+        line-height: 1.6;
+    }
+
+    .error-actions {
+        margin-bottom: 2rem;
+    }
+
+    .error-help {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .error-help h5 {
+        color: var(--dark-color);
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .error-help ul {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .error-help li {
+        padding: 0.5rem 0;
+        position: relative;
+        padding-left: 1.5rem;
+    }
+
+    .error-help li:before {
+        content: '•';
+        color: var(--primary-color);
+        font-weight: bold;
+        position: absolute;
+        left: 0;
+    }
+
     @media (max-width: 768px) {
         .result-title {
             font-size: 2.5rem;
@@ -423,6 +625,19 @@
         .details-grid {
             grid-template-columns: 1fr;
         }
+
+        .pulse-ring {
+            width: 60px;
+            height: 60px;
+        }
+
+        .status-container h3 {
+            font-size: 1.25rem;
+        }
+
+        .progress-container {
+            padding: 1rem;
+        }
     }
 </style>
 {% endblock %}
@@ -436,30 +651,83 @@
             <p class="result-subtitle">Your AI-Powered Resume Analysis</p>
         </div>
 
-        <!-- Loading State -->
+        <!-- Enhanced Loading State -->
         <div id="loading-state"{% if analysis.task_status == 'completed' %} style="display: none;"{% endif %}>
             <div class="text-center">
-                <div class="loading-spinner mb-4">
-                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-                        <span class="visually-hidden">Loading...</span>
+                <!-- Animated Loading Icon -->
+                <div class="loading-animation mb-4">
+                    <div class="ai-brain">
+                        <i class="fas fa-brain fa-3x text-primary"></i>
+                        <div class="pulse-ring"></div>
+                        <div class="pulse-ring delay-1"></div>
+                        <div class="pulse-ring delay-2"></div>
                     </div>
                 </div>
-                <h3>Analyzing Your Resume...</h3>
-                <p class="text-muted">Please wait while our AI analyzes your resume against the job description. This usually takes 30-60 seconds.</p>
-                <div class="progress mt-3" style="max-width: 400px; margin: 0 auto;">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                
+                <!-- Dynamic Status Messages -->
+                <div class="status-container mb-4">
+                    <h3 id="status-title">Initializing Analysis...</h3>
+                    <p id="status-description" class="text-muted">Preparing AI models and processing your resume</p>
+                </div>
+                
+                <!-- Progress Bar with Time Estimate -->
+                <div class="progress-container" style="max-width: 500px; margin: 0 auto;">
+                    <div class="progress mb-2" style="height: 8px; border-radius: 10px;">
+                        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 0%; border-radius: 10px;"></div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted" id="progress-text">0% Complete</small>
+                        <small class="text-muted" id="time-estimate">Estimated: 45 seconds</small>
+                    </div>
+                </div>
+                
+                <!-- Loading Tips -->
+                <div class="loading-tips mt-4">
+                    <div class="tip-card">
+                        <i class="fas fa-lightbulb text-warning"></i>
+                        <span id="loading-tip">While you wait, consider reviewing your job description to ensure it matches your target role.</span>
+                    </div>
+                </div>
+                
+                <!-- Cancel Option -->
+                <div class="mt-4">
+                    <button id="cancel-analysis" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-times me-2"></i>Cancel Analysis
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Error State -->
+        <!-- Enhanced Error State -->
         <div id="error-state" style="display: none;">
             <div class="text-center">
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
-                    <h4>Analysis Failed</h4>
-                    <p id="error-message">An error occurred during analysis. Please try again.</p>
-                    <a href="{% url 'hirevision:resume_analyzer' %}" class="btn btn-primary">Try Again</a>
+                <div class="error-container">
+                    <div class="error-icon mb-4">
+                        <i class="fas fa-exclamation-triangle fa-4x text-danger"></i>
+                    </div>
+                    <h3 class="error-title mb-3">Analysis Failed</h3>
+                    <p id="error-message" class="error-description mb-4">An error occurred during analysis. Please try again.</p>
+                    
+                    <div class="error-actions">
+                        <a href="{% url 'hirevision:resume_analyzer' %}" class="btn btn-primary btn-lg me-3">
+                            <i class="fas fa-redo me-2"></i>Try Again
+                        </a>
+                        <button onclick="window.location.reload()" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-refresh me-2"></i>Refresh Page
+                        </button>
+                    </div>
+                    
+                    <div class="error-help mt-4">
+                        <h5>Need Help?</h5>
+                        <p class="text-muted">If this problem persists, try:</p>
+                        <ul class="text-muted text-start" style="max-width: 400px; margin: 0 auto;">
+                            <li>Checking your internet connection</li>
+                            <li>Using a different resume file format (PDF recommended)</li>
+                            <li>Ensuring your job description is detailed enough</li>
+                            <li>Contacting support if the issue continues</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -707,42 +975,172 @@ document.addEventListener('DOMContentLoaded', function() {
     const analysisId = '{{ analysis.id }}';
     const taskStatus = '{{ analysis.task_status }}';
     
-    // If task is not completed, start polling
+    // Progress tracking variables
+    let startTime = Date.now();
+    let pollCount = 0;
+    let progressInterval;
+    let tipInterval;
+    
+    // Status messages for different stages
+    const statusMessages = [
+        { title: 'Initializing Analysis...', description: 'Preparing AI models and processing your resume', progress: 10 },
+        { title: 'Extracting Resume Content...', description: 'Reading and parsing your resume document', progress: 25 },
+        { title: 'Analyzing Job Requirements...', description: 'Processing the job description and requirements', progress: 40 },
+        { title: 'Comparing Skills & Experience...', description: 'Matching your qualifications with job requirements', progress: 60 },
+        { title: 'Generating ATS Score...', description: 'Calculating your Applicant Tracking System score', progress: 80 },
+        { title: 'Creating Detailed Analysis...', description: 'Preparing comprehensive feedback and recommendations', progress: 90 },
+        { title: 'Finalizing Results...', description: 'Completing analysis and preparing your report', progress: 95 }
+    ];
+    
+    // Loading tips to keep users engaged
+    const loadingTips = [
+        'While you wait, consider reviewing your job description to ensure it matches your target role.',
+        'Did you know? Most ATS systems scan for specific keywords from the job description.',
+        'Tip: Quantify your achievements with numbers and percentages to stand out.',
+        'Consider tailoring your resume summary to match the job requirements.',
+        'Remember to include relevant certifications and training in your resume.',
+        'Pro tip: Use action verbs at the beginning of each bullet point.',
+        'Make sure your contact information and LinkedIn profile are up to date.'
+    ];
+    
+    // If task is not completed, start enhanced polling
     if (taskStatus !== 'completed') {
+        startEnhancedPolling();
+        startProgressSimulation();
+        startTipRotation();
+    }
+    
+    // Cancel analysis button
+    document.getElementById('cancel-analysis').addEventListener('click', function() {
+        if (confirm('Are you sure you want to cancel this analysis? You will need to start over.')) {
+            window.location.href = '{% url "hirevision:resume_analyzer" %}';
+        }
+    });
+    
+    function startEnhancedPolling() {
         pollTaskStatus();
     }
     
+    function startProgressSimulation() {
+        let currentProgress = 0;
+        let currentStage = 0;
+        
+        progressInterval = setInterval(() => {
+            if (currentProgress < 95) {
+                currentProgress += Math.random() * 2;
+                updateProgress(currentProgress);
+                
+                // Update status message based on progress
+                if (currentProgress > statusMessages[currentStage].progress && currentStage < statusMessages.length - 1) {
+                    currentStage++;
+                    updateStatus(statusMessages[currentStage]);
+                }
+            }
+        }, 1000);
+    }
+    
+    function startTipRotation() {
+        let tipIndex = 0;
+        tipInterval = setInterval(() => {
+            document.getElementById('loading-tip').textContent = loadingTips[tipIndex];
+            tipIndex = (tipIndex + 1) % loadingTips.length;
+        }, 8000); // Change tip every 8 seconds
+    }
+    
+    function updateProgress(progress) {
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const timeEstimate = document.getElementById('time-estimate');
+        
+        progressBar.style.width = Math.min(progress, 95) + '%';
+        progressText.textContent = Math.round(progress) + '% Complete';
+        
+        // Calculate remaining time
+        const elapsed = (Date.now() - startTime) / 1000;
+        const estimatedTotal = 45; // 45 seconds total
+        const remaining = Math.max(0, estimatedTotal - elapsed);
+        timeEstimate.textContent = `Estimated: ${Math.round(remaining)} seconds`;
+    }
+    
+    function updateStatus(status) {
+        document.getElementById('status-title').textContent = status.title;
+        document.getElementById('status-description').textContent = status.description;
+        
+        // Add fade effect
+        const title = document.getElementById('status-title');
+        const description = document.getElementById('status-description');
+        
+        title.style.opacity = '0';
+        description.style.opacity = '0';
+        
+        setTimeout(() => {
+            title.style.opacity = '1';
+            description.style.opacity = '1';
+        }, 200);
+    }
+    
     function pollTaskStatus() {
+        pollCount++;
+        
         fetch(`/api/resume-analysis/${analysisId}/status/`)
             .then(response => response.json())
             .then(data => {
                 console.log('Task status:', data);
                 
                 if (data.status === 'completed') {
-                    if (data.has_results) {
-                        // Task completed successfully, reload page to show results
-                        window.location.reload();
-                    } else {
-                        showError('Analysis completed but no results found. Please try again.');
-                    }
+                    clearInterval(progressInterval);
+                    clearInterval(tipInterval);
+                    updateProgress(100);
+                    updateStatus({ title: 'Analysis Complete!', description: 'Your results are ready' });
+                    
+                    setTimeout(() => {
+                        if (data.has_results) {
+                            // Task completed successfully, reload page to show results
+                            window.location.reload();
+                        } else {
+                            showError('Analysis completed but no results found. Please try again.');
+                        }
+                    }, 1500);
                 } else if (data.status === 'failed') {
+                    clearInterval(progressInterval);
+                    clearInterval(tipInterval);
                     showError(data.error || 'Analysis failed. Please try again.');
                 } else if (data.status === 'running' || data.status === 'pending') {
-                    // Continue polling
-                    setTimeout(pollTaskStatus, 3000); // Poll every 3 seconds
+                    // Continue polling with exponential backoff
+                    const delay = Math.min(3000 + (pollCount * 500), 10000); // Max 10 seconds
+                    setTimeout(pollTaskStatus, delay);
                 }
             })
             .catch(error => {
                 console.error('Error checking task status:', error);
-                showError('Unable to check analysis status. Please refresh the page.');
+                if (pollCount < 5) {
+                    // Retry a few times before showing error
+                    setTimeout(pollTaskStatus, 5000);
+                } else {
+                    showError('Unable to check analysis status. Please refresh the page or try again.');
+                }
             });
     }
     
     function showError(message) {
+        clearInterval(progressInterval);
+        clearInterval(tipInterval);
         loadingState.style.display = 'none';
         document.getElementById('error-message').textContent = message;
         errorState.style.display = 'block';
     }
+    
+    // Add smooth transitions
+    const style = document.createElement('style');
+    style.textContent = `
+        #status-title, #status-description {
+            transition: opacity 0.3s ease;
+        }
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+    `;
+    document.head.appendChild(style);
 });
 </script>
 {% endblock %} 

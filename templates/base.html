@@ -197,6 +197,47 @@
             color: #1e40af;
         }
 
+        /* Professional Toast Notifications */
+        .toast {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .toast-header {
+            border-radius: 12px 12px 0 0;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+        }
+
+        .toast-header.alert-success {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #166534;
+        }
+
+        .toast-header.alert-danger {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #991b1b;
+        }
+
+        .toast-header.alert-warning {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+        }
+
+        .toast-header.alert-info {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+        }
+
+        .toast-body {
+            padding: 1rem;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
         /* Professional Dropdown */
         .dropdown-menu {
             border: none;
@@ -426,21 +467,27 @@
 
     <!-- Main Content -->
     <main style="margin-top: 80px;">
-        <!-- Messages -->
-        {% if messages %}
-            <div class="container mt-3">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-
         <!-- Page Content -->
         {% block content %}{% endblock %}
     </main>
+
+    <!-- Toast Messages Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050; margin-top: 80px;">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header alert-{{ message.tags }} border-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong class="me-auto">Notification</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        {{ message }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
 
     <!-- Footer -->
     <footer class="py-4 mt-5">
@@ -504,12 +551,12 @@
             });
         });
 
-        // Auto-hide alerts after 5 seconds
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(alert => {
+        // Auto-hide toast notifications after 5 seconds
+        const toasts = document.querySelectorAll('.toast');
+        toasts.forEach(toast => {
             setTimeout(() => {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
+                const bsToast = new bootstrap.Toast(toast);
+                bsToast.hide();
             }, 5000);
         });
 
