@@ -144,11 +144,18 @@ def resume_analysis_result(request, analysis_id):
 
 @login_required
 def learning_path_analyzer(request):
-    """Learning path analyzer view with async processing"""
+    """Learning path analyzer view with async processing and proper error handling"""
+    start_time = time.time()
+    user_id = request.user.id
+    logger.info(f"Learning path analyzer accessed by user: {user_id}")
+    
     if request.method == 'POST':
+        logger.info(f"Learning path form submitted by user: {user_id}")
         form = LearningPathForm(request.POST)
         if form.is_valid():
             try:
+                logger.debug("Form validation successful, processing learning path analysis")
+                
                 # Save the form to get the model instance
                 learning_path = form.save(commit=False)
                 
@@ -156,46 +163,115 @@ def learning_path_analyzer(request):
                 if request.user.is_authenticated:
                     learning_path.user = request.user
                 
+                # Validate inputs before saving
+                if not learning_path.current_skills or not learning_path.dream_role:
+                    error_msg = "Please provide both your current skills and dream role"
+                    logger.warning(f"Validation failed for user {user_id}: {error_msg}")
+                    messages.error(request, error_msg)
+                    return render(request, 'hirevision/learning_path_analyzer.html', {'form': form})
+                
                 # Save the model first
                 learning_path.save()
+                logger.info(f"Learning path record created with ID: {learning_path.id}")
                 
                 # Start async processing
+                logger.info(f"Starting async task for learning path ID: {learning_path.id}")
                 task = process_learning_path_task.send(str(learning_path.id))
                 learning_path.task_id = task.message_id
                 learning_path.task_status = 'pending'
                 learning_path.save(update_fields=['task_id', 'task_status'])
                 
-                messages.success(request, "Learning path analysis started! Your analysis is being processed in the background.")
+                log_user_action(str(user_id), "start_learning_path_analysis", 
+                              f"Started learning path analysis for skills: {len(learning_path.current_skills)} chars, role: {len(learning_path.dream_role)} chars")
+                
+                messages.success(request, "Learning path analysis started! Your personalized learning path is being generated in the background.")
+                
+                duration = time.time() - start_time
+                log_performance("Learning path analyzer POST", duration, 
+                              f"Learning path analysis started for user {user_id}, path ID: {learning_path.id}")
+                
                 return redirect('hirevision:learning_path_result', path_id=learning_path.id)
                 
             except Exception as e:
-                messages.error(request, f"An error occurred: {str(e)}")
+                logger.error(f"Error in learning path analyzer for user {user_id}: {str(e)}", exc_info=True)
+                log_user_action(str(user_id), "learning_path_analysis_error", f"Error: {str(e)}", success=False)
+                messages.error(request, f"An error occurred while starting the learning path analysis. Please try again.")
+        else:
+            logger.warning(f"Form validation failed for user {user_id}: {form.errors}")
+            messages.error(request, "Please correct the errors in the form.")
     else:
         form = LearningPathForm()
+        log_user_action(str(user_id), "view_learning_path_analyzer", "User accessed learning path analyzer")
+    
+    duration = time.time() - start_time
+    log_performance("Learning path analyzer", duration, f"Learning path analyzer rendered for user {user_id}")
     
     return render(request, 'hirevision/learning_path_analyzer.html', {'form': form})
 
 @login_required
 def learning_path_result(request, path_id):
-    """Display learning path result"""
+    """Display learning path result with proper error handling and user feedback"""
+    start_time = time.time()
+    user_id = request.user.id
+    logger.info(f"Learning path result accessed by user: {user_id} for path ID: {path_id}")
+    
     try:
         learning_path = LearningPath.objects.get(id=path_id)
+        
         # Check if user has permission to view this learning path
-        if request.user.is_authenticated and learning_path.user and learning_path.user != request.user:
+        if learning_path.user and learning_path.user != request.user:
+            logger.warning(f"User {user_id} attempted to access learning path {path_id} owned by user {learning_path.user.id}")
             messages.error(request, "You don't have permission to view this learning path.")
             return redirect('hirevision:learning_path_analyzer')
+        
+        # Log the access
+        log_user_action(str(user_id), "view_learning_path_result", f"Viewed learning path result: {path_id}")
+        
+        # Check task status and provide appropriate feedback
+        if learning_path.task_status == 'failed':
+            logger.warning(f"Learning path {path_id} failed for user {user_id}: {learning_path.task_error}")
+            messages.error(request, "The learning path analysis failed. Please try again or contact support if the issue persists.")
+        elif learning_path.task_status == 'pending':
+            logger.info(f"Learning path {path_id} still pending for user {user_id}")
+            messages.info(request, "Your learning path is still being generated. Please wait a moment and refresh the page.")
+        elif learning_path.task_status == 'running':
+            logger.info(f"Learning path {path_id} running for user {user_id}")
+            messages.info(request, "Your learning path is currently being generated. This may take a few moments.")
+        elif learning_path.task_status == 'completed':
+            logger.info(f"Learning path {path_id} completed successfully for user {user_id}")
+            # Check if we have meaningful data
+            if not learning_path.role_analysis or len(learning_path.role_analysis.strip()) < 50:
+                logger.warning(f"Learning path {path_id} completed but has insufficient data")
+                messages.warning(request, "The learning path analysis completed but the results may be incomplete. Please try again.")
+        
+        duration = time.time() - start_time
+        log_performance("Learning path result", duration, f"Learning path result rendered for user {user_id}, path ID: {path_id}")
+        
         return render(request, 'hirevision/learning_path_result.html', {'learning_path': learning_path})
+        
     except LearningPath.DoesNotExist:
-        messages.error(request, "Learning path not found.")
+        logger.error(f"Learning path {path_id} not found for user {user_id}")
+        messages.error(request, "Learning path not found. It may have been deleted or you may have an invalid link.")
+        return redirect('hirevision:learning_path_analyzer')
+    except Exception as e:
+        logger.error(f"Error accessing learning path result for user {user_id}, path ID {path_id}: {str(e)}", exc_info=True)
+        messages.error(request, "An error occurred while loading the learning path result. Please try again.")
         return redirect('hirevision:learning_path_analyzer')
 
 @login_required
 def resume_builder(request):
-    """Resume builder view with async processing"""
+    """Resume builder view with step-by-step wizard and proper error handling"""
+    start_time = time.time()
+    user_id = request.user.id
+    logger.info(f"Resume builder accessed by user: {user_id}")
+    
     if request.method == 'POST':
+        logger.info(f"Resume builder form submitted by user: {user_id}")
         form = ResumeBuilderForm(request.POST)
         if form.is_valid():
             try:
+                logger.debug("Form validation successful, processing resume builder")
+                
                 # Save the form to get the model instance
                 resume = form.save(commit=False)
                 
@@ -203,22 +279,50 @@ def resume_builder(request):
                 if request.user.is_authenticated:
                     resume.user = request.user
                 
+                # Validate required fields
+                required_fields = ['name', 'email']
+                for field in required_fields:
+                    if not getattr(resume, field):
+                        error_msg = f"Please provide your {field.replace('_', ' ')}"
+                        logger.warning(f"Validation failed for user {user_id}: {error_msg}")
+                        messages.error(request, error_msg)
+                        return render(request, 'hirevision/resume_builder.html', {'form': form})
+                
                 # Save the model first
                 resume.save()
+                logger.info(f"Resume builder record created with ID: {resume.id}")
                 
                 # Start async processing
+                logger.info(f"Starting async task for resume builder ID: {resume.id}")
                 task = process_resume_builder_task.send(str(resume.id))
                 resume.task_id = task.message_id
                 resume.task_status = 'pending'
                 resume.save(update_fields=['task_id', 'task_status'])
                 
-                messages.success(request, "Resume generation started! Your resume is being processed in the background.")
+                log_user_action(str(user_id), "start_resume_builder", 
+                              f"Started resume builder for user: {resume.name}")
+                
+                messages.success(request, "Resume generation started! Your professional resume is being created in the background.")
+                
+                duration = time.time() - start_time
+                log_performance("Resume builder POST", duration, 
+                              f"Resume builder started for user {user_id}, resume ID: {resume.id}")
+                
                 return redirect('hirevision:resume_builder_result', resume_id=resume.id)
                 
             except Exception as e:
-                messages.error(request, f"An error occurred: {str(e)}")
+                logger.error(f"Error in resume builder for user {user_id}: {str(e)}", exc_info=True)
+                log_user_action(str(user_id), "resume_builder_error", f"Error: {str(e)}", success=False)
+                messages.error(request, f"An error occurred while starting the resume generation. Please try again.")
+        else:
+            logger.warning(f"Form validation failed for user {user_id}: {form.errors}")
+            messages.error(request, "Please correct the errors in the form.")
     else:
         form = ResumeBuilderForm()
+        log_user_action(str(user_id), "view_resume_builder", "User accessed resume builder")
+    
+    duration = time.time() - start_time
+    log_performance("Resume builder", duration, f"Resume builder rendered for user {user_id}")
     
     return render(request, 'hirevision/resume_builder.html', {'form': form})
 

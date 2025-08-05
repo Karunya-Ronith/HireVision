@@ -926,41 +926,7 @@
                     </div>
                 </div>
 
-                <!-- Analysis Details -->
-                <div class="details-card">
-                    <div class="details-header">
-                        <h3><i class="fas fa-info-circle me-2"></i>Analysis Details</h3>
-                        <p>Technical information about this analysis</p>
-                    </div>
-                    <div class="details-content">
-                        <div class="details-grid">
-                            <div class="detail-item">
-                                <div class="detail-label">Analysis Date</div>
-                                <div class="detail-value">{{ analysis.created_at|date:"M j, Y" }}</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Analysis Time</div>
-                                <div class="detail-value">{{ analysis.created_at|date:"g:i A" }}</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Resume File</div>
-                                <div class="detail-value">{{ analysis.resume_file.name|slice:"9:"|truncatechars:20 }}</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Job Description</div>
-                                <div class="detail-value">{{ analysis.job_description|length }} chars</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Analysis ID</div>
-                                <div class="detail-value">#{{ analysis.id|slice:":8" }}</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Score Range</div>
-                                <div class="detail-value">0-100</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </div>
         </div> <!-- Close results-content -->

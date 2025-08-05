@@ -2,294 +2,729 @@
 
 {% block title %}Resume Generated - HireVision{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Modern Resume Builder Result Styles */
+    .result-container {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .result-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem 0;
+    }
+
+    .result-title {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .result-subtitle {
+        font-size: 1.25rem;
+        color: var(--secondary-color);
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* Loading Animation */
+    .loading-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        padding: 3rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .loading-spinner {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 2rem;
+    }
+
+    .resume-icon {
+        position: relative;
+        z-index: 3;
+        animation: resume-pulse 2s ease-in-out infinite;
+    }
+
+    .pulse-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80px;
+        height: 80px;
+        border: 3px solid var(--success-color);
+        border-radius: 50%;
+        opacity: 0;
+        animation: pulse 2s ease-out infinite;
+    }
+
+    .pulse-ring.delay-1 {
+        animation-delay: 0.5s;
+    }
+
+    .pulse-ring.delay-2 {
+        animation-delay: 1s;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 1;
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(2);
+            opacity: 0;
+        }
+    }
+
+    @keyframes resume-pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    .loading-status {
+        margin-bottom: 2rem;
+    }
+
+    .loading-status h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--dark-color);
+    }
+
+    .loading-status p {
+        font-size: 1rem;
+        color: var(--secondary-color);
+        margin-bottom: 0;
+    }
+
+    .progress-container {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color);
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .progress {
+        background-color: #e9ecef;
+        overflow: hidden;
+        height: 8px;
+        border-radius: 10px;
+    }
+
+    .progress-bar {
+        transition: width 0.5s ease;
+        background: linear-gradient(90deg, var(--success-color) 0%, #059669 100%);
+    }
+
+    .loading-tips {
+        max-width: 600px;
+        margin: 2rem auto 0;
+    }
+
+    .tip-card {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        border: 1px solid var(--success-color);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+    }
+
+    .tip-card i {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        color: var(--success-color);
+    }
+
+    .tip-card span {
+        font-weight: 500;
+        color: #065f46;
+        line-height: 1.5;
+    }
+
+    /* Success State */
+    .success-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .success-header {
+        background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .success-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .success-subtitle {
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+
+    .success-content {
+        padding: 2rem;
+    }
+
+    /* Download Section */
+    .download-section {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        border: 2px solid #0ea5e9;
+    }
+
+    .download-btn {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    }
+
+    .download-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* LaTeX Section */
+    .latex-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .latex-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .latex-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .copy-btn {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .copy-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .latex-code {
+        background: #1e293b;
+        color: #e2e8f0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        overflow-x: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        padding: 0.875rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        border: none;
+    }
+
+    .action-btn.primary {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+    }
+
+    .action-btn.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .action-btn.secondary {
+        background: var(--light-color);
+        color: var(--secondary-color);
+        border: 2px solid var(--border-color);
+    }
+
+    .action-btn.secondary:hover {
+        background: var(--border-color);
+        color: var(--dark-color);
+        text-decoration: none;
+    }
+
+    /* Error State */
+    .error-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        padding: 3rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .error-icon {
+        color: var(--danger-color);
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .error-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 1rem;
+    }
+
+    .error-message {
+        color: var(--secondary-color);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .result-title {
+            font-size: 2rem;
+        }
+        
+        .success-title {
+            font-size: 1.5rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .action-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<!-- Professional header -->
-<div class="header-container">
-    <h1>Resume Builder Result</h1>
-    <p>Your professional resume</p>
-</div>
+<div class="result-container">
+    <div class="container">
+        <!-- Header -->
+        <div class="result-header">
+            <h1 class="result-title">Resume Generated</h1>
+            <p class="result-subtitle">Your professional resume has been created successfully</p>
+        </div>
 
-<!-- Loading State -->
-<div id="loading-state"{% if resume.task_status == 'completed' %} style="display: none;"{% endif %}>
-    <div class="text-center">
-        <div class="loading-spinner mb-4">
-            <div class="spinner-border text-info" role="status" style="width: 3rem; height: 3rem;">
-                <span class="visually-hidden">Loading...</span>
+        <!-- Loading State -->
+        <div id="loading-state"{% if resume.task_status == 'completed' %} style="display: none;"{% endif %}>
+            <div class="loading-container">
+                <!-- Animated Loading Icon -->
+                <div class="loading-spinner mb-4">
+                    <div class="resume-icon">
+                        <i class="fas fa-file-alt fa-3x text-success"></i>
+                        <div class="pulse-ring"></div>
+                        <div class="pulse-ring delay-1"></div>
+                        <div class="pulse-ring delay-2"></div>
+                    </div>
+                </div>
+                
+                <!-- Dynamic Status Messages -->
+                <div class="loading-status">
+                    <h3 id="status-title">Building Your Resume...</h3>
+                    <p id="status-description" class="text-muted">Generating professional LaTeX resume and PDF</p>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress mb-2">
+                        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted" id="progress-text">0% Complete</small>
+                        <small class="text-muted" id="time-estimate">Estimated: 45 seconds</small>
+                    </div>
+                </div>
+                
+                <!-- Loading Tips -->
+                <div class="loading-tips">
+                    <div class="tip-card">
+                        <i class="fas fa-lightbulb"></i>
+                        <span id="loading-tip">While you wait, think about how you'll customize your resume for different job applications.</span>
+                    </div>
+                </div>
             </div>
         </div>
-        <h3>Building Your Resume...</h3>
-        <p class="text-muted">Please wait while we generate your professional LaTeX resume and PDF. This usually takes 30-60 seconds.</p>
-        <div class="progress mt-3" style="max-width: 400px; margin: 0 auto;">
-            <div class="progress-bar bg-info progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
-        </div>
-    </div>
-</div>
 
-<!-- Error State -->
-<div id="error-state" style="display: none;">
-    <div class="text-center">
-        <div class="alert alert-danger">
-            <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
-            <h4>Resume Generation Failed</h4>
-            <p id="error-message">An error occurred while building your resume. Please try again.</p>
-            <a href="{% url 'hirevision:resume_builder' %}" class="btn btn-info">Try Again</a>
-        </div>
-    </div>
-</div>
-
-<!-- Results Content -->
-<div id="results-content"{% if resume.task_status != 'completed' %} style="display: none;"{% endif %}>
-<div class="row">
-    <div class="col-lg-10 mx-auto">
-        <!-- Success Message -->
-        <div class="card mb-4">
-            <div class="card-body text-center">
-                <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
-                <h3 class="card-title">Resume Generated Successfully!</h3>
-                <p class="lead">Your resume has been generated in both LaTeX and PDF formats.</p>
-            </div>
-        </div>
-
-        <!-- Download Section -->
-        {% if resume.pdf_file %}
-            <div class="card mb-4">
-                <div class="card-body text-center">
-                    <h4 class="card-title">
-                        <i class="fas fa-download"></i> Download Your Resume
-                    </h4>
-                    <p class="card-text">Get your professional PDF resume ready for immediate use.</p>
-                    <a href="{% url 'hirevision:download_pdf' resume.id %}" class="btn btn-success btn-lg">
-                        <i class="fas fa-file-pdf"></i> Download PDF
+        <!-- Error State -->
+        <div id="error-state" style="display: none;">
+            <div class="error-container">
+                <div class="error-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3 class="error-title">Resume Generation Failed</h3>
+                <p class="error-message" id="error-message">An error occurred while building your resume. Please try again.</p>
+                <div class="action-buttons">
+                    <a href="{% url 'hirevision:resume_builder' %}" class="action-btn primary">
+                        <i class="fas fa-redo"></i>
+                        Try Again
+                    </a>
+                    <a href="{% url 'hirevision:home' %}" class="action-btn secondary">
+                        <i class="fas fa-home"></i>
+                        Go Home
                     </a>
                 </div>
             </div>
-        {% endif %}
+        </div>
 
-        <!-- LaTeX Code Section -->
-        {% if resume.latex_content %}
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h4 class="card-title">
-                        <i class="fas fa-code"></i> LaTeX Code
-                    </h4>
-                    <p class="card-text">Copy this LaTeX code for customization and compilation.</p>
-                    <div class="bg-light p-3 rounded">
-                        <pre class="mb-0"><code>{{ resume.latex_content }}</code></pre>
-                    </div>
-                    <button class="btn btn-outline-primary mt-3" onclick="copyLatexCode()">
-                        <i class="fas fa-copy"></i> Copy LaTeX Code
-                    </button>
+        <!-- Results Content -->
+        <div id="results-content"{% if resume.task_status != 'completed' %} style="display: none;"{% endif %}>
+            <div class="success-container">
+                <div class="success-header">
+                    <h2 class="success-title">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Resume Generated Successfully!
+                    </h2>
+                    <p class="success-subtitle">Your professional resume is ready for download</p>
                 </div>
-            </div>
-        {% endif %}
-
-        <!-- How to Use Section -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h4 class="card-title">
-                    <i class="fas fa-question-circle"></i> How to Use
-                </h4>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="text-center mb-3">
-                            <i class="fas fa-copy fa-2x text-primary mb-2"></i>
-                            <h6>1. Copy the LaTeX code</h6>
-                            <p class="small">Copy the code above for customization</p>
+                
+                <div class="success-content">
+                    <!-- Download Section -->
+                    {% if resume.pdf_file %}
+                        <div class="download-section">
+                            <h4 class="mb-3">
+                                <i class="fas fa-download me-2"></i>
+                                Download Your Resume
+                            </h4>
+                            <p class="mb-4">Get your professional PDF resume ready for immediate use in job applications.</p>
+                            <a href="{% url 'hirevision:download_pdf' resume.id %}" class="download-btn">
+                                <i class="fas fa-file-pdf"></i>
+                                Download PDF Resume
+                            </a>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="text-center mb-3">
-                            <i class="fas fa-download fa-2x text-success mb-2"></i>
-                            <h6>2. Download the PDF</h6>
-                            <p class="small">Get the PDF below for immediate use</p>
+                    {% endif %}
+
+                    <!-- LaTeX Code Section -->
+                    {% if resume.latex_content %}
+                        <div class="latex-section">
+                            <div class="latex-header">
+                                <h4 class="latex-title">
+                                    <i class="fas fa-code"></i>
+                                    LaTeX Source Code
+                                </h4>
+                                <button class="copy-btn" onclick="copyLatexCode()">
+                                    <i class="fas fa-copy"></i>
+                                    Copy Code
+                                </button>
+                            </div>
+                            <p class="text-muted mb-3">Copy this LaTeX code for customization and compilation in your preferred LaTeX editor.</p>
+                            <div class="latex-code" id="latex-code">
+                                {{ resume.latex_content }}
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="text-center mb-3">
-                            <i class="fas fa-cog fa-2x text-warning mb-2"></i>
-                            <h6>3. Compile LaTeX</h6>
-                            <p class="small">Use online editors or local installation</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    {% endif %}
 
-        <!-- Compilation Options -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h4 class="card-title">
-                    <i class="fas fa-tools"></i> Compilation Options
-                </h4>
-                <div class="row">
-                    <div class="col-md-4">
-                        <h6><i class="fas fa-globe text-primary"></i> Option 1: Online LaTeX Editor</h6>
-                        <ul class="list-unstyled">
-                            <li>• Go to <a href="https://www.overleaf.com/" target="_blank">Overleaf</a> (free)</li>
-                            <li>• Create a new project</li>
-                            <li>• Paste the code and compile</li>
-                        </ul>
-                    </div>
-                    <div class="col-md-4">
-                        <h6><i class="fas fa-desktop text-success"></i> Option 2: Local Installation</h6>
-                        <ul class="list-unstyled">
-                            <li>• Install TeX Live or MiKTeX</li>
-                            <li>• Install TeXstudio or TeXmaker</li>
-                            <li>• Open .tex file and compile</li>
-                        </ul>
-                    </div>
-                    <div class="col-md-4">
-                        <h6><i class="fas fa-terminal text-warning"></i> Option 3: Command Line</h6>
-                        <ul class="list-unstyled">
-                            <li>• Save as resume.tex</li>
-                            <li>• Run: <code>pdflatex resume.tex</code></li>
-                            <li>• Get resume.pdf</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Customization Tips -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h4 class="card-title">
-                    <i class="fas fa-palette"></i> Customization Tips
-                </h4>
-                <div class="row">
-                    <div class="col-md-6">
-                        <ul class="list-unstyled">
-                            <li><i class="fas fa-font text-primary"></i> <strong>Fonts:</strong> Uncomment different font options in the header</li>
-                            <li><i class="fas fa-palette text-success"></i> <strong>Colors:</strong> Modify the color scheme in the header</li>
-                            <li><i class="fas fa-ruler text-warning"></i> <strong>Layout:</strong> Adjust margins and spacing as needed</li>
-                        </ul>
-                    </div>
-                    <div class="col-md-6">
-                        <ul class="list-unstyled">
-                            <li><i class="fas fa-edit text-info"></i> <strong>Content:</strong> Edit the generated content to match your preferences</li>
-                            <li><i class="fas fa-search text-danger"></i> <strong>ATS Optimization:</strong> Template is designed to be ATS-friendly</li>
-                            <li><i class="fas fa-save text-success"></i> <strong>Save Both:</strong> Keep both .tex and .pdf versions</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pro Tips -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h4 class="card-title">
-                    <i class="fas fa-star"></i> Pro Tips
-                </h4>
-                <ul class="list-unstyled">
-                    <li><i class="fas fa-check text-success"></i> Keep descriptions concise and action-oriented</li>
-                    <li><i class="fas fa-check text-success"></i> Use bullet points for easy scanning</li>
-                    <li><i class="fas fa-check text-success"></i> Include relevant keywords from job descriptions</li>
-                    <li><i class="fas fa-check text-success"></i> Proofread carefully before submitting</li>
-                    <li><i class="fas fa-check text-success"></i> The LaTeX community is very helpful - check out <a href="https://tex.stackexchange.com/" target="_blank">TeX Stack Exchange</a></li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="card">
-            <div class="card-body text-center">
-                <h4 class="card-title">What's Next?</h4>
-                <div class="row">
-                    <div class="col-md-4 mb-2">
-                        <a href="{% url 'hirevision:resume_analyzer' %}" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-file-alt"></i> Analyze Resume
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <a href="{% url 'hirevision:resume_builder' %}" class="action-btn primary">
+                            <i class="fas fa-plus"></i>
+                            Create Another Resume
                         </a>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <a href="{% url 'hirevision:learning_path_analyzer' %}" class="btn btn-outline-success w-100">
-                            <i class="fas fa-road"></i> Plan Learning
+                        <a href="{% url 'hirevision:home' %}" class="action-btn secondary">
+                            <i class="fas fa-home"></i>
+                            Back to Dashboard
                         </a>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <a href="{% url 'hirevision:resume_builder' %}" class="btn btn-outline-info w-100">
-                            <i class="fas fa-redo"></i> Build Another
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Resume Details -->
-        <div class="card mt-4">
-            <div class="card-body">
-                <h5 class="card-title">
-                    <i class="fas fa-info-circle"></i> Resume Details
-                </h5>
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Name:</strong> {{ resume.name }}</p>
-                        <p><strong>Generated Date:</strong> {{ resume.created_at|date:"F j, Y, g:i a" }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>Email:</strong> {{ resume.email|default:"Not provided" }}</p>
-                        <p><strong>Resume ID:</strong> #{{ resume.id }}</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-</div> <!-- Close results-content -->
 
 <script>
-function copyLatexCode() {
-    const latexCode = `{{ resume.latex_content|escapejs }}`;
-    navigator.clipboard.writeText(latexCode).then(function() {
-        alert('LaTeX code copied to clipboard!');
-    }, function(err) {
-        console.error('Could not copy text: ', err);
-    });
-}
-
 document.addEventListener('DOMContentLoaded', function() {
+    const resumeId = '{{ resume.id }}';
+    const taskStatus = '{{ resume.task_status }}';
+    const startTime = Date.now();
+    let pollCount = 0;
+    let progressInterval;
+    let tipInterval;
+    
     const loadingState = document.getElementById('loading-state');
     const errorState = document.getElementById('error-state');
     const resultsContent = document.getElementById('results-content');
-    const resumeId = '{{ resume.id }}';
-    const taskStatus = '{{ resume.task_status }}';
     
-    // If task is not completed, start polling
-    if (taskStatus !== 'completed') {
+    // Enhanced status messages
+    const statusMessages = [
+        { title: 'Processing Your Information...', description: 'Analyzing your resume data', progress: 10 },
+        { title: 'Generating LaTeX Code...', description: 'Creating professional LaTeX structure', progress: 30 },
+        { title: 'Formatting Content...', description: 'Applying professional formatting', progress: 50 },
+        { title: 'Compiling PDF...', description: 'Generating your PDF resume', progress: 80 },
+        { title: 'Finalizing...', description: 'Preparing your resume for download', progress: 95 }
+    ];
+    
+    // Loading tips
+    const loadingTips = [
+        'While you wait, think about how you\'ll customize your resume for different job applications.',
+        'Did you know? ATS systems prefer simple, clean resume formats.',
+        'Tip: Keep your resume to 1-2 pages for best results.',
+        'Remember to tailor your resume for each specific job application.',
+        'Pro tip: Use action verbs to describe your achievements.',
+        'Consider getting feedback from professionals in your field.',
+        'Think about how your resume will look when printed.',
+        'Make sure all contact information is up to date.',
+        'Consider creating different versions for different industries.',
+        'Remember to proofread your resume carefully.'
+    ];
+    
+    // Handle different initial states
+    if (taskStatus === 'failed') {
+        loadingState.style.display = 'none';
+        resultsContent.style.display = 'block';
+        // Error will be displayed in the template
+    } else if (taskStatus === 'completed') {
+        loadingState.style.display = 'none';
+        resultsContent.style.display = 'block';
+    } else {
+        startEnhancedPolling();
+        startProgressSimulation();
+        startTipRotation();
+    }
+    
+    function startEnhancedPolling() {
         pollTaskStatus();
     }
     
+    function startProgressSimulation() {
+        let currentProgress = 0;
+        let currentStage = 0;
+        
+        progressInterval = setInterval(() => {
+            if (currentProgress < 95) {
+                const increment = Math.random() * 1.5 + 0.5;
+                currentProgress += increment;
+                updateProgress(currentProgress);
+                
+                if (currentProgress > statusMessages[currentStage].progress && currentStage < statusMessages.length - 1) {
+                    currentStage++;
+                    updateStatus(statusMessages[currentStage]);
+                }
+            }
+        }, 1200);
+    }
+    
+    function startTipRotation() {
+        let tipIndex = 0;
+        tipInterval = setInterval(() => {
+            const tipElement = document.getElementById('loading-tip');
+            if (tipElement) {
+                tipElement.textContent = loadingTips[tipIndex];
+                tipIndex = (tipIndex + 1) % loadingTips.length;
+            }
+        }, 10000);
+    }
+    
+    function updateProgress(progress) {
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const timeEstimate = document.getElementById('time-estimate');
+        
+        if (progressBar && progressText && timeEstimate) {
+            progressBar.style.width = Math.min(progress, 95) + '%';
+            progressText.textContent = Math.round(progress) + '% Complete';
+            
+            const elapsed = (Date.now() - startTime) / 1000;
+            const estimatedTotal = 60;
+            const remaining = Math.max(0, estimatedTotal - elapsed);
+            
+            if (remaining > 60) {
+                timeEstimate.textContent = `Estimated: ${Math.round(remaining / 60)} minutes`;
+            } else {
+                timeEstimate.textContent = `Estimated: ${Math.round(remaining)} seconds`;
+            }
+        }
+    }
+    
+    function updateStatus(status) {
+        const titleElement = document.getElementById('status-title');
+        const descriptionElement = document.getElementById('status-description');
+        
+        if (titleElement && descriptionElement) {
+            titleElement.style.opacity = '0';
+            descriptionElement.style.opacity = '0';
+            
+            setTimeout(() => {
+                titleElement.textContent = status.title;
+                descriptionElement.textContent = status.description;
+                titleElement.style.opacity = '1';
+                descriptionElement.style.opacity = '1';
+            }, 200);
+        }
+    }
+    
     function pollTaskStatus() {
+        pollCount++;
+        
         fetch(`/api/resume-builder/${resumeId}/status/`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
-                console.log('Task status:', data);
+                console.log('Task status response:', data);
                 
                 if (data.status === 'completed') {
-                    if (data.has_results) {
-                        // Task completed successfully, reload page to show results
+                    clearInterval(progressInterval);
+                    clearInterval(tipInterval);
+                    updateProgress(100);
+                    updateStatus({ title: 'Resume Complete!', description: 'Your professional resume is ready' });
+                    
+                    setTimeout(() => {
                         window.location.reload();
-                    } else {
-                        showError('Resume building completed but no results found. Please try again.');
-                    }
+                    }, 2000);
                 } else if (data.status === 'failed') {
-                    showError(data.error || 'Resume building failed. Please try again.');
+                    clearInterval(progressInterval);
+                    clearInterval(tipInterval);
+                    showError(data.error || 'Resume generation failed. Please try again.');
                 } else if (data.status === 'running' || data.status === 'pending') {
-                    // Continue polling
-                    setTimeout(pollTaskStatus, 3000); // Poll every 3 seconds
+                    const delay = Math.min(3000 + (pollCount * 1000), 15000);
+                    setTimeout(pollTaskStatus, delay);
+                } else {
+                    setTimeout(pollTaskStatus, 10000);
                 }
             })
             .catch(error => {
                 console.error('Error checking task status:', error);
-                showError('Unable to check resume building status. Please refresh the page.');
+                if (pollCount < 8) {
+                    const delay = Math.min(5000 + (pollCount * 2000), 30000);
+                    setTimeout(pollTaskStatus, delay);
+                } else {
+                    showError('Unable to check resume status. Please refresh the page or try again.');
+                }
             });
     }
     
     function showError(message) {
-        loadingState.style.display = 'none';
-        document.getElementById('error-message').textContent = message;
-        errorState.style.display = 'block';
+        clearInterval(progressInterval);
+        clearInterval(tipInterval);
+        
+        if (loadingState) {
+            loadingState.style.display = 'none';
+        }
+        
+        const errorMessageElement = document.getElementById('error-message');
+        if (errorMessageElement) {
+            errorMessageElement.textContent = message;
+        }
+        
+        if (errorState) {
+            errorState.style.display = 'block';
+        }
     }
 });
+
+// Copy LaTeX code function
+function copyLatexCode() {
+    const latexCode = document.getElementById('latex-code');
+    const textArea = document.createElement('textarea');
+    textArea.value = latexCode.textContent;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    
+    // Show feedback
+    const copyBtn = document.querySelector('.copy-btn');
+    const originalText = copyBtn.innerHTML;
+    copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    copyBtn.style.background = 'linear-gradient(135deg, var(--success-color) 0%, #059669 100%)';
+    
+    setTimeout(() => {
+        copyBtn.innerHTML = originalText;
+        copyBtn.style.background = 'linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%)';
+    }, 2000);
+}
 </script>
 {% endblock %} 
