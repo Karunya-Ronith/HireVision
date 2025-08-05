@@ -45,142 +45,89 @@ def analyze_learning_path(current_skills, dream_role):
 
     # Check if OpenRouter API key is available
     if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "your_openrouter_api_key_here":
-        logger.warning("OpenRouter API key not configured, returning demo message")
-        return """
-## ⚠️ OpenRouter API Key Not Configured
-
-To get AI-powered learning path guidance, please:
-
-1. Get your OpenRouter API key from: https://openrouter.ai/keys
-2. Create a `.env` file in the project directory
-3. Add your API key: `OPENROUTER_API_KEY=your_actual_api_key_here`
-4. Restart the application
-"""
+        logger.warning("OpenRouter API key not configured, returning error message")
+        return "## ❌ Configuration Error\n\nOpenRouter API key not configured. Please configure your API key to use the learning path generator."
 
     def make_api_call():
         """Make the actual API call with retry logic"""
         logger.info("Making OpenRouter API call for learning path analysis")
         
-        # Create the enhanced analysis prompt with anti-hallucination instructions
+        # Create a focused, structured prompt for better results
         prompt = f"""
-        You are an expert career coach and learning path specialist with 15+ years of experience in career development.
-        
-        Please analyze the user's current skills against their dream role and provide a comprehensive, detailed learning path.
-        
-        **CRITICAL INSTRUCTIONS:**
-        - DO NOT hallucinate or invent links to resources that don't exist
-        - Only recommend resources (courses, books, websites) if you are confident they are real and accessible
-        - If you cannot find a good, verified resource for a particular skill, simply state "No specific resource recommended" 
-          rather than making up a fake link
-        - Focus on well-known, established platforms like Coursera, edX, Udemy, LinkedIn Learning, etc.
-        - For books, only recommend real, published books with actual authors and titles
-        - Be honest about resource limitations - it's better to recommend fewer, verified resources than many fake ones
-        
-        Current Skills:
-        {current_skills}
-        
-        Dream Role:
-        {dream_role}
-        
-        Please provide a detailed learning path in the following JSON format:
+You are an expert career coach and learning path specialist. Analyze the user's current skills against their dream role and provide a comprehensive, actionable learning path.
+
+**Current Skills:**
+{current_skills}
+
+**Dream Role:**
+{dream_role}
+
+**Instructions:**
+1. Analyze the gap between current skills and dream role requirements
+2. Create a realistic, phased learning path
+3. Recommend only verified, accessible resources
+4. Provide specific, actionable advice
+5. Return ONLY valid JSON in the exact format specified below
+
+**Required JSON Response Format:**
+{{
+    "role_analysis": "Detailed analysis of the dream role, its requirements, and how it differs from current skills. Include specific responsibilities, technologies, and skills needed.",
+    "skills_gap": [
+        "Specific skill 1 that needs development",
+        "Specific skill 2 that needs development",
+        "Specific skill 3 that needs development"
+    ],
+    "learning_path": [
         {{
-            "role_analysis": "<analysis of the dream role and its requirements>",
-            "skills_gap": ["<missing_skill1>", "<missing_skill2>", ...],
-            "learning_path": [
+            "phase": "Phase 1: Foundation (2-3 months)",
+            "duration": "2-3 months",
+            "description": "Detailed description of what this phase covers and why it's important",
+            "skills_to_learn": [
+                "Specific skill to learn in this phase",
+                "Another specific skill"
+            ],
+            "resources": [
                 {{
-                    "phase": "Phase 1: Foundation",
-                    "duration": "<estimated_duration>",
-                    "description": "<detailed_description>",
-                    "skills_to_learn": ["<skill1>", "<skill2>", ...],
-                    "resources": [
-                        {{
-                            "type": "<course/book/project/tool>",
-                            "name": "<resource_name>",
-                            "url": "<resource_url_or_placeholder>",
-                            "description": "<why_this_resource>",
-                            "difficulty": "<beginner/intermediate/advanced>",
-                            "verified": "<true/false>"
-                        }}
-                    ],
-                    "projects": [
-                        {{
-                            "name": "<project_name>",
-                            "description": "<project_description>",
-                            "skills_practiced": ["<skill1>", "<skill2>"],
-                            "github_template": "<github_url_if_available>"
-                        }}
-                    ]
-                }},
-                {{
-                    "phase": "Phase 2: Intermediate",
-                    "duration": "<estimated_duration>",
-                    "description": "<detailed_description>",
-                    "skills_to_learn": ["<skill1>", "<skill2>", ...],
-                    "resources": [
-                        {{
-                            "type": "<course/book/project/tool>",
-                            "name": "<resource_name>",
-                            "url": "<resource_url_or_placeholder>",
-                            "description": "<why_this_resource>",
-                            "difficulty": "<beginner/intermediate/advanced>",
-                            "verified": "<true/false>"
-                        }}
-                    ],
-                    "projects": [
-                        {{
-                            "name": "<project_name>",
-                            "description": "<project_description>",
-                            "skills_practiced": ["<skill1>", "<skill2>"],
-                            "github_template": "<github_url_if_available>"
-                        }}
-                    ]
-                }},
-                {{
-                    "phase": "Phase 3: Advanced",
-                    "duration": "<estimated_duration>",
-                    "description": "<detailed_description>",
-                    "skills_to_learn": ["<skill1>", "<skill2>", ...],
-                    "resources": [
-                        {{
-                            "type": "<course/book/project/tool>",
-                            "name": "<resource_name>",
-                            "url": "<resource_url_or_placeholder>",
-                            "description": "<why_this_resource>",
-                            "difficulty": "<beginner/intermediate/advanced>",
-                            "verified": "<true/false>"
-                        }}
-                    ],
-                    "projects": [
-                        {{
-                            "name": "<project_name>",
-                            "description": "<project_description>",
-                            "skills_practiced": ["<skill1>", "<skill2>"],
-                            "github_template": "<github_url_if_available>"
-                        }}
-                    ]
+                    "type": "course",
+                    "name": "Course name (only if you know it exists)",
+                    "url": "URL (only if verified)",
+                    "description": "Why this resource is recommended",
+                    "difficulty": "beginner/intermediate/advanced",
+                    "verified": true/false
                 }}
             ],
-            "timeline": "<overall_timeline_summary>",
-            "success_metrics": ["<metric1>", "<metric2>", ...],
-            "career_advice": "<additional_career_advice>",
-            "networking_tips": ["<tip1>", "<tip2>", ...]
+            "projects": [
+                {{
+                    "name": "Project name",
+                    "description": "What this project should accomplish",
+                    "skills_practiced": ["skill1", "skill2"],
+                    "github_template": "URL if available, otherwise null"
+                }}
+            ]
         }}
-        
-        **RESOURCE GUIDELINES:**
-        - For courses: Only recommend from well-known platforms (Coursera, edX, Udemy, LinkedIn Learning, etc.)
-        - For books: Only recommend real, published books with actual authors
-        - For tools: Only recommend tools that actually exist and are accessible
-        - For projects: Be specific about what the project should accomplish
-        - If unsure about a resource, mark it as "verified": false or don't include it
-        
-        Make the learning path very detailed and practical. Include:
-        - Specific courses, books, and online resources with URLs (only if verified)
-        - Hands-on projects for each phase
-        - Realistic timelines
-        - Success metrics to track progress
-        - Networking and career advice
-        - Industry-specific recommendations
-        """
+    ],
+    "timeline": "Overall timeline summary (e.g., '6-9 months total')",
+    "success_metrics": [
+        "Specific, measurable metric 1",
+        "Specific, measurable metric 2",
+        "Specific, measurable metric 3"
+    ],
+    "career_advice": "Detailed career advice specific to this transition, including strategies, tips, and actionable steps",
+    "networking_tips": [
+        "Specific networking tip 1",
+        "Specific networking tip 2",
+        "Specific networking tip 3"
+    ]
+}}
+
+**Important Guidelines:**
+- Only include resources you are confident exist and are accessible
+- Be specific about skills, technologies, and requirements
+- Provide realistic timelines and expectations
+- Focus on actionable, measurable advice
+- If unsure about a resource, set verified: false or omit it
+- Return ONLY the JSON object, no additional text or markdown
+"""
 
         logger.debug(f"Prompt length: {len(prompt)} characters")
         logger.debug(f"Using model: {OPENROUTER_MODEL}, temperature: {OPENROUTER_TEMPERATURE}, max_tokens: {OPENROUTER_MAX_TOKENS}")
@@ -203,7 +150,7 @@ To get AI-powered learning path guidance, please:
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are an expert career coach and learning path specialist. Provide detailed, actionable learning paths with verified resources only. Never hallucinate or invent fake links.",
+                        "content": "You are an expert career coach and learning path specialist. Provide detailed, actionable learning paths with verified resources only. Return only valid JSON in the exact format requested. Never hallucinate or invent fake links.",
                     },
                     {"role": "user", "content": prompt},
                 ],
@@ -246,19 +193,19 @@ To get AI-powered learning path guidance, please:
         logger.debug("Attempting to extract JSON from response")
         analysis = extract_json_from_text(analysis_text)
         if analysis is None:
-            logger.warning("No JSON found in response, creating fallback analysis")
-            # If no JSON found, create a structured response
-            analysis = {
-                "role_analysis": analysis_text,
-                "skills_gap": ["Analysis completed"],
-                "learning_path": [],
-                "timeline": "See detailed analysis above",
-                "success_metrics": ["Review the analysis"],
-                "career_advice": analysis_text,
-                "networking_tips": ["Refer to the analysis"],
-            }
-        else:
-            logger.info("Successfully extracted JSON from response")
+            logger.warning("No valid JSON found in response, creating error response")
+            return create_error_analysis(
+                "Failed to parse structured response from AI service. Please try again."
+            )
+        
+        logger.info("Successfully extracted JSON from response")
+        
+        # Validate the extracted data
+        if not _validate_extracted_data(analysis):
+            logger.warning("Extracted data failed validation")
+            return create_error_analysis(
+                "Received invalid data structure from AI service. Please try again."
+            )
 
         duration = time.time() - start_time
         log_performance("Learning path analysis", duration, f"Analysis completed with {len(analysis_text)} characters")
@@ -270,6 +217,55 @@ To get AI-powered learning path guidance, please:
         logger.error(f"Learning path analysis failed after {duration:.3f}s: {str(e)}", exc_info=True)
         error_message = handle_api_error(e)
         return create_error_analysis(error_message)
+
+
+def _validate_extracted_data(data: dict) -> bool:
+    """
+    Validate the extracted JSON data has the required structure and content
+    """
+    if not isinstance(data, dict):
+        logger.warning("Extracted data is not a dictionary")
+        return False
+    
+    # Check required fields
+    required_fields = ['role_analysis', 'skills_gap', 'learning_path']
+    for field in required_fields:
+        if field not in data:
+            logger.warning(f"Missing required field: {field}")
+            return False
+    
+    # Validate role_analysis
+    role_analysis = data.get('role_analysis', '')
+    if not role_analysis or len(str(role_analysis).strip()) < 50:
+        logger.warning("Role analysis is too short or empty")
+        return False
+    
+    # Validate skills_gap
+    skills_gap = data.get('skills_gap', [])
+    if not isinstance(skills_gap, list) or len(skills_gap) == 0:
+        logger.warning("Skills gap must be a non-empty list")
+        return False
+    
+    # Validate learning_path
+    learning_path = data.get('learning_path', [])
+    if not isinstance(learning_path, list) or len(learning_path) == 0:
+        logger.warning("Learning path must be a non-empty list")
+        return False
+    
+    # Validate each phase in learning_path
+    for i, phase in enumerate(learning_path):
+        if not isinstance(phase, dict):
+            logger.warning(f"Phase {i} is not a dictionary")
+            return False
+        
+        required_phase_fields = ['phase', 'description', 'skills_to_learn']
+        for field in required_phase_fields:
+            if field not in phase:
+                logger.warning(f"Phase {i} missing required field: {field}")
+                return False
+    
+    logger.info("Extracted data validation passed")
+    return True
 
 
 def format_learning_path_output(analysis):

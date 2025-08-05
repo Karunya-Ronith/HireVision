@@ -2,289 +2,1121 @@
 
 {% block title %}Resume Builder - HireVision{% endblock %}
 
-{% block content %}
-<!-- Professional header -->
-<div class="header-container">
-    <h1>Resume Builder</h1>
-    <p>AI-Powered Professional Resume Creation</p>
-</div>
+{% block extra_css %}
+<style>
+    /* Modern Resume Builder Styles */
+    .resume-builder-container {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
 
-<div class="row">
-    <div class="col-lg-10 mx-auto">
-        <div class="card">
-            <div class="card-body">
-                <h3 class="card-title text-center mb-4">
-                    <i class="fas fa-tools"></i> Build Your Professional Resume
-                </h3>
-                
-                <form method="post">
-                    {% csrf_token %}
-                    
-                    <!-- Personal Information -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label for="{{ form.name.id_for_label }}" class="form-label">
-                                <i class="fas fa-user"></i> Full Name *
-                            </label>
-                            {{ form.name }}
-                            {% if form.name.errors %}
-                                <div class="text-danger">
-                                    {% for error in form.name.errors %}
-                                        <small>{{ error }}</small>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-6">
-                            <label for="{{ form.email.id_for_label }}" class="form-label">
-                                <i class="fas fa-envelope"></i> Email
-                            </label>
-                            {{ form.email }}
-                            {% if form.email.errors %}
-                                <div class="text-danger">
-                                    {% for error in form.email.errors %}
-                                        <small>{{ error }}</small>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label for="{{ form.phone.id_for_label }}" class="form-label">
-                                <i class="fas fa-phone"></i> Phone
-                            </label>
-                            {{ form.phone }}
-                            {% if form.phone.errors %}
-                                <div class="text-danger">
-                                    {% for error in form.phone.errors %}
-                                        <small>{{ error }}</small>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-6">
-                            <label for="{{ form.linkedin.id_for_label }}" class="form-label">
-                                <i class="fab fa-linkedin"></i> LinkedIn
-                            </label>
-                            {{ form.linkedin }}
-                            {% if form.linkedin.errors %}
-                                <div class="text-danger">
-                                    {% for error in form.linkedin.errors %}
-                                        <small>{{ error }}</small>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label for="{{ form.github.id_for_label }}" class="form-label">
-                                <i class="fab fa-github"></i> GitHub
-                            </label>
-                            {{ form.github }}
-                            {% if form.github.errors %}
-                                <div class="text-danger">
-                                    {% for error in form.github.errors %}
-                                        <small>{{ error }}</small>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <!-- Education -->
-                    <div class="mb-4">
-                        <label for="{{ form.education.id_for_label }}" class="form-label">
-                            <i class="fas fa-graduation-cap"></i> Education *
-                        </label>
-                        {{ form.education }}
-                        {% if form.education.errors %}
-                            <div class="text-danger">
-                                {% for error in form.education.errors %}
-                                    <small>{{ error }}</small>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                        <div class="form-text">
-                            Enter in JSON format: [{"degree": "Bachelor of Science", "school": "University Name", "year": "2020", "gpa": "3.8"}]
-                        </div>
-                    </div>
-                    
-                    <!-- Experience -->
-                    <div class="mb-4">
-                        <label for="{{ form.experience.id_for_label }}" class="form-label">
-                            <i class="fas fa-briefcase"></i> Work Experience
-                        </label>
-                        {{ form.experience }}
-                        {% if form.experience.errors %}
-                            <div class="text-danger">
-                                {% for error in form.experience.errors %}
-                                    <small>{{ error }}</small>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                        <div class="form-text">
-                            Enter in JSON format: [{"title": "Software Engineer", "company": "Company Name", "duration": "2020-2023", "description": "Job description"}]
-                        </div>
-                    </div>
-                    
-                    <!-- Projects -->
-                    <div class="mb-4">
-                        <label for="{{ form.projects.id_for_label }}" class="form-label">
-                            <i class="fas fa-code"></i> Projects *
-                        </label>
-                        {{ form.projects }}
-                        {% if form.projects.errors %}
-                            <div class="text-danger">
-                                {% for error in form.projects.errors %}
-                                    <small>{{ error }}</small>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                        <div class="form-text">
-                            Enter in JSON format: [{"name": "Project Name", "description": "Project description", "technologies": ["Python", "Django"]}]
-                        </div>
-                    </div>
-                    
-                    <!-- Skills -->
-                    <div class="mb-4">
-                        <label for="{{ form.skills.id_for_label }}" class="form-label">
-                            <i class="fas fa-tools"></i> Skills *
-                        </label>
-                        {{ form.skills }}
-                        {% if form.skills.errors %}
-                            <div class="text-danger">
-                                {% for error in form.skills.errors %}
-                                    <small>{{ error }}</small>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                        <div class="form-text">
-                            Enter in JSON format: {"Programming Languages": ["Python", "JavaScript"], "Frameworks": ["Django", "React"]}
-                        </div>
-                    </div>
-                    
-                    <!-- Research Papers -->
-                    <div class="mb-4">
-                        <label for="{{ form.research_papers.id_for_label }}" class="form-label">
-                            <i class="fas fa-file-alt"></i> Research Papers
-                        </label>
-                        {{ form.research_papers }}
-                        {% if form.research_papers.errors %}
-                            <div class="text-danger">
-                                {% for error in form.research_papers.errors %}
-                                    <small>{{ error }}</small>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                        <div class="form-text">
-                            Enter in JSON format: [{"title": "Paper Title", "conference": "Conference Name", "year": "2023"}]
-                        </div>
-                    </div>
-                    
-                    <!-- Achievements -->
-                    <div class="mb-4">
-                        <label for="{{ form.achievements.id_for_label }}" class="form-label">
-                            <i class="fas fa-trophy"></i> Achievements
-                        </label>
-                        {{ form.achievements }}
-                        {% if form.achievements.errors %}
-                            <div class="text-danger">
-                                {% for error in form.achievements.errors %}
-                                    <small>{{ error }}</small>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                        <div class="form-text">
-                            Enter one achievement per line
-                        </div>
-                    </div>
-                    
-                    <!-- Others -->
-                    <div class="mb-4">
-                        <label for="{{ form.others.id_for_label }}" class="form-label">
-                            <i class="fas fa-plus"></i> Additional Information
-                        </label>
-                        {{ form.others }}
-                        {% if form.others.errors %}
-                            <div class="text-danger">
-                                {% for error in form.others.errors %}
-                                    <small>{{ error }}</small>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                        <div class="form-text">
-                            Any additional information you'd like to include
-                        </div>
-                    </div>
-                    
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-magic"></i> Generate Resume
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+    .builder-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem 0;
+    }
+
+    .builder-title {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .builder-subtitle {
+        font-size: 1.25rem;
+        color: var(--secondary-color);
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* Step Wizard */
+    .step-wizard {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .wizard-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .wizard-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .wizard-subtitle {
+        opacity: 0.9;
+        font-size: 1rem;
+    }
+
+    .step-indicators {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: var(--light-color);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .step-indicator.active {
+        background: var(--primary-color);
+        color: white;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .step-indicator.completed {
+        background: var(--success-color);
+        color: white;
+    }
+
+    .step-indicator.pending {
+        background: var(--light-color);
+        color: var(--secondary-color);
+        border: 2px solid var(--border-color);
+    }
+
+    .step-number {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    /* Form Sections */
+    .form-section {
+        padding: 2rem;
+        display: none;
+    }
+
+    .form-section.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-title i {
+        color: var(--primary-color);
+        font-size: 1.25rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .form-input.has-icon {
+        padding-left: 3rem;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--secondary-color);
+        font-size: 1rem;
+    }
+
+    .form-textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    /* Dynamic Sections */
+    .dynamic-section {
+        background: var(--light-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border: 2px dashed var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .dynamic-section:hover {
+        border-color: var(--primary-color);
+        background: rgba(37, 99, 235, 0.05);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .section-title-small {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin: 0;
+    }
+
+    .remove-section {
+        background: var(--danger-color);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .remove-section:hover {
+        background: #dc2626;
+        transform: scale(1.1);
+    }
+
+    /* Add Section Button */
+    .add-section-btn {
+        background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .add-section-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Navigation Buttons */
+    .wizard-navigation {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 2rem;
+        background: var(--light-color);
+        border-top: 1px solid var(--border-color);
+    }
+
+    .nav-btn {
+        padding: 0.875rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .nav-btn.prev {
+        background: var(--light-color);
+        color: var(--secondary-color);
+        border: 2px solid var(--border-color);
+    }
+
+    .nav-btn.prev:hover {
+        background: var(--border-color);
+        color: var(--dark-color);
+    }
+
+    .nav-btn.next {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+    }
+
+    .nav-btn.next:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .nav-btn.generate {
+        background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+        color: white;
+        border: none;
+    }
+
+    .nav-btn.generate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .nav-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+        padding: 0 2rem 1.5rem;
+        background: var(--light-color);
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%);
+        transition: width 0.3s ease;
+        border-radius: 4px;
+    }
+
+    .progress-text {
+        text-align: center;
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--secondary-color);
+        font-weight: 500;
+    }
+
+    /* Preview Section */
+    .preview-section {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-top: 2rem;
+    }
+
+    .preview-header {
+        background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .preview-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .preview-content {
+        padding: 2rem;
+        min-height: 400px;
+        background: #f8f9fa;
+    }
+
+    .preview-placeholder {
+        text-align: center;
+        color: var(--secondary-color);
+        padding: 3rem;
+    }
+
+    .preview-placeholder i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .builder-title {
+            font-size: 2rem;
+        }
         
-        <!-- Information card -->
-        <div class="card mt-4">
-            <div class="card-body">
-                <h4 class="card-title">
-                    <i class="fas fa-info-circle"></i> What You'll Get
-                </h4>
-                <div class="row">
-                    <div class="col-md-6">
-                        <ul class="list-unstyled">
-                            <li><i class="fas fa-file-pdf text-danger"></i> <strong>Professional PDF</strong> - Ready-to-use resume</li>
-                            <li><i class="fas fa-code text-primary"></i> <strong>LaTeX Code</strong> - For customization</li>
-                            <li><i class="fas fa-eye text-success"></i> <strong>ATS-Optimized</strong> - Machine-readable format</li>
-                        </ul>
-                    </div>
-                    <div class="col-md-6">
-                        <ul class="list-unstyled">
-                            <li><i class="fas fa-palette text-info"></i> <strong>Clean Design</strong> - Professional template</li>
-                            <li><i class="fas fa-edit text-warning"></i> <strong>Customizable</strong> - Easy to modify</li>
-                            <li><i class="fas fa-download text-success"></i> <strong>Easy Export</strong> - Multiple formats</li>
-                        </ul>
-                    </div>
+        .step-indicators {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .step-indicator {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .wizard-navigation {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .nav-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* Loading States */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        display: none;
+    }
+
+    .loading-content {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        max-width: 400px;
+        margin: 0 1rem;
+    }
+
+    .loading-spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid var(--border-color);
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="resume-builder-container">
+    <div class="container">
+        <!-- Header -->
+        <div class="builder-header">
+            <h1 class="builder-title">Resume Builder</h1>
+            <p class="builder-subtitle">Create a professional resume with AI-powered guidance and real-time preview</p>
+        </div>
+
+        <!-- Step Wizard -->
+        <div class="step-wizard">
+            <div class="wizard-header">
+                <h2 class="wizard-title">Build Your Professional Resume</h2>
+                <p class="wizard-subtitle">Follow the steps below to create your perfect resume</p>
+            </div>
+
+            <!-- Step Indicators -->
+            <div class="step-indicators">
+                <div class="step-indicator active" data-step="1">
+                    <div class="step-number">1</div>
+                    <span>Basic Info</span>
+                </div>
+                <div class="step-indicator pending" data-step="2">
+                    <div class="step-number">2</div>
+                    <span>Education</span>
+                </div>
+                <div class="step-indicator pending" data-step="3">
+                    <div class="step-number">3</div>
+                    <span>Experience</span>
+                </div>
+                <div class="step-indicator pending" data-step="4">
+                    <div class="step-number">4</div>
+                    <span>Skills & Projects</span>
+                </div>
+                <div class="step-indicator pending" data-step="5">
+                    <div class="step-number">5</div>
+                    <span>Review & Generate</span>
                 </div>
             </div>
-        </div>
-        
-        <!-- Tips card -->
-        <div class="card mt-4">
-            <div class="card-body">
-                <h4 class="card-title">
-                    <i class="fas fa-lightbulb"></i> Tips for Better Results
-                </h4>
-                <ul class="list-unstyled">
-                    <li><i class="fas fa-check text-success"></i> Use action verbs in experience descriptions</li>
-                    <li><i class="fas fa-check text-success"></i> Quantify achievements with numbers</li>
-                    <li><i class="fas fa-check text-success"></i> Include relevant keywords from job descriptions</li>
-                    <li><i class="fas fa-check text-success"></i> Keep descriptions concise and impactful</li>
-                    <li><i class="fas fa-check text-success"></i> Use standard section headers</li>
-                </ul>
+
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 20%"></div>
+                </div>
+                <div class="progress-text" id="progress-text">Step 1 of 5: Basic Information</div>
             </div>
-        </div>
-        
-        <!-- Sample card -->
-        <div class="card mt-4">
-            <div class="card-body">
-                <h4 class="card-title">
-                    <i class="fas fa-eye"></i> Need Help?
-                </h4>
-                <p class="card-text">
-                    Check out our sample resume to see the format and get inspiration for your own resume.
-                </p>
-                <a href="{% url 'hirevision:sample_resume' %}" class="btn btn-outline-primary">
-                    <i class="fas fa-file-alt"></i> View Sample Resume
-                </a>
-            </div>
+
+            <!-- Form Sections -->
+            <form id="resume-form" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Step 1: Basic Information -->
+                <div class="form-section active" id="step-1">
+                    <h3 class="section-title">
+                        <i class="fas fa-user"></i>
+                        Basic Information
+                    </h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Full Name *</label>
+                            <input type="text" class="form-input has-icon" name="name" placeholder="Your Full Name" required>
+                            <i class="fas fa-user input-icon"></i>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email Address *</label>
+                            <input type="email" class="form-input has-icon" name="email" placeholder="your.email@example.com" required>
+                            <i class="fas fa-envelope input-icon"></i>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-input has-icon" name="phone" placeholder="+1 (555) 123-4567">
+                            <i class="fas fa-phone input-icon"></i>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">LinkedIn Profile</label>
+                            <input type="url" class="form-input has-icon" name="linkedin" placeholder="https://linkedin.com/in/yourprofile">
+                            <i class="fab fa-linkedin input-icon"></i>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">GitHub Profile</label>
+                            <input type="url" class="form-input has-icon" name="github" placeholder="https://github.com/yourusername">
+                            <i class="fab fa-github input-icon"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Education -->
+                <div class="form-section" id="step-2">
+                    <h3 class="section-title">
+                        <i class="fas fa-graduation-cap"></i>
+                        Education
+                    </h3>
+                    <div id="education-sections">
+                        <div class="dynamic-section education-item">
+                            <div class="section-header">
+                                <h4 class="section-title-small">Education Entry #1</h4>
+                                <button type="button" class="remove-section" onclick="removeSection(this)">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Degree *</label>
+                                    <input type="text" class="form-input" name="education_degree[]" placeholder="e.g., Bachelor of Science in Computer Science" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Institution *</label>
+                                    <input type="text" class="form-input" name="education_school[]" placeholder="University Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Graduation Year *</label>
+                                    <input type="number" class="form-input" name="education_year[]" placeholder="2020" min="1950" max="2030" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">GPA (Optional)</label>
+                                    <input type="text" class="form-input" name="education_gpa[]" placeholder="3.8">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="add-section-btn" onclick="addEducationSection()">
+                        <i class="fas fa-plus"></i>
+                        Add Another Education Entry
+                    </button>
+                </div>
+
+                <!-- Step 3: Experience -->
+                <div class="form-section" id="step-3">
+                    <h3 class="section-title">
+                        <i class="fas fa-briefcase"></i>
+                        Work Experience
+                    </h3>
+                    <div id="experience-sections">
+                        <div class="dynamic-section experience-item">
+                            <div class="section-header">
+                                <h4 class="section-title-small">Experience Entry #1</h4>
+                                <button type="button" class="remove-section" onclick="removeSection(this)">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Job Title *</label>
+                                    <input type="text" class="form-input" name="experience_title[]" placeholder="e.g., Software Engineer" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Company *</label>
+                                    <input type="text" class="form-input" name="experience_company[]" placeholder="Company Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Start Date *</label>
+                                    <input type="month" class="form-input" name="experience_start[]" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">End Date</label>
+                                    <input type="month" class="form-input" name="experience_end[]" placeholder="Present">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Job Description *</label>
+                                <textarea class="form-input form-textarea" name="experience_description[]" placeholder="Describe your responsibilities and achievements..." required></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="add-section-btn" onclick="addExperienceSection()">
+                        <i class="fas fa-plus"></i>
+                        Add Another Experience Entry
+                    </button>
+                </div>
+
+                <!-- Step 4: Skills & Projects -->
+                <div class="form-section" id="step-4">
+                    <h3 class="section-title">
+                        <i class="fas fa-code"></i>
+                        Skills & Projects
+                    </h3>
+                    
+                    <!-- Skills Section -->
+                    <div class="form-group">
+                        <label class="form-label">Technical Skills *</label>
+                        <textarea class="form-input form-textarea" name="skills" placeholder="Enter your technical skills (e.g., Python, JavaScript, React, AWS, Docker...)" required></textarea>
+                    </div>
+
+                    <!-- Projects Section -->
+                    <h4 class="section-title-small" style="margin-top: 2rem; margin-bottom: 1rem;">
+                        <i class="fas fa-project-diagram"></i>
+                        Projects
+                    </h4>
+                    <div id="project-sections">
+                        <div class="dynamic-section project-item">
+                            <div class="section-header">
+                                <h4 class="section-title-small">Project #1</h4>
+                                <button type="button" class="remove-section" onclick="removeSection(this)">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Project Name *</label>
+                                    <input type="text" class="form-input" name="project_name[]" placeholder="e.g., E-commerce Platform" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Technologies Used</label>
+                                    <input type="text" class="form-input" name="project_tech[]" placeholder="e.g., React, Node.js, MongoDB">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Project Description *</label>
+                                <textarea class="form-input form-textarea" name="project_description[]" placeholder="Describe what the project does and your role..." required></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="add-section-btn" onclick="addProjectSection()">
+                        <i class="fas fa-plus"></i>
+                        Add Another Project
+                    </button>
+                </div>
+
+                <!-- Step 5: Review & Generate -->
+                <div class="form-section" id="step-5">
+                    <h3 class="section-title">
+                        <i class="fas fa-eye"></i>
+                        Review & Generate
+                    </h3>
+                    <div class="preview-section">
+                        <div class="preview-header">
+                            <h4 class="preview-title">Resume Preview</h4>
+                            <p>Review your information before generating</p>
+                        </div>
+                        <div class="preview-content" id="resume-preview">
+                            <div class="preview-placeholder">
+                                <i class="fas fa-file-alt"></i>
+                                <h5>Resume Preview</h5>
+                                <p>Fill out the previous steps to see your resume preview here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="wizard-navigation">
+                    <button type="button" class="nav-btn prev" id="prev-btn" onclick="previousStep()" disabled>
+                        <i class="fas fa-arrow-left"></i>
+                        Previous
+                    </button>
+                    <button type="button" class="nav-btn next" id="next-btn" onclick="nextStep()">
+                        Next
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button type="submit" class="nav-btn generate" id="generate-btn" style="display: none;">
+                        <i class="fas fa-magic"></i>
+                        Generate Resume
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loading-overlay">
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <h4>Generating Your Resume...</h4>
+        <p>Please wait while we create your professional resume with AI assistance.</p>
+    </div>
+</div>
+
+<script>
+let currentStep = 1;
+const totalSteps = 5;
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateProgress();
+    updateNavigation();
+    updateStepIndicators();
+});
+
+function nextStep() {
+    if (currentStep < totalSteps) {
+        if (validateCurrentStep()) {
+            currentStep++;
+            updateStepIndicators();
+            updateProgress();
+            updateNavigation();
+            showCurrentStep();
+        }
+    }
+}
+
+function previousStep() {
+    if (currentStep > 1) {
+        currentStep--;
+        updateStepIndicators();
+        updateProgress();
+        updateNavigation();
+        showCurrentStep();
+    }
+}
+
+function showCurrentStep() {
+    // Hide all sections
+    document.querySelectorAll('.form-section').forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    // Show current section
+    document.getElementById(`step-${currentStep}`).classList.add('active');
+    
+    // Update preview if on last step
+    if (currentStep === 5) {
+        updatePreview();
+    }
+}
+
+function updateStepIndicators() {
+    document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+        const stepNumber = index + 1;
+        indicator.classList.remove('active', 'completed', 'pending');
+        
+        if (stepNumber < currentStep) {
+            indicator.classList.add('completed');
+        } else if (stepNumber === currentStep) {
+            indicator.classList.add('active');
+        } else {
+            indicator.classList.add('pending');
+        }
+    });
+}
+
+function updateProgress() {
+    const progress = (currentStep / totalSteps) * 100;
+    document.getElementById('progress-fill').style.width = `${progress}%`;
+    
+    const stepNames = [
+        'Basic Information',
+        'Education',
+        'Work Experience',
+        'Skills & Projects',
+        'Review & Generate'
+    ];
+    
+    document.getElementById('progress-text').textContent = `Step ${currentStep} of ${totalSteps}: ${stepNames[currentStep - 1]}`;
+}
+
+function updateNavigation() {
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const generateBtn = document.getElementById('generate-btn');
+    
+    prevBtn.disabled = currentStep === 1;
+    
+    if (currentStep === totalSteps) {
+        nextBtn.style.display = 'none';
+        generateBtn.style.display = 'flex';
+    } else {
+        nextBtn.style.display = 'flex';
+        generateBtn.style.display = 'none';
+    }
+}
+
+function validateCurrentStep() {
+    const currentSection = document.getElementById(`step-${currentStep}`);
+    const requiredFields = currentSection.querySelectorAll('[required]');
+    
+    for (let field of requiredFields) {
+        if (!field.value.trim()) {
+            field.focus();
+            field.style.borderColor = 'var(--danger-color)';
+            return false;
+        } else {
+            field.style.borderColor = '';
+        }
+    }
+    
+    return true;
+}
+
+function addEducationSection() {
+    const container = document.getElementById('education-sections');
+    const sectionCount = container.children.length + 1;
+    
+    const newSection = document.createElement('div');
+    newSection.className = 'dynamic-section education-item';
+    newSection.innerHTML = `
+        <div class="section-header">
+            <h4 class="section-title-small">Education Entry #${sectionCount}</h4>
+            <button type="button" class="remove-section" onclick="removeSection(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Degree *</label>
+                <input type="text" class="form-input" name="education_degree[]" placeholder="e.g., Bachelor of Science in Computer Science" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Institution *</label>
+                <input type="text" class="form-input" name="education_school[]" placeholder="University Name" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Graduation Year *</label>
+                <input type="number" class="form-input" name="education_year[]" placeholder="2020" min="1950" max="2030" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">GPA (Optional)</label>
+                <input type="text" class="form-input" name="education_gpa[]" placeholder="3.8">
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(newSection);
+    updateSectionNumbers('education-sections', 'Education Entry');
+}
+
+function addExperienceSection() {
+    const container = document.getElementById('experience-sections');
+    const sectionCount = container.children.length + 1;
+    
+    const newSection = document.createElement('div');
+    newSection.className = 'dynamic-section experience-item';
+    newSection.innerHTML = `
+        <div class="section-header">
+            <h4 class="section-title-small">Experience Entry #${sectionCount}</h4>
+            <button type="button" class="remove-section" onclick="removeSection(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Job Title *</label>
+                <input type="text" class="form-input" name="experience_title[]" placeholder="e.g., Software Engineer" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Company *</label>
+                <input type="text" class="form-input" name="experience_company[]" placeholder="Company Name" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Start Date *</label>
+                <input type="month" class="form-input" name="experience_start[]" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">End Date</label>
+                <input type="month" class="form-input" name="experience_end[]" placeholder="Present">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Job Description *</label>
+            <textarea class="form-input form-textarea" name="experience_description[]" placeholder="Describe your responsibilities and achievements..." required></textarea>
+        </div>
+    `;
+    
+    container.appendChild(newSection);
+    updateSectionNumbers('experience-sections', 'Experience Entry');
+}
+
+function addProjectSection() {
+    const container = document.getElementById('project-sections');
+    const sectionCount = container.children.length + 1;
+    
+    const newSection = document.createElement('div');
+    newSection.className = 'dynamic-section project-item';
+    newSection.innerHTML = `
+        <div class="section-header">
+            <h4 class="section-title-small">Project #${sectionCount}</h4>
+            <button type="button" class="remove-section" onclick="removeSection(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Project Name *</label>
+                <input type="text" class="form-input" name="project_name[]" placeholder="e.g., E-commerce Platform" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Technologies Used</label>
+                <input type="text" class="form-input" name="project_tech[]" placeholder="e.g., React, Node.js, MongoDB">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Project Description *</label>
+            <textarea class="form-input form-textarea" name="project_description[]" placeholder="Describe what the project does and your role..." required></textarea>
+        </div>
+    `;
+    
+    container.appendChild(newSection);
+    updateSectionNumbers('project-sections', 'Project');
+}
+
+function removeSection(button) {
+    const section = button.closest('.dynamic-section');
+    const container = section.parentElement;
+    
+    if (container.children.length > 1) {
+        section.remove();
+        updateSectionNumbers(container.id, getSectionType(container.id));
+    }
+}
+
+function updateSectionNumbers(containerId, sectionType) {
+    const container = document.getElementById(containerId);
+    const sections = container.querySelectorAll('.section-title-small');
+    
+    sections.forEach((title, index) => {
+        title.textContent = `${sectionType} #${index + 1}`;
+    });
+}
+
+function getSectionType(containerId) {
+    const types = {
+        'education-sections': 'Education Entry',
+        'experience-sections': 'Experience Entry',
+        'project-sections': 'Project'
+    };
+    return types[containerId] || 'Section';
+}
+
+function updatePreview() {
+    const preview = document.getElementById('resume-preview');
+    const formData = new FormData(document.getElementById('resume-form'));
+    
+    // Create a simple preview
+    let previewHTML = `
+        <div style="font-family: 'Arial', sans-serif; line-height: 1.6;">
+            <h2 style="color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">
+                ${formData.get('name') || 'Your Name'}
+            </h2>
+            <p style="color: var(--secondary-color); margin-bottom: 1rem;">
+                ${formData.get('email') || 'email@example.com'} | 
+                ${formData.get('phone') || 'Phone'} | 
+                ${formData.get('linkedin') ? `<a href="${formData.get('linkedin')}" target="_blank">LinkedIn</a>` : ''}
+            </p>
+            
+            <h3 style="color: var(--dark-color); margin-top: 2rem;">Education</h3>
+            <div style="margin-bottom: 1rem;">
+                <strong>${formData.get('education_degree[]') || 'Degree'}</strong><br>
+                ${formData.get('education_school[]') || 'Institution'} | ${formData.get('education_year[]') || 'Year'}
+                ${formData.get('education_gpa[]') ? `| GPA: ${formData.get('education_gpa[]')}` : ''}
+            </div>
+            
+            <h3 style="color: var(--dark-color); margin-top: 2rem;">Experience</h3>
+            <div style="margin-bottom: 1rem;">
+                <strong>${formData.get('experience_title[]') || 'Job Title'}</strong><br>
+                ${formData.get('experience_company[]') || 'Company'} | ${formData.get('experience_start[]') || 'Start'} - ${formData.get('experience_end[]') || 'End'}<br>
+                ${formData.get('experience_description[]') || 'Description'}
+            </div>
+            
+            <h3 style="color: var(--dark-color); margin-top: 2rem;">Skills</h3>
+            <p>${formData.get('skills') || 'Your skills will appear here'}</p>
+            
+            <h3 style="color: var(--dark-color); margin-top: 2rem;">Projects</h3>
+            <div style="margin-bottom: 1rem;">
+                <strong>${formData.get('project_name[]') || 'Project Name'}</strong><br>
+                ${formData.get('project_tech[]') ? `Technologies: ${formData.get('project_tech[]')}<br>` : ''}
+                ${formData.get('project_description[]') || 'Project description'}
+            </div>
+        </div>
+    `;
+    
+    preview.innerHTML = previewHTML;
+}
+
+// Form submission
+document.getElementById('resume-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Show loading overlay
+    document.getElementById('loading-overlay').style.display = 'flex';
+    
+    // Convert form data to JSON format for backend
+    const formData = new FormData(this);
+    const jsonData = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        linkedin: formData.get('linkedin'),
+        github: formData.get('github'),
+        education: [],
+        experience: [],
+        projects: [],
+        skills: formData.get('skills'),
+        research_papers: [],
+        achievements: [],
+        others: []
+    };
+    
+    // Process education
+    const degrees = formData.getAll('education_degree[]');
+    const schools = formData.getAll('education_school[]');
+    const years = formData.getAll('education_year[]');
+    const gpas = formData.getAll('education_gpa[]');
+    
+    for (let i = 0; i < degrees.length; i++) {
+        if (degrees[i]) {
+            jsonData.education.push({
+                degree: degrees[i],
+                school: schools[i] || '',
+                year: years[i] || '',
+                gpa: gpas[i] || ''
+            });
+        }
+    }
+    
+    // Process experience
+    const titles = formData.getAll('experience_title[]');
+    const companies = formData.getAll('experience_company[]');
+    const starts = formData.getAll('experience_start[]');
+    const ends = formData.getAll('experience_end[]');
+    const descriptions = formData.getAll('experience_description[]');
+    
+    for (let i = 0; i < titles.length; i++) {
+        if (titles[i]) {
+            jsonData.experience.push({
+                title: titles[i],
+                company: companies[i] || '',
+                start: starts[i] || '',
+                end: ends[i] || '',
+                description: descriptions[i] || ''
+            });
+        }
+    }
+    
+    // Process projects
+    const projectNames = formData.getAll('project_name[]');
+    const projectTechs = formData.getAll('project_tech[]');
+    const projectDescriptions = formData.getAll('project_description[]');
+    
+    for (let i = 0; i < projectNames.length; i++) {
+        if (projectNames[i]) {
+            jsonData.projects.push({
+                name: projectNames[i],
+                technologies: projectTechs[i] || '',
+                description: projectDescriptions[i] || ''
+            });
+        }
+    }
+    
+    // Add hidden fields with JSON data
+    const hiddenFields = ['education', 'experience', 'projects', 'skills', 'research_papers', 'achievements', 'others'];
+    hiddenFields.forEach(field => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = field;
+        input.value = JSON.stringify(jsonData[field]);
+        this.appendChild(input);
+    });
+    
+    // Submit the form
+    this.submit();
+});
+</script>
 {% endblock %} 

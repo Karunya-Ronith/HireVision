@@ -36,6 +36,11 @@
         word-wrap: break-word;
         overflow-wrap: break-word;
         hyphens: auto;
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border-left: 4px solid var(--primary-color);
+        margin-bottom: 2rem;
     }
 
     .path-card {
@@ -107,11 +112,29 @@
     }
 
     .role-content {
-        background: var(--light-color);
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
         border-radius: 12px;
-        padding: 1.5rem;
-        line-height: 1.6;
+        padding: 2rem;
+        line-height: 1.8;
         color: var(--dark-color);
+        border: 1px solid var(--border-color);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .role-content h4 {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .role-content ul {
+        margin-left: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .role-content li {
+        margin-bottom: 0.5rem;
     }
 
     .skills-gap-grid {
@@ -124,28 +147,35 @@
         display: flex;
         align-items: center;
         gap: 1rem;
-        padding: 1rem;
-        background: rgba(220, 38, 38, 0.1);
+        padding: 1.5rem;
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.08) 0%, rgba(239, 68, 68, 0.12) 100%);
         border-radius: 12px;
         border-left: 4px solid var(--danger-color);
         transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
     }
 
     .skill-gap-item:hover {
         transform: translateX(4px);
-        background: rgba(220, 38, 38, 0.15);
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.12) 0%, rgba(239, 68, 68, 0.16) 100%);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
     }
 
     .skill-gap-item i {
         color: var(--danger-color);
-        font-size: 1.2rem;
-        width: 20px;
+        font-size: 1.3rem;
+        width: 24px;
         text-align: center;
+        background: rgba(220, 38, 38, 0.1);
+        padding: 0.5rem;
+        border-radius: 50%;
     }
 
     .skill-gap-item span {
-        font-weight: 500;
+        font-weight: 600;
         color: var(--dark-color);
+        font-size: 1rem;
+        line-height: 1.4;
     }
 
     .phase-card {
@@ -811,6 +841,25 @@
         <div id="results-content"{% if learning_path.task_status != 'completed' %} style="display: none;"{% endif %}>
         <div class="row justify-content-center">
             <div class="col-lg-12">
+                <!-- Error Display -->
+                {% if learning_path.task_status == 'failed' %}
+                    <div class="alert alert-danger">
+                        <h4><i class="fas fa-exclamation-triangle me-2"></i>Learning Path Generation Failed</h4>
+                        {% if learning_path.task_error %}
+                            <div class="mt-3">
+                                {{ learning_path.task_error|linebreaks }}
+                            </div>
+                        {% else %}
+                            <p>An unexpected error occurred while generating your learning path. Please try again.</p>
+                        {% endif %}
+                        <div class="mt-3">
+                            <a href="{% url 'hirevision:learning_path_analyzer' %}" class="btn btn-success">
+                                <i class="fas fa-redo me-2"></i>Try Again
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+
                 <!-- Role Analysis -->
                 <div class="path-card">
                     <div class="card-header role-analysis">
@@ -819,7 +868,19 @@
                     </div>
                     <div class="card-body">
                         <div class="role-content">
-                            {{ learning_path.role_analysis|linebreaks }}
+                            {% if learning_path.role_analysis %}
+                                {% if learning_path.role_analysis|length > 100 %}
+                                    <h4>🎯 Career Transition Analysis</h4>
+                                    <p>{{ learning_path.role_analysis|linebreaks }}</p>
+                                {% else %}
+                                    <p>{{ learning_path.role_analysis|linebreaks }}</p>
+                                {% endif %}
+                            {% else %}
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-info-circle fa-2x mb-3"></i>
+                                    <p>Role analysis is being generated. Please wait a moment and refresh the page.</p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -827,30 +888,37 @@
                 <!-- Skills Gap Analysis -->
                 <div class="path-card">
                     <div class="card-header skills-gap">
-                        <h3><i class="fas fa-gap me-2"></i>Skills Gap Analysis</h3>
+                        <h3><i class="fas fa-exclamation-triangle me-2"></i>Skills Gap Analysis</h3>
                         <p>Areas you need to develop</p>
                     </div>
                     <div class="card-body">
-                        {% if learning_path.skills_gap %}
+                        {% if learning_path.skills_gap and learning_path.skills_gap|length > 0 %}
                             <div class="skills-gap-grid">
                                 {% for skill in learning_path.skills_gap %}
                                     <div class="skill-gap-item">
-                                        <i class="fas fa-times"></i>
+                                        <i class="fas fa-exclamation-triangle"></i>
                                         <span>{{ skill }}</span>
                                     </div>
                                 {% endfor %}
                             </div>
+                            <div class="mt-4 p-3 bg-warning bg-opacity-10 border border-warning rounded">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-lightbulb text-warning me-2"></i>
+                                    <strong class="text-warning">Pro Tip:</strong>
+                                    <span class="ms-2">Focus on these skills gaps systematically. Start with foundational skills and gradually move to advanced concepts.</span>
+                                </div>
+                            </div>
                         {% else %}
                             <div class="text-center text-muted">
-                                <i class="fas fa-check-circle fa-3x mb-3"></i>
-                                <p>No significant skills gaps identified. You're well-positioned for this role!</p>
+                                <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                                <p>Skills gap analysis is being generated. Please wait a moment and refresh the page.</p>
                             </div>
                         {% endif %}
                     </div>
                 </div>
 
                 <!-- Learning Journey -->
-                {% if learning_path.learning_path_data %}
+                {% if learning_path.learning_path_data and learning_path.learning_path_data|length > 0 %}
                     <div class="path-card">
                         <div class="card-header learning-journey">
                             <h3><i class="fas fa-road me-2"></i>Your Learning Journey</h3>
@@ -860,14 +928,18 @@
                             {% for phase in learning_path.learning_path_data %}
                                 <div class="phase-card">
                                     <div class="phase-header">
-                                        <h5 class="phase-title">{{ phase.phase }}</h5>
-                                        <span class="phase-duration">
-                                            <i class="fas fa-clock me-1"></i>{{ phase.duration }}
-                                        </span>
+                                        <h5 class="phase-title">{{ phase.phase|default:"Phase" }}</h5>
+                                        {% if phase.duration %}
+                                            <span class="phase-duration">
+                                                <i class="fas fa-clock me-1"></i>{{ phase.duration }}
+                                            </span>
+                                        {% endif %}
                                     </div>
-                                    <p class="phase-description">{{ phase.description }}</p>
+                                    {% if phase.description %}
+                                        <p class="phase-description">{{ phase.description }}</p>
+                                    {% endif %}
                                     
-                                    {% if phase.skills_to_learn %}
+                                    {% if phase.skills_to_learn and phase.skills_to_learn|length > 0 %}
                                         <div class="mb-3">
                                             <h6><i class="fas fa-graduation-cap me-2"></i>Skills to Learn:</h6>
                                             <div class="skills-badges">
@@ -878,17 +950,21 @@
                                         </div>
                                     {% endif %}
                                     
-                                    {% if phase.resources %}
+                                    {% if phase.resources and phase.resources|length > 0 %}
                                         <div class="mb-3">
                                             <h6><i class="fas fa-book me-2"></i>Recommended Resources:</h6>
                                             {% for resource in phase.resources %}
                                                 <div class="resource-item">
                                                     <div class="resource-header">
                                                         <div class="resource-info">
-                                                            <h6>{{ resource.name }}</h6>
-                                                            <p class="resource-description">{{ resource.description }}</p>
+                                                            <h6>{{ resource.name|default:"Resource" }}</h6>
+                                                            {% if resource.description %}
+                                                                <p class="resource-description">{{ resource.description }}</p>
+                                                            {% endif %}
                                                             <div class="resource-badges">
-                                                                <span class="resource-badge difficulty">{{ resource.difficulty }}</span>
+                                                                {% if resource.difficulty %}
+                                                                    <span class="resource-badge difficulty">{{ resource.difficulty }}</span>
+                                                                {% endif %}
                                                                 {% if resource.verified %}
                                                                     <span class="resource-badge verified">
                                                                         <i class="fas fa-check me-1"></i>Verified
@@ -896,7 +972,7 @@
                                                                 {% endif %}
                                                             </div>
                                                         </div>
-                                                        {% if resource.url and resource.url != "placeholder" %}
+                                                        {% if resource.url and resource.url != "placeholder" and resource.url != "#" %}
                                                             <a href="{{ resource.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                                                 <i class="fas fa-external-link-alt"></i> Visit
                                                             </a>
@@ -907,20 +983,24 @@
                                         </div>
                                     {% endif %}
                                     
-                                    {% if phase.projects %}
+                                    {% if phase.projects and phase.projects|length > 0 %}
                                         <div class="mb-3">
                                             <h6><i class="fas fa-code me-2"></i>Hands-on Projects:</h6>
                                             {% for project in phase.projects %}
                                                 <div class="project-item">
-                                                    <h6 class="project-title">{{ project.name }}</h6>
-                                                    <p class="project-description">{{ project.description }}</p>
-                                                    <div class="project-skills">
-                                                        <strong>Skills practiced:</strong>
-                                                        {% for skill in project.skills_practiced %}
-                                                            <span class="project-skill-badge">{{ skill }}</span>
-                                                        {% endfor %}
-                                                    </div>
-                                                    {% if project.github_template %}
+                                                    <h6 class="project-title">{{ project.name|default:"Project" }}</h6>
+                                                    {% if project.description %}
+                                                        <p class="project-description">{{ project.description }}</p>
+                                                    {% endif %}
+                                                    {% if project.skills_practiced and project.skills_practiced|length > 0 %}
+                                                        <div class="project-skills">
+                                                            <strong>Skills practiced:</strong>
+                                                            {% for skill in project.skills_practiced %}
+                                                                <span class="project-skill-badge">{{ skill }}</span>
+                                                            {% endfor %}
+                                                        </div>
+                                                    {% endif %}
+                                                    {% if project.github_template and project.github_template != "placeholder" %}
                                                         <a href="{{ project.github_template }}" target="_blank" class="btn btn-sm btn-outline-dark">
                                                             <i class="fab fa-github"></i> Template
                                                         </a>
@@ -930,7 +1010,23 @@
                                         </div>
                                     {% endif %}
                                 </div>
+                                {% if not forloop.last %}
+                                    <hr class="my-4">
+                                {% endif %}
                             {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="path-card">
+                        <div class="card-header learning-journey">
+                            <h3><i class="fas fa-road me-2"></i>Your Learning Journey</h3>
+                            <p>Structured phases to reach your goal</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                                <p>Learning path phases are being generated. Please wait a moment and refresh the page.</p>
+                            </div>
                         </div>
                     </div>
                 {% endif %}
@@ -952,11 +1048,11 @@
                 {% endif %}
 
                 <!-- Success Metrics -->
-                {% if learning_path.success_metrics %}
+                {% if learning_path.success_metrics and learning_path.success_metrics|length > 0 %}
                     <div class="path-card">
                         <div class="card-header metrics">
                             <h3><i class="fas fa-chart-line me-2"></i>Success Metrics</h3>
-                            <p>Track your progress with these key indicators</p>
+                            <p>Track your progress with these measurable goals</p>
                         </div>
                         <div class="card-body">
                             <div class="metrics-grid">
@@ -976,82 +1072,28 @@
                     <div class="path-card">
                         <div class="card-header career-advice">
                             <h3><i class="fas fa-lightbulb me-2"></i>Career Advice</h3>
-                            <p>Strategic insights for your career growth</p>
+                            <p>Strategic guidance for your career transition</p>
                         </div>
                         <div class="card-body">
                             <div class="career-advice-content">
-                                {% if "role_analysis" in learning_path.career_advice %}
-                                    <div class="advice-section">
-                                        <h5><i class="fas fa-briefcase"></i>Role Analysis</h5>
-                                        <div class="advice-content">
-                                            {% if "role_analysis" in learning_path.career_advice %}
-                                                {% with role_analysis=learning_path.career_advice|slice:"role_analysis"|slice:":500" %}
-                                                    {{ role_analysis|linebreaks }}
-                                                {% endwith %}
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                {% endif %}
-
-                                {% if "skills_gap" in learning_path.career_advice %}
-                                    <div class="advice-section">
-                                        <h5><i class="fas fa-gap"></i>Skills Development Strategy</h5>
-                                        <div class="advice-content">
-                                            {% if "skills_gap" in learning_path.career_advice %}
-                                                {% with skills_gap=learning_path.career_advice|slice:"skills_gap"|slice:":500" %}
-                                                    {{ skills_gap|linebreaks }}
-                                                {% endwith %}
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                {% endif %}
-
-                                {% if "learning_path" in learning_path.career_advice %}
-                                    <div class="advice-section">
-                                        <h5><i class="fas fa-road"></i>Learning Strategy</h5>
-                                        <div class="advice-content">
-                                            {% if "learning_path" in learning_path.career_advice %}
-                                                {% with learning_path=learning_path.career_advice|slice:"learning_path"|slice:":500" %}
-                                                    {{ learning_path|linebreaks }}
-                                                {% endwith %}
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                {% endif %}
-
-                                <div class="advice-highlight">
-                                    <strong>💡 Pro Tip:</strong> Focus on building a strong portfolio with real-world projects that demonstrate your skills. This will be crucial when applying for senior positions.
-                                </div>
-
-                                <div class="advice-section">
-                                    <h5><i class="fas fa-rocket"></i>Next Steps</h5>
-                                    <div class="advice-content">
-                                        <ul>
-                                            <li>Start with the foundational skills in Phase 1</li>
-                                            <li>Build at least 2-3 projects per phase</li>
-                                            <li>Network with professionals in your target role</li>
-                                            <li>Update your resume after completing each phase</li>
-                                            <li>Consider mentorship or coaching programs</li>
-                                        </ul>
-                                    </div>
-                                </div>
+                                {{ learning_path.career_advice|linebreaks }}
                             </div>
                         </div>
                     </div>
                 {% endif %}
 
                 <!-- Networking Tips -->
-                {% if learning_path.networking_tips %}
+                {% if learning_path.networking_tips and learning_path.networking_tips|length > 0 %}
                     <div class="path-card">
                         <div class="card-header networking">
-                            <h3><i class="fas fa-network-wired me-2"></i>Networking Tips</h3>
+                            <h3><i class="fas fa-users me-2"></i>Networking Tips</h3>
                             <p>Build connections in your target industry</p>
                         </div>
                         <div class="card-body">
                             <div class="networking-grid">
                                 {% for tip in learning_path.networking_tips %}
                                     <div class="networking-item">
-                                        <i class="fas fa-users"></i>
+                                        <i class="fas fa-handshake"></i>
                                         <span>{{ tip }}</span>
                                     </div>
                                 {% endfor %}
@@ -1093,41 +1135,7 @@
                     </div>
                 </div>
 
-                <!-- Analysis Details -->
-                <div class="details-card">
-                    <div class="details-header">
-                        <h3><i class="fas fa-info-circle me-2"></i>Analysis Details</h3>
-                        <p>Technical information about this analysis</p>
-                    </div>
-                    <div class="details-content">
-                        <div class="details-grid">
-                            <div class="detail-item">
-                                <div class="detail-label">Analysis Date</div>
-                                <div class="detail-value">{{ learning_path.created_at|date:"M j, Y" }}</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Analysis Time</div>
-                                <div class="detail-value">{{ learning_path.created_at|date:"g:i A" }}</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Target Role</div>
-                                <div class="detail-value" title="{{ learning_path.dream_role }}">{{ learning_path.dream_role|truncatechars:50 }}</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Skills Input</div>
-                                <div class="detail-value">{{ learning_path.current_skills|length }} chars</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Analysis ID</div>
-                                <div class="detail-value">#{{ learning_path.id|slice:":8" }}</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-label">Phases</div>
-                                <div class="detail-value">{{ learning_path.learning_path_data|length }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </div>
         </div> <!-- Close results-content -->
@@ -1136,30 +1144,30 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const loadingState = document.getElementById('loading-state');
-    const errorState = document.getElementById('error-state');
-    const resultsContent = document.getElementById('results-content');
     const pathId = '{{ learning_path.id }}';
     const taskStatus = '{{ learning_path.task_status }}';
-    
-    // Progress tracking variables
-    let startTime = Date.now();
+    const startTime = Date.now();
     let pollCount = 0;
     let progressInterval;
     let tipInterval;
     
-    // Status messages for different stages
+    const loadingState = document.getElementById('loading-state');
+    const errorState = document.getElementById('error-state');
+    const resultsContent = document.getElementById('results-content');
+    
+    // Enhanced status messages with more realistic progression
     const statusMessages = [
-        { title: 'Analyzing Your Career Goals...', description: 'Understanding your current skills and target role', progress: 10 },
-        { title: 'Processing Current Skills...', description: 'Analyzing your existing qualifications and experience', progress: 25 },
-        { title: 'Researching Role Requirements...', description: 'Gathering information about your target position', progress: 40 },
-        { title: 'Identifying Skills Gaps...', description: 'Comparing your skills with job requirements', progress: 60 },
-        { title: 'Creating Learning Phases...', description: 'Designing structured learning milestones', progress: 80 },
-        { title: 'Generating Career Advice...', description: 'Preparing personalized recommendations', progress: 90 },
-        { title: 'Finalizing Your Roadmap...', description: 'Completing your personalized learning path', progress: 95 }
+        { title: 'Analyzing Your Skills...', description: 'Understanding your current technical background and experience', progress: 10 },
+        { title: 'Evaluating Target Role...', description: 'Analyzing requirements for your dream position', progress: 25 },
+        { title: 'Identifying Skills Gaps...', description: 'Mapping the difference between current and required skills', progress: 40 },
+        { title: 'Designing Learning Phases...', description: 'Creating structured learning phases for your journey', progress: 55 },
+        { title: 'Researching Resources...', description: 'Finding verified courses, books, and learning materials', progress: 70 },
+        { title: 'Planning Projects...', description: 'Designing hands-on projects to practice your skills', progress: 80 },
+        { title: 'Generating Career Advice...', description: 'Preparing personalized career transition strategies', progress: 90 },
+        { title: 'Finalizing Your Roadmap...', description: 'Completing your comprehensive learning path', progress: 95 }
     ];
     
-    // Loading tips to keep users engaged
+    // Enhanced loading tips with more specific advice
     const loadingTips = [
         'While you wait, think about your long-term career goals and the skills you want to develop.',
         'Did you know? Most successful career transitions involve both technical and soft skills.',
@@ -1167,22 +1175,38 @@ document.addEventListener('DOMContentLoaded', function() {
         'Remember to set realistic timelines for your learning journey.',
         'Pro tip: Focus on skills that are in high demand in your target role.',
         'Consider getting certifications that are recognized in your target industry.',
-        'Think about how your current experience can transfer to your new role.'
+        'Think about how your current experience can transfer to your new role.',
+        'Start building a portfolio of projects that demonstrate your target skills.',
+        'Research companies and roles in your target industry to understand requirements.',
+        'Consider finding a mentor who has made a similar career transition.'
     ];
     
-    // If task is not completed, start enhanced polling
-    if (taskStatus !== 'completed') {
+    // Handle different initial states
+    if (taskStatus === 'failed') {
+        // Show error state immediately
+        loadingState.style.display = 'none';
+        resultsContent.style.display = 'block';
+        // Error will be displayed in the template
+    } else if (taskStatus === 'completed') {
+        // Show results immediately
+        loadingState.style.display = 'none';
+        resultsContent.style.display = 'block';
+    } else {
+        // Start polling for status updates
         startEnhancedPolling();
         startProgressSimulation();
         startTipRotation();
     }
     
     // Cancel analysis button
-    document.getElementById('cancel-analysis').addEventListener('click', function() {
-        if (confirm('Are you sure you want to cancel this analysis? You will need to start over.')) {
-            window.location.href = '{% url "hirevision:learning_path_analyzer" %}';
-        }
-    });
+    const cancelButton = document.getElementById('cancel-analysis');
+    if (cancelButton) {
+        cancelButton.addEventListener('click', function() {
+            if (confirm('Are you sure you want to cancel this analysis? You will need to start over.')) {
+                window.location.href = '{% url "hirevision:learning_path_analyzer" %}';
+            }
+        });
+    }
     
     function startEnhancedPolling() {
         pollTaskStatus();
@@ -1194,7 +1218,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         progressInterval = setInterval(() => {
             if (currentProgress < 95) {
-                currentProgress += Math.random() * 2;
+                // More realistic progress increments
+                const increment = Math.random() * 1.5 + 0.5; // 0.5 to 2.0
+                currentProgress += increment;
                 updateProgress(currentProgress);
                 
                 // Update status message based on progress
@@ -1203,15 +1229,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     updateStatus(statusMessages[currentStage]);
                 }
             }
-        }, 1000);
+        }, 1200); // Slightly slower for more realistic feel
     }
     
     function startTipRotation() {
         let tipIndex = 0;
         tipInterval = setInterval(() => {
-            document.getElementById('loading-tip').textContent = loadingTips[tipIndex];
-            tipIndex = (tipIndex + 1) % loadingTips.length;
-        }, 8000); // Change tip every 8 seconds
+            const tipElement = document.getElementById('loading-tip');
+            if (tipElement) {
+                tipElement.textContent = loadingTips[tipIndex];
+                tipIndex = (tipIndex + 1) % loadingTips.length;
+            }
+        }, 10000); // Change tip every 10 seconds
     }
     
     function updateProgress(progress) {
@@ -1219,40 +1248,53 @@ document.addEventListener('DOMContentLoaded', function() {
         const progressText = document.getElementById('progress-text');
         const timeEstimate = document.getElementById('time-estimate');
         
-        progressBar.style.width = Math.min(progress, 95) + '%';
-        progressText.textContent = Math.round(progress) + '% Complete';
-        
-        // Calculate remaining time
-        const elapsed = (Date.now() - startTime) / 1000;
-        const estimatedTotal = 45; // 45 seconds total
-        const remaining = Math.max(0, estimatedTotal - elapsed);
-        timeEstimate.textContent = `Estimated: ${Math.round(remaining)} seconds`;
+        if (progressBar && progressText && timeEstimate) {
+            progressBar.style.width = Math.min(progress, 95) + '%';
+            progressText.textContent = Math.round(progress) + '% Complete';
+            
+            // Calculate remaining time with more realistic estimates
+            const elapsed = (Date.now() - startTime) / 1000;
+            const estimatedTotal = 60; // 60 seconds total for more realistic estimate
+            const remaining = Math.max(0, estimatedTotal - elapsed);
+            
+            if (remaining > 60) {
+                timeEstimate.textContent = `Estimated: ${Math.round(remaining / 60)} minutes`;
+            } else {
+                timeEstimate.textContent = `Estimated: ${Math.round(remaining)} seconds`;
+            }
+        }
     }
     
     function updateStatus(status) {
-        document.getElementById('status-title').textContent = status.title;
-        document.getElementById('status-description').textContent = status.description;
+        const titleElement = document.getElementById('status-title');
+        const descriptionElement = document.getElementById('status-description');
         
-        // Add fade effect
-        const title = document.getElementById('status-title');
-        const description = document.getElementById('status-description');
-        
-        title.style.opacity = '0';
-        description.style.opacity = '0';
-        
-        setTimeout(() => {
-            title.style.opacity = '1';
-            description.style.opacity = '1';
-        }, 200);
+        if (titleElement && descriptionElement) {
+            // Add fade effect
+            titleElement.style.opacity = '0';
+            descriptionElement.style.opacity = '0';
+            
+            setTimeout(() => {
+                titleElement.textContent = status.title;
+                descriptionElement.textContent = status.description;
+                titleElement.style.opacity = '1';
+                descriptionElement.style.opacity = '1';
+            }, 200);
+        }
     }
     
     function pollTaskStatus() {
         pollCount++;
         
         fetch(`/api/learning-path/${pathId}/status/`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
-                console.log('Task status:', data);
+                console.log('Task status response:', data);
                 
                 if (data.status === 'completed') {
                     clearInterval(progressInterval);
@@ -1261,30 +1303,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     updateStatus({ title: 'Learning Path Complete!', description: 'Your personalized roadmap is ready' });
                     
                     setTimeout(() => {
-                        if (data.has_results) {
-                            // Task completed successfully, reload page to show results
-                            window.location.reload();
-                        } else {
-                            showError('Learning path completed but no results found. Please try again.');
-                        }
-                    }, 1500);
+                        // Reload page to show results
+                        window.location.reload();
+                    }, 2000);
                 } else if (data.status === 'failed') {
                     clearInterval(progressInterval);
                     clearInterval(tipInterval);
                     showError(data.error || 'Learning path generation failed. Please try again.');
                 } else if (data.status === 'running' || data.status === 'pending') {
                     // Continue polling with exponential backoff
-                    const delay = Math.min(3000 + (pollCount * 500), 10000); // Max 10 seconds
+                    const delay = Math.min(3000 + (pollCount * 1000), 15000); // Max 15 seconds
                     setTimeout(pollTaskStatus, delay);
+                } else {
+                    // Unknown status, retry with longer delay
+                    setTimeout(pollTaskStatus, 10000);
                 }
             })
             .catch(error => {
                 console.error('Error checking task status:', error);
-                if (pollCount < 5) {
-                    // Retry a few times before showing error
-                    setTimeout(pollTaskStatus, 5000);
+                if (pollCount < 8) { // Increased retry count
+                    // Retry with exponential backoff
+                    const delay = Math.min(5000 + (pollCount * 2000), 30000); // Max 30 seconds
+                    setTimeout(pollTaskStatus, delay);
                 } else {
-                    showError('Unable to check learning path status. Please refresh the page or try again.');
+                    showError('Unable to check learning path status. Please refresh the page or try again. If the problem persists, contact support.');
                 }
             });
     }
@@ -1292,9 +1334,19 @@ document.addEventListener('DOMContentLoaded', function() {
     function showError(message) {
         clearInterval(progressInterval);
         clearInterval(tipInterval);
-        loadingState.style.display = 'none';
-        document.getElementById('error-message').textContent = message;
-        errorState.style.display = 'block';
+        
+        if (loadingState) {
+            loadingState.style.display = 'none';
+        }
+        
+        const errorMessageElement = document.getElementById('error-message');
+        if (errorMessageElement) {
+            errorMessageElement.textContent = message;
+        }
+        
+        if (errorState) {
+            errorState.style.display = 'block';
+        }
     }
     
     // Add smooth transitions
@@ -1305,6 +1357,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         .progress-bar {
             transition: width 0.5s ease;
+        }
+        .tip-card {
+            transition: all 0.3s ease;
+        }
+        .tip-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
         }
     `;
     document.head.appendChild(style);
