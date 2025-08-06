@@ -40,10 +40,63 @@ def home(request):
         logger.debug(f"Rendering dashboard for authenticated user: {user_id}")
         log_user_action(str(user_id), "view_dashboard", "User accessed dashboard")
         
+        # Enhanced data for god-level dashboard
+        user = request.user
+        
+        # Get user statistics
+        resume_analyses = user.resumeanalysis_set.all()
+        learning_paths = user.learningpath_set.all()
+        resume_builders = user.resumebuilder_set.all()
+        
+        # Calculate success rates and performance metrics
+        successful_analyses = resume_analyses.filter(task_status='completed')
+        successful_paths = learning_paths.filter(task_status='completed')
+        successful_builders = resume_builders.filter(task_status='completed')
+        
+        # Get recent activities (preserving the 3 recent learning paths as requested)
+        recent_analyses = resume_analyses.order_by('-created_at')[:3]
+        recent_paths = learning_paths.order_by('-created_at')[:3]  # Preserving these 3
+        recent_builders = resume_builders.order_by('-created_at')[:3]
+        
+        # Calculate average ATS scores
+        avg_ats_score = 0
+        if successful_analyses.exists():
+            avg_ats_score = sum(analysis.ats_score or 0 for analysis in successful_analyses) / successful_analyses.count()
+        
+        # Get community stats
+        total_threads = user.threads.count()
+        total_comments = user.comments.count()
+        total_messages = user.sent_messages.count()
+        
+        # Prepare context with enhanced data
+        context = {
+            'user': user,
+            'stats': {
+                'resume_analyses_count': resume_analyses.count(),
+                'learning_paths_count': learning_paths.count(),
+                'resume_builders_count': resume_builders.count(),
+                'successful_analyses_count': successful_analyses.count(),
+                'successful_paths_count': successful_paths.count(),
+                'successful_builders_count': successful_builders.count(),
+                'avg_ats_score': round(avg_ats_score, 1),
+                'total_threads': total_threads,
+                'total_comments': total_comments,
+                'total_messages': total_messages,
+            },
+            'recent_analyses': recent_analyses,
+            'recent_paths': recent_paths,  # These 3 are preserved for your demo
+            'recent_builders': recent_builders,
+            'performance_metrics': {
+                'analysis_success_rate': round((successful_analyses.count() / resume_analyses.count() * 100) if resume_analyses.count() > 0 else 0, 1),
+                'path_success_rate': round((successful_paths.count() / learning_paths.count() * 100) if learning_paths.count() > 0 else 0, 1),
+                'builder_success_rate': round((successful_builders.count() / resume_builders.count() * 100) if resume_builders.count() > 0 else 0, 1),
+            }
+        }
+        
         duration = time.time() - start_time
         log_performance("Home page (dashboard)", duration, f"Dashboard rendered for user {user_id}")
         
-        return render(request, 'hirevision/dashboard.html')
+        return render(request, 'hirevision/dashboard.html', context)
     else:
         # Show landing page for non-logged-in users
         logger.debug("Rendering landing page for anonymous user")
