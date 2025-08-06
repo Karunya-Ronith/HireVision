@@ -625,12 +625,7 @@ def messages_list(request):
     
     # Get unread counts for each conversation
     for conversation in conversations:
-
         conversation.unread_count = conversation.get_unread_count(request.user)
-
-        conversation.unread_count = conversation.messages.filter(
-            is_read=False
-        ).exclude(sender=request.user).count()
 
     
     return render(request, 'hirevision/messages_list.html', {'conversations': conversations})
