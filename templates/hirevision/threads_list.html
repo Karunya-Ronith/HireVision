@@ -4,111 +4,225 @@
 {% block title %}Discussion Forum - HireVision{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="mb-0">
-                    <i class="fas fa-comments text-primary"></i>
-                    Discussion Forum
+<!-- Enhanced Discussion Forum with Modern UI/UX -->
+<div class="forum-container">
+    <!-- Hero Section with Search -->
+    <div class="forum-hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="hero-content">
+                        <h1 class="hero-title">
+                            <span class="gradient-text">Discussion Forum</span>
                 </h1>
-                <a href="{% url 'hirevision:create_thread' %}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Create New Thread
-                </a>
+                        <p class="hero-subtitle">
+                            Connect with professionals, share insights, and grow your career together
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="hero-actions">
+                        <a href="{% url 'hirevision:create_thread' %}" class="btn btn-primary btn-lg create-thread-btn">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Start Discussion</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="search-section">
+        <div class="container">
+            <div class="search-container">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="threadSearch" class="form-control search-input" 
+                                   placeholder="Search discussions, topics, or users...">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="filter-container">
+                            <select class="form-select filter-select" id="categoryFilter">
+                                <option value="">All Categories</option>
+                                <option value="career">Career Advice</option>
+                                <option value="job-search">Job Search</option>
+                                <option value="skills">Skills Development</option>
+                                <option value="industry">Industry Insights</option>
+                                <option value="networking">Networking</option>
+                                <option value="general">General Discussion</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
             </div>
             
+    <!-- Main Content -->
+    <div class="forum-content">
+        <div class="container">
             {% if messages %}
+                <div class="messages-container">
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show custom-alert" role="alert">
+                            <div class="alert-content">
+                                <i class="fas fa-info-circle me-2"></i>
                         {{ message }}
+                            </div>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 {% endfor %}
+                </div>
             {% endif %}
             
             {% if threads %}
-                <div class="row">
+                <!-- Threads Grid -->
+                <div class="threads-grid" id="threadsContainer">
                     {% for thread in threads %}
-                        <div class="col-12 mb-4">
-                            <div class="card shadow-sm thread-card">
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <h5 class="card-title">
-                                                <a href="{% url 'hirevision:thread_detail' thread.id %}" class="text-decoration-none">
+                        <div class="thread-card-wrapper" data-category="general">
+                            <div class="thread-card">
+                                <div class="thread-header">
+                                    <div class="thread-author">
+                                        <div class="author-avatar">
+                                            {% if thread.user.profile_picture %}
+                                                <img src="{{ thread.user.profile_picture.url }}" alt="{{ thread.user.get_full_name }}" class="avatar-img">
+                                            {% else %}
+                                                <div class="avatar-placeholder">
+                                                    {{ thread.user.first_name|first|upper|default:thread.user.username|first|upper }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="author-info">
+                                            <h6 class="author-name">{{ thread.user.get_full_name|default:thread.user.username }}</h6>
+                                            <span class="post-time">{{ thread.created_at|timesince }} ago</span>
+                                        </div>
+                                    </div>
+                                    {% if thread.user == request.user %}
+                                        <div class="thread-actions">
+                                            <div class="dropdown">
+                                                <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="{% url 'hirevision:edit_thread' thread.id %}">
+                                                        <i class="fas fa-edit"></i> Edit
+                                                    </a></li>
+                                                    <li><a class="dropdown-item text-danger" href="{% url 'hirevision:delete_thread' thread.id %}">
+                                                        <i class="fas fa-trash"></i> Delete
+                                                    </a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="thread-content">
+                                    <h3 class="thread-title">
+                                        <a href="{% url 'hirevision:thread_detail' thread.id %}" class="title-link">
                                                     {{ thread.title }}
                                                 </a>
-                                            </h5>
-                                            <p class="card-text text-muted">
-                                                {{ thread.content|truncatewords:30 }}
+                                    </h3>
+                                    <p class="thread-excerpt">
+                                        {{ thread.content|truncatewords:25 }}
                                             </p>
                                             
                                             {% if thread.has_media %}
-                                                <div class="mb-2">
+                                        <div class="thread-media">
                                                     {% if thread.image %}
-                                                        <span class="badge bg-info me-2">
+                                                <span class="media-badge image-badge">
                                                             <i class="fas fa-image"></i> Image
                                                         </span>
                                                     {% endif %}
                                                     {% if thread.article_url %}
-                                                        <span class="badge bg-warning">
+                                                <span class="media-badge link-badge">
                                                             <i class="fas fa-link"></i> Article
                                                         </span>
                                                     {% endif %}
                                                 </div>
                                             {% endif %}
-                                            
-                                            <div class="d-flex align-items-center text-muted small">
-                                                <div class="rounded-circle user-avatar primary me-2" 
-                                                     style="width: 24px; height: 24px; font-size: 12px;">
-                                                    {{ thread.user.first_name|first|upper|default:thread.user.username|first|upper }}
-                                                </div>
-                                                <span>{{ thread.user.get_full_name|default:thread.user.username }}</span>
-                                                <span class="mx-2">•</span>
-                                                <span>{{ thread.created_at|timesince }} ago</span>
-                                                {% if thread.is_edited %}
-                                                    <span class="mx-2">•</span>
-                                                    <span class="text-muted">(edited)</span>
-                                                {% endif %}
-                                            </div>
+                                </div>
+
+                                <div class="thread-footer">
+                                    <div class="thread-stats">
+                                        <div class="stat-item">
+                                            <i class="fas fa-comment"></i>
+                                            <span>{{ thread.comment_count }} comments</span>
                                         </div>
-                                        
-                                        <div class="col-md-4">
-                                            <div class="d-flex flex-column align-items-md-end align-items-start">
-                                                <div class="mb-2">
-                                                    <span class="badge bg-secondary">
-                                                        <i class="fas fa-comment"></i> {{ thread.comment_count }} comments
-                                                    </span>
-                                                </div>
-                                                
-                                                {% if thread.user == request.user %}
-                                                    <div class="btn-group btn-group-sm">
-                                                        <a href="{% url 'hirevision:edit_thread' thread.id %}" class="btn btn-outline-primary btn-sm">
-                                                            <i class="fas fa-edit"></i> Edit
-                                                        </a>
-                                                        <a href="{% url 'hirevision:delete_thread' thread.id %}" class="btn btn-outline-danger btn-sm">
-                                                            <i class="fas fa-trash"></i> Delete
-                                                        </a>
-                                                    </div>
-                                                {% endif %}
+                                        {% if thread.is_edited %}
+                                            <div class="stat-item edited-indicator">
+                                                <i class="fas fa-edit"></i>
+                                                <span>Edited</span>
                                             </div>
+                                        {% endif %}
                                         </div>
+                                    <div class="thread-engagement">
+                                        <button class="btn btn-sm btn-outline-primary like-btn" data-thread-id="{{ thread.id }}">
+                                            <i class="fas fa-heart"></i>
+                                            <span>Like</span>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary bookmark-btn" data-thread-id="{{ thread.id }}">
+                                            <i class="fas fa-bookmark"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
+
+                <!-- Load More Button -->
+                <div class="load-more-container text-center mt-5">
+                    <button class="btn btn-outline-primary btn-lg load-more-btn" id="loadMoreBtn">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Load More Discussions
+                    </button>
+                </div>
+
             {% else %}
-                <div class="text-center py-5">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body py-5">
-                            <i class="fas fa-comments fa-4x text-muted mb-4"></i>
-                            <h3 class="text-muted mb-3">No threads yet</h3>
-                            <p class="text-muted mb-4">Be the first to start a discussion and connect with other professionals!</p>
-                            <a href="{% url 'hirevision:create_thread' %}" class="btn btn-primary btn-lg">
-                                <i class="fas fa-plus me-2"></i> Create Your First Thread
+                <!-- Enhanced Empty State -->
+                <div class="empty-state">
+                    <div class="empty-state-content">
+                        <div class="empty-state-illustration">
+                            <div class="illustration-container">
+                                <div class="chat-bubbles">
+                                    <div class="bubble bubble-1"></div>
+                                    <div class="bubble bubble-2"></div>
+                                    <div class="bubble bubble-3"></div>
+                                </div>
+                                <div class="sparkles">
+                                    <div class="sparkle sparkle-1"></div>
+                                    <div class="sparkle sparkle-2"></div>
+                                    <div class="sparkle sparkle-3"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="empty-state-text">
+                            <h2 class="empty-title">Ready to Start the Conversation?</h2>
+                            <p class="empty-description">
+                                Be the first to share your insights, ask questions, or connect with other professionals. 
+                                Your voice matters in building this community!
+                            </p>
+                        </div>
+
+                        <div class="empty-state-actions">
+                            <a href="{% url 'hirevision:create_thread' %}" class="btn btn-primary btn-lg start-discussion-btn">
+                                <i class="fas fa-plus-circle me-2"></i>
+                                Create Your First Thread
                             </a>
+                            <div class="suggestions">
+                                <p class="suggestion-text">Popular topics to get you started:</p>
+                                <div class="suggestion-tags">
+                                    <span class="suggestion-tag">Career Advice</span>
+                                    <span class="suggestion-tag">Job Search Tips</span>
+                                    <span class="suggestion-tag">Skills Development</span>
+                                    <span class="suggestion-tag">Industry Trends</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -116,4 +230,722 @@
         </div>
     </div>
 </div>
+
+<!-- Custom CSS for Enhanced Forum Design -->
+<style>
+    /* Forum Container */
+    .forum-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+
+    /* Hero Section */
+    .forum-hero {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        color: white;
+        padding: 4rem 0 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .forum-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+    }
+
+    .gradient-text {
+        background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero-subtitle {
+        font-size: 1.25rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+        font-weight: 400;
+    }
+
+    .hero-actions {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+    }
+
+    .create-thread-btn {
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        border: none;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .create-thread-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(59, 130, 246, 0.4);
+        background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    }
+
+    /* Search Section */
+    .search-section {
+        background: white;
+        padding: 2rem 0;
+        border-bottom: 1px solid #e2e8f0;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .search-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .search-box {
+        position: relative;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #64748b;
+        z-index: 3;
+    }
+
+    .search-input {
+        padding-left: 3rem;
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+    }
+
+    .search-input:focus {
+        background: white;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .filter-select {
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
+        background: #f8fafc;
+        font-weight: 500;
+    }
+
+    /* Forum Content */
+    .forum-content {
+        padding: 3rem 0;
+    }
+
+    .messages-container {
+        margin-bottom: 2rem;
+    }
+
+    .custom-alert {
+        border-radius: 12px;
+        border: none;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .alert-content {
+        display: flex;
+        align-items: center;
+    }
+
+    /* Threads Grid */
+    .threads-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .thread-card-wrapper {
+        transition: all 0.3s ease;
+    }
+
+    .thread-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .thread-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+        border-color: #3b82f6;
+    }
+
+    .thread-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .thread-author {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .author-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .author-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .author-name {
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .post-time {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    .thread-actions .dropdown-toggle {
+        color: #64748b;
+        padding: 0.25rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .thread-actions .dropdown-toggle:hover {
+        background: #f1f5f9;
+        color: #1e293b;
+    }
+
+    .thread-content {
+        flex: 1;
+        margin-bottom: 1rem;
+    }
+
+    .thread-title {
+        margin-bottom: 0.75rem;
+    }
+
+    .title-link {
+        color: #1e293b;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+        line-height: 1.4;
+        transition: color 0.2s ease;
+    }
+
+    .title-link:hover {
+        color: #3b82f6;
+    }
+
+    .thread-excerpt {
+        color: #64748b;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+    }
+
+    .thread-media {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .media-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .image-badge {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .link-badge {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .thread-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .thread-stats {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    .edited-indicator {
+        color: #f59e0b;
+    }
+
+    .thread-engagement {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .like-btn, .bookmark-btn {
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+
+    .like-btn:hover {
+        background: #fef2f2;
+        border-color: #ef4444;
+        color: #ef4444;
+    }
+
+    .bookmark-btn:hover {
+        background: #f0f9ff;
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
+
+    /* Load More Button */
+    .load-more-btn {
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .load-more-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+    }
+
+    /* Enhanced Empty State */
+    .empty-state {
+        padding: 4rem 0;
+        text-align: center;
+    }
+
+    .empty-state-content {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .empty-state-illustration {
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .illustration-container {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        margin: 0 auto;
+    }
+
+    .chat-bubbles {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .bubble {
+        position: absolute;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        opacity: 0.8;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .bubble-1 {
+        width: 60px;
+        height: 60px;
+        top: 20px;
+        left: 20px;
+        animation-delay: 0s;
+    }
+
+    .bubble-2 {
+        width: 40px;
+        height: 40px;
+        top: 80px;
+        right: 30px;
+        animation-delay: 1s;
+    }
+
+    .bubble-3 {
+        width: 50px;
+        height: 50px;
+        bottom: 30px;
+        left: 50px;
+        animation-delay: 2s;
+    }
+
+    .sparkles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .sparkle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: #fbbf24;
+        border-radius: 50%;
+        animation: sparkle 2s ease-in-out infinite;
+    }
+
+    .sparkle-1 {
+        top: 30px;
+        right: 40px;
+        animation-delay: 0.5s;
+    }
+
+    .sparkle-2 {
+        top: 120px;
+        left: 20px;
+        animation-delay: 1.5s;
+    }
+
+    .sparkle-3 {
+        bottom: 60px;
+        right: 20px;
+        animation-delay: 2.5s;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    @keyframes sparkle {
+        0%, 100% { opacity: 0; transform: scale(0); }
+        50% { opacity: 1; transform: scale(1); }
+    }
+
+    .empty-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1rem;
+    }
+
+    .empty-description {
+        font-size: 1.1rem;
+        color: #64748b;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    .empty-state-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .start-discussion-btn {
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        border: none;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .start-discussion-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(59, 130, 246, 0.4);
+        background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    }
+
+    .suggestions {
+        text-align: center;
+    }
+
+    .suggestion-text {
+        font-size: 0.9rem;
+        color: #64748b;
+        margin-bottom: 0.75rem;
+    }
+
+    .suggestion-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .suggestion-tag {
+        padding: 0.5rem 1rem;
+        background: #f1f5f9;
+        color: #475569;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .suggestion-tag:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+        transform: translateY(-1px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .threads-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .thread-card {
+            padding: 1rem;
+        }
+
+        .thread-footer {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .thread-engagement {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .empty-title {
+            font-size: 2rem;
+        }
+
+        .illustration-container {
+            width: 150px;
+            height: 150px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .forum-hero {
+            padding: 2rem 0 1.5rem;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .search-section {
+            padding: 1rem 0;
+        }
+
+        .forum-content {
+            padding: 2rem 0;
+        }
+    }
+</style>
+
+<!-- JavaScript for Enhanced Functionality -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('threadSearch');
+    const threadsContainer = document.getElementById('threadsContainer');
+    const threadCards = document.querySelectorAll('.thread-card-wrapper');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            threadCards.forEach(card => {
+                const title = card.querySelector('.thread-title').textContent.toLowerCase();
+                const content = card.querySelector('.thread-excerpt').textContent.toLowerCase();
+                const author = card.querySelector('.author-name').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || content.includes(searchTerm) || author.includes(searchTerm)) {
+                    card.style.display = 'block';
+                    card.style.animation = 'fadeIn 0.3s ease-in';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // Category filter
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', function() {
+            const selectedCategory = this.value;
+            
+            threadCards.forEach(card => {
+                if (selectedCategory === '' || card.dataset.category === selectedCategory) {
+                    card.style.display = 'block';
+                    card.style.animation = 'fadeIn 0.3s ease-in';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // Like button functionality
+    const likeButtons = document.querySelectorAll('.like-btn');
+    likeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            const text = this.querySelector('span');
+            
+            if (this.classList.contains('liked')) {
+                this.classList.remove('liked');
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                text.textContent = 'Like';
+                this.style.color = '#64748b';
+            } else {
+                this.classList.add('liked');
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                text.textContent = 'Liked';
+                this.style.color = '#ef4444';
+            }
+        });
+    });
+
+    // Bookmark button functionality
+    const bookmarkButtons = document.querySelectorAll('.bookmark-btn');
+    bookmarkButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            
+            if (this.classList.contains('bookmarked')) {
+                this.classList.remove('bookmarked');
+                icon.style.color = '#64748b';
+            } else {
+                this.classList.add('bookmarked');
+                icon.style.color = '#3b82f6';
+            }
+        });
+    });
+
+    // Load more functionality
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', function() {
+            // Simulate loading more content
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
+            this.disabled = true;
+            
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-plus-circle me-2"></i>Load More Discussions';
+                this.disabled = false;
+                // Here you would typically make an AJAX call to load more threads
+            }, 2000);
+        });
+    }
+
+    // Suggestion tags click handler
+    const suggestionTags = document.querySelectorAll('.suggestion-tag');
+    suggestionTags.forEach(tag => {
+        tag.addEventListener('click', function() {
+            const searchInput = document.getElementById('threadSearch');
+            if (searchInput) {
+                searchInput.value = this.textContent;
+                searchInput.dispatchEvent(new Event('input'));
+            }
+        });
+    });
+});
+
+// Add fadeIn animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+`;
+document.head.appendChild(style);
+</script>
 {% endblock %} 

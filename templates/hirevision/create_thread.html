@@ -4,109 +4,960 @@
 {% block title %}Create New Thread - HireVision{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <!-- Breadcrumb -->
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'hirevision:threads_list' %}">
-                            <i class="fas fa-comments"></i> Discussion Forum
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page">Create New Thread</li>
-                </ol>
-            </nav>
-            
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    <h3 class="mb-0">
-                        <i class="fas fa-plus text-primary"></i>
-                        Create New Thread
-                    </h3>
+<!-- Enhanced Create Thread Page with Modern UI/UX -->
+<div class="create-thread-container">
+    <!-- Hero Section -->
+    <div class="create-hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="hero-content">
+                        <nav aria-label="breadcrumb" class="breadcrumb-nav">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item">
+                                    <a href="{% url 'hirevision:threads_list' %}" class="breadcrumb-link">
+                                        <i class="fas fa-comments"></i> Discussion Forum
+                                    </a>
+                                </li>
+                                <li class="breadcrumb-item active" aria-current="page">Create New Thread</li>
+                            </ol>
+                        </nav>
+                        <h1 class="hero-title">
+                            <span class="gradient-text">Start a Discussion</span>
+                        </h1>
+                        <p class="hero-subtitle">
+                            Share your insights, ask questions, and connect with the community
+                        </p>
+                    </div>
                 </div>
-                
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        <div class="mb-3">
-                            <label for="{{ form.title.id_for_label }}" class="form-label">
-                                <strong>Thread Title *</strong>
-                            </label>
-                            {{ form.title }}
-                            {% if form.title.errors %}
-                                <div class="text-danger small">{{ form.title.errors }}</div>
-                            {% endif %}
-                            <div class="form-text">Choose a clear, descriptive title for your thread.</div>
+                <div class="col-lg-4">
+                    <div class="hero-illustration">
+                        <div class="illustration-container">
+                            <div class="floating-elements">
+                                <div class="element element-1">💬</div>
+                                <div class="element element-2">💡</div>
+                                <div class="element element-3">🚀</div>
+                            </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="{{ form.content.id_for_label }}" class="form-label">
-                                <strong>Content *</strong>
-                            </label>
-                            {{ form.content }}
-                            {% if form.content.errors %}
-                                <div class="text-danger small">{{ form.content.errors }}</div>
-                            {% endif %}
-                            <div class="form-text">Share your thoughts, questions, or insights. Be respectful and constructive.</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="{{ form.image.id_for_label }}" class="form-label">
-                                <strong>Image (Optional)</strong>
-                            </label>
-                            {{ form.image }}
-                            {% if form.image.errors %}
-                                <div class="text-danger small">{{ form.image.errors }}</div>
-                            {% endif %}
-                            <div class="form-text">Upload an image to support your thread. Max size: 10MB. Supported formats: JPG, PNG, GIF, WebP.</div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label for="{{ form.article_url.id_for_label }}" class="form-label">
-                                <strong>Article URL (Optional)</strong>
-                            </label>
-                            {{ form.article_url }}
-                            {% if form.article_url.errors %}
-                                <div class="text-danger small">{{ form.article_url.errors }}</div>
-                            {% endif %}
-                            <div class="form-text">Link to a relevant article or resource that supports your discussion.</div>
-                        </div>
-                        
-                        <div class="d-flex justify-content-between">
-                            <a href="{% url 'hirevision:threads_list' %}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-paper-plane"></i> Create Thread
-                            </button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Guidelines Card -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-info-circle text-info"></i>
-                        Community Guidelines
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <ul class="mb-0">
-                        <li>Be respectful and constructive in your discussions</li>
-                        <li>Share relevant and valuable content</li>
-                        <li>Use clear, descriptive titles</li>
-                        <li>Support your points with evidence when possible</li>
-                        <li>Engage with others' comments thoughtfully</li>
-                        <li>Report inappropriate content to moderators</li>
-                    </ul>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="create-content">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <!-- Main Form Card -->
+                    <div class="form-card">
+                        <div class="form-header">
+                            <div class="form-icon">
+                                <i class="fas fa-edit"></i>
+                            </div>
+                            <div class="form-title">
+                                <h2>Create Your Thread</h2>
+                                <p>Share your thoughts with the community</p>
+                            </div>
+                        </div>
+
+                        <form method="post" enctype="multipart/form-data" class="enhanced-form">
+                            {% csrf_token %}
+                            
+                            <!-- Title Field -->
+                            <div class="form-group">
+                                <label for="{{ form.title.id_for_label }}" class="form-label">
+                                    <i class="fas fa-heading"></i>
+                                    Thread Title
+                                    <span class="required">*</span>
+                                </label>
+                                <div class="input-wrapper">
+                                    {{ form.title }}
+                                    <div class="input-icon">
+                                        <i class="fas fa-lightbulb"></i>
+                                    </div>
+                                </div>
+                                {% if form.title.errors %}
+                                    <div class="error-message">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ form.title.errors }}
+                                    </div>
+                                {% endif %}
+                                <div class="form-hint">
+                                    <i class="fas fa-info-circle"></i>
+                                    Choose a clear, descriptive title that captures the essence of your discussion
+                                </div>
+                            </div>
+
+                            <!-- Content Field -->
+                            <div class="form-group">
+                                <label for="{{ form.content.id_for_label }}" class="form-label">
+                                    <i class="fas fa-align-left"></i>
+                                    Content
+                                    <span class="required">*</span>
+                                </label>
+                                <div class="textarea-wrapper">
+                                    {{ form.content }}
+                                    <div class="textarea-counter">
+                                        <span id="charCount">0</span> characters
+                                    </div>
+                                </div>
+                                {% if form.content.errors %}
+                                    <div class="error-message">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ form.content.errors }}
+                                    </div>
+                                {% endif %}
+                                <div class="form-hint">
+                                    <i class="fas fa-info-circle"></i>
+                                    Share your thoughts, questions, or insights. Be respectful and constructive
+                                </div>
+                            </div>
+
+                            <!-- Media Section -->
+                            <div class="media-section">
+                                <h4 class="section-title">
+                                    <i class="fas fa-image"></i>
+                                    Add Media (Optional)
+                                </h4>
+                                
+                                <!-- Image Upload -->
+                                <div class="form-group">
+                                    <label for="{{ form.image.id_for_label }}" class="form-label">
+                                        <i class="fas fa-upload"></i>
+                                        Image
+                                    </label>
+                                    <div class="file-upload-wrapper">
+                                        <div class="file-upload-area" id="imageUploadArea">
+                                            <div class="upload-content">
+                                                <i class="fas fa-cloud-upload-alt"></i>
+                                                <p>Click to upload or drag and drop</p>
+                                                <span class="file-types">JPG, PNG, GIF, WebP (Max 10MB)</span>
+                                            </div>
+                                            {{ form.image }}
+                                        </div>
+                                        <div class="file-preview" id="imagePreview" style="display: none;">
+                                            <img id="previewImg" src="" alt="Preview">
+                                            <button type="button" class="remove-file" id="removeImage">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% if form.image.errors %}
+                                        <div class="error-message">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            {{ form.image.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Article URL -->
+                                <div class="form-group">
+                                    <label for="{{ form.article_url.id_for_label }}" class="form-label">
+                                        <i class="fas fa-link"></i>
+                                        Article URL
+                                    </label>
+                                    <div class="input-wrapper">
+                                        {{ form.article_url }}
+                                        <div class="input-icon">
+                                            <i class="fas fa-external-link-alt"></i>
+                                        </div>
+                                    </div>
+                                    {% if form.article_url.errors %}
+                                        <div class="error-message">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            {{ form.article_url.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-hint">
+                                        <i class="fas fa-info-circle"></i>
+                                        Link to a relevant article or resource that supports your discussion
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="form-actions">
+                                <a href="{% url 'hirevision:threads_list' %}" class="btn btn-outline-secondary btn-lg cancel-btn">
+                                    <i class="fas fa-arrow-left"></i>
+                                    Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-lg submit-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                    <span>Create Thread</span>
+                                    <div class="btn-loading" style="display: none;">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                    </div>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Guidelines Card -->
+                    <div class="guidelines-card">
+                        <div class="guidelines-header">
+                            <div class="guidelines-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="guidelines-title">
+                                <h3>Community Guidelines</h3>
+                                <p>Help us maintain a positive environment</p>
+                            </div>
+                        </div>
+                        <div class="guidelines-content">
+                            <div class="guidelines-grid">
+                                <div class="guideline-item">
+                                    <div class="guideline-icon">
+                                        <i class="fas fa-heart"></i>
+                                    </div>
+                                    <div class="guideline-text">
+                                        <h5>Be Respectful</h5>
+                                        <p>Treat others with kindness and respect</p>
+                                    </div>
+                                </div>
+                                <div class="guideline-item">
+                                    <div class="guideline-icon">
+                                        <i class="fas fa-lightbulb"></i>
+                                    </div>
+                                    <div class="guideline-text">
+                                        <h5>Share Value</h5>
+                                        <p>Provide relevant and constructive content</p>
+                                    </div>
+                                </div>
+                                <div class="guideline-item">
+                                    <div class="guideline-icon">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                    <div class="guideline-text">
+                                        <h5>Be Clear</h5>
+                                        <p>Use descriptive titles and clear language</p>
+                                    </div>
+                                </div>
+                                <div class="guideline-item">
+                                    <div class="guideline-icon">
+                                        <i class="fas fa-handshake"></i>
+                                    </div>
+                                    <div class="guideline-text">
+                                        <h5>Engage Thoughtfully</h5>
+                                        <p>Respond to others with consideration</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Custom CSS for Enhanced Create Thread Design -->
+<style>
+    /* Create Thread Container */
+    .create-thread-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+
+    /* Hero Section */
+    .create-hero {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        color: white;
+        padding: 3rem 0 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .create-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .breadcrumb-nav {
+        margin-bottom: 1.5rem;
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+    }
+
+    .breadcrumb-item {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .breadcrumb-link {
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumb-link:hover {
+        color: white;
+    }
+
+    .breadcrumb-item.active {
+        color: white;
+    }
+
+    .hero-title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+    }
+
+    .gradient-text {
+        background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero-subtitle {
+        font-size: 1.25rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+        font-weight: 400;
+    }
+
+    .hero-illustration {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+    }
+
+    .illustration-container {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        margin: 0 auto;
+    }
+
+    .floating-elements {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .element {
+        position: absolute;
+        font-size: 2rem;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .element-1 {
+        top: 20px;
+        left: 20px;
+        animation-delay: 0s;
+    }
+
+    .element-2 {
+        top: 80px;
+        right: 30px;
+        animation-delay: 1s;
+    }
+
+    .element-3 {
+        bottom: 30px;
+        left: 50px;
+        animation-delay: 2s;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-10px) rotate(5deg); }
+    }
+
+    /* Main Content */
+    .create-content {
+        padding: 3rem 0;
+    }
+
+    /* Form Card */
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .form-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .form-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .form-title h2 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .form-title p {
+        margin: 0.25rem 0 0;
+        color: #64748b;
+        font-size: 1rem;
+    }
+
+    /* Enhanced Form */
+    .enhanced-form {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+    }
+
+    .form-label i {
+        color: #3b82f6;
+        width: 16px;
+    }
+
+    .required {
+        color: #ef4444;
+        margin-left: 0.25rem;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .input-wrapper input,
+    .input-wrapper select {
+        width: 100%;
+        padding: 1rem 1rem 1rem 3rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+    }
+
+    .input-wrapper input:focus,
+    .input-wrapper select:focus {
+        outline: none;
+        border-color: #3b82f6;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #64748b;
+        z-index: 2;
+    }
+
+    .textarea-wrapper {
+        position: relative;
+    }
+
+    .textarea-wrapper textarea {
+        width: 100%;
+        min-height: 150px;
+        padding: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        line-height: 1.6;
+        resize: vertical;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+        font-family: inherit;
+    }
+
+    .textarea-wrapper textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .textarea-counter {
+        position: absolute;
+        bottom: 0.75rem;
+        right: 1rem;
+        font-size: 0.8rem;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+    }
+
+    .error-message {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        padding: 0.75rem;
+        background: #fef2f2;
+        border-radius: 8px;
+        border-left: 4px solid #ef4444;
+    }
+
+    .form-hint {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        color: #64748b;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        line-height: 1.5;
+    }
+
+    .form-hint i {
+        color: #3b82f6;
+        margin-top: 0.125rem;
+    }
+
+    /* Media Section */
+    .media-section {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 2rem;
+        border: 2px dashed #cbd5e1;
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title i {
+        color: #3b82f6;
+    }
+
+    /* File Upload */
+    .file-upload-wrapper {
+        position: relative;
+    }
+
+    .file-upload-area {
+        position: relative;
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: white;
+    }
+
+    .file-upload-area:hover {
+        border-color: #3b82f6;
+        background: #f0f9ff;
+    }
+
+    .file-upload-area.dragover {
+        border-color: #3b82f6;
+        background: #f0f9ff;
+        transform: scale(1.02);
+    }
+
+    .upload-content i {
+        font-size: 2rem;
+        color: #64748b;
+        margin-bottom: 1rem;
+    }
+
+    .upload-content p {
+        margin: 0 0 0.5rem;
+        font-weight: 500;
+        color: #1e293b;
+    }
+
+    .file-types {
+        font-size: 0.875rem;
+        color: #64748b;
+    }
+
+    .file-upload-area input[type="file"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .file-preview {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .file-preview img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .remove-file {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 32px;
+        height: 32px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .remove-file:hover {
+        background: rgba(0, 0, 0, 0.9);
+        transform: scale(1.1);
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #f1f5f9;
+    }
+
+    .cancel-btn {
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    }
+
+    .btn-loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    /* Guidelines Card */
+    .guidelines-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+    }
+
+    .guidelines-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .guidelines-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .guidelines-title h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .guidelines-title p {
+        margin: 0.25rem 0 0;
+        color: #64748b;
+        font-size: 1rem;
+    }
+
+    .guidelines-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .guideline-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .guideline-item:hover {
+        background: #f1f5f9;
+        transform: translateY(-2px);
+    }
+
+    .guideline-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .guideline-text h5 {
+        margin: 0 0 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .guideline-text p {
+        margin: 0;
+        font-size: 0.875rem;
+        color: #64748b;
+        line-height: 1.5;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .form-card,
+        .guidelines-card {
+            padding: 1.5rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .guidelines-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .illustration-container {
+            width: 150px;
+            height: 150px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .create-hero {
+            padding: 2rem 0 1.5rem;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .create-content {
+            padding: 2rem 0;
+        }
+
+        .form-header,
+        .guidelines-header {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+
+<!-- JavaScript for Enhanced Functionality -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Character counter for content textarea
+    const contentTextarea = document.querySelector('textarea[name="content"]');
+    const charCount = document.getElementById('charCount');
+    
+    if (contentTextarea && charCount) {
+        contentTextarea.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+        });
+    }
+
+    // File upload functionality
+    const imageUploadArea = document.getElementById('imageUploadArea');
+    const imageInput = document.querySelector('input[name="image"]');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const removeImage = document.getElementById('removeImage');
+
+    if (imageUploadArea && imageInput) {
+        // Drag and drop functionality
+        imageUploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+
+        imageUploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+
+        imageUploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        // Click to upload
+        imageUploadArea.addEventListener('click', function() {
+            imageInput.click();
+        });
+
+        // File input change
+        imageInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+    }
+
+    function handleFileSelect(file) {
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            alert('Please select a valid image file (JPG, PNG, GIF, WebP)');
+            return;
+        }
+
+        // Validate file size (10MB)
+        if (file.size > 10 * 1024 * 1024) {
+            alert('File size must be less than 10MB');
+            return;
+        }
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            imageUploadArea.style.display = 'none';
+            imagePreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Remove image
+    if (removeImage) {
+        removeImage.addEventListener('click', function() {
+            imageInput.value = '';
+            imagePreview.style.display = 'none';
+            imageUploadArea.style.display = 'block';
+        });
+    }
+
+    // Form submission with loading state
+    const form = document.querySelector('.enhanced-form');
+    const submitBtn = document.querySelector('.submit-btn');
+    const btnText = submitBtn.querySelector('span');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+
+    if (form) {
+        form.addEventListener('submit', function() {
+            // Show loading state
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'block';
+            submitBtn.disabled = true;
+        });
+    }
+
+    // Auto-resize textarea
+    if (contentTextarea) {
+        contentTextarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.max(150, this.scrollHeight) + 'px';
+        });
+    }
+});
+</script>
 {% endblock %} 
