@@ -340,8 +340,7 @@ class Conversation(models.Model):
         logger.debug(f"Last message retrieved for conversation {self.id}: {last_msg.id if last_msg else 'None'}")
         return last_msg
     
-    @property
-    def unread_count(self, user):
+    def get_unread_count(self, user):
         count = self.messages.filter(is_read=False).exclude(sender=user).count()
         logger.debug(f"Unread count calculated for conversation {self.id}, user {user.email}: {count}")
         return count
