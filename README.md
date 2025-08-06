@@ -2,11 +2,11 @@
 
 **Your AI-Powered Career Success Platform**
 
-HireVision is a comprehensive Django-based web application that leverages artificial intelligence to help users optimize their career development through resume analysis, personalized learning paths, and professional resume building.
+HireVision is a comprehensive Django-based web application that leverages artificial intelligence to help users optimize their career development through resume analysis, personalized learning paths, professional resume building, and a vibrant community platform for career networking and discussions.
 
 ![HireVision](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![Django](https://img.shields.io/badge/Django-4.2+-green.svg)
-![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4-orange.svg)
+![OpenRouter](https://img.shields.io/badge/OpenRouter-AI-orange.svg)
 ![Dramatiq](https://img.shields.io/badge/Dramatiq-Async-red.svg)
 ![Redis](https://img.shields.io/badge/Redis-Queue-orange.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
@@ -44,6 +44,8 @@ python manage.py runserver
 - **Skills Gap Analysis** comparing your resume to job requirements
 - **Upskilling Recommendations** with actionable suggestions
 - **Support for multiple formats**: PDF, DOCX, DOC
+- **Asynchronous processing** for better user experience
+- **Real-time status updates** with progress tracking
 
 ### 🎯 **Learning Path Analyzer**
 - **Personalized learning roadmaps** based on your current skills and dream role
@@ -52,26 +54,56 @@ python manage.py runserver
 - **Timeline estimation** with realistic milestones
 - **Success metrics** to track your progress
 - **Career advice and networking tips**
+- **Background processing** for complex AI analysis
 
 ### 📝 **Resume Builder**
 - **Professional LaTeX resume generation** with ATS-optimized formatting
-- **Customizable sections**: Education, Experience, Projects, Skills, Achievements
+- **Customizable sections**: Education, Experience, Projects, Skills, Achievements, Research Papers
 - **Multiple template options** for different industries
 - **Easy PDF export** with high-quality output
 - **Real-time preview** of your resume
 - **Professional formatting** that passes ATS systems
+- **Async LaTeX compilation** for better performance
 
-### 👤 **User Management**
+### 👥 **Community Platform**
+- **Discussion Forums** with threaded conversations
+- **Create and manage threads** on career topics, job search, industry insights
+- **Rich media support** with image uploads and article links
+- **Comment system** for engaging discussions
+- **Edit and delete functionality** for content management
+- **User-friendly interface** for easy navigation
+
+### 💬 **Messaging System**
+- **Private messaging** between users
+- **Real-time conversations** with message history
+- **Image sharing** in messages
+- **User search functionality** to find and connect with others
+- **Conversation management** with delete options
+- **Direct messaging from forum threads** for networking
+
+### 👤 **Advanced User Management**
 - **Secure user authentication** with email-based login
-- **Profile management** with customizable user profiles
+- **Comprehensive profile management** with customizable user profiles
+- **Profile pictures and social links** (LinkedIn, GitHub)
+- **User verification system** for enhanced security
 - **Resume history** to track all your analyses and builds
 - **Learning path tracking** to monitor your career development progress
+- **Activity logging** for user actions and performance monitoring
+
+### 🔧 **Technical Features**
+- **Asynchronous Processing** with Dramatiq and Redis
+- **Real-time Status Updates** for all AI operations
+- **Comprehensive Logging System** with performance monitoring
+- **Error Handling and Recovery** with automatic retries
+- **File Upload Management** with size and type validation
+- **API Endpoints** for status checking and integration
+- **Responsive Design** with modern UI/UX
 
 ## 🛠️ Technology Stack
 
 - **Backend**: Django 4.2+
 - **Database**: SQLite (development) / PostgreSQL (production)
-- **AI Integration**: OpenAI GPT-4 API
+- **AI Integration**: OpenRouter API (with OpenAI compatibility)
 - **Async Processing**: Dramatiq + Redis for background tasks
 - **Task Queue**: Redis as message broker
 - **PDF Processing**: PyPDF2, ReportLab, LaTeX
@@ -79,6 +111,7 @@ python manage.py runserver
 - **Authentication**: Django's built-in authentication system
 - **File Handling**: Django's FileField for resume uploads
 - **Real-time Updates**: JavaScript polling with status endpoints
+- **Logging**: Custom logging configuration with performance monitoring
 
 ## 📋 Prerequisites
 
@@ -86,7 +119,7 @@ Before you begin, ensure you have the following installed:
 - Python 3.8 or higher
 - pip (Python package installer)
 - Git
-- OpenAI API key (for AI features)
+- OpenRouter API key (for AI features) or OpenAI API key
 
 ## 🚀 Installation
 
@@ -115,7 +148,13 @@ pip install -r requirements.txt
 ### 4. Set Up Environment Variables
 Create a `.env` file in the project root directory:
 ```env
-# OpenAI API Configuration
+# OpenRouter API Configuration (Recommended)
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+OPENROUTER_MODEL=qwen/qwen3-coder:free
+OPENROUTER_TEMPERATURE=0.3
+OPENROUTER_MAX_TOKENS=2000
+
+# Legacy OpenAI Configuration (Alternative)
 OPENAI_API_KEY=your_openai_api_key_here
 
 # Django Configuration
@@ -123,7 +162,7 @@ SECRET_KEY=your_django_secret_key_here
 DEBUG=True
 ```
 
-**Note**: Get your OpenAI API key from [OpenAI Platform](https://platform.openai.com/api-keys)
+**Note**: Get your OpenRouter API key from [OpenRouter Platform](https://openrouter.ai/) or OpenAI API key from [OpenAI Platform](https://platform.openai.com/api-keys)
 
 ### 5. Run Database Migrations
 ```bash
@@ -182,9 +221,9 @@ python manage.py runserver
 - **Main Application**: http://127.0.0.1:8000/
 - **Admin Interface**: http://127.0.0.1:8000/admin/
 
-## ⚡ **NEW: Asynchronous Processing**
+## ⚡ **Asynchronous Processing**
 
-HireVision now features **enterprise-grade asynchronous processing** using Dramatiq:
+HireVision features **enterprise-grade asynchronous processing** using Dramatiq:
 
 ### 🚀 **Benefits:**
 - **No More Timeouts**: AI processing happens in the background
@@ -210,19 +249,6 @@ You need **3 services running** for full functionality:
 - **Completed**: Results ready and displayed
 - **Failed**: Error occurred, user notified
 
-### 🎯 **Production Deployment:**
-For production, use a process manager like **systemd** or **supervisor** to manage Redis and Dramatiq workers:
-
-```bash
-# Example supervisor config for Dramatiq worker
-[program:hirevision-worker]
-command=python -m dramatiq hirevision.tasks
-directory=/path/to/HireVision
-user=www-data
-autostart=true
-autorestart=true
-```
-
 ## 📁 Project Structure
 
 ```
@@ -240,19 +266,26 @@ HireVision/
 │   ├── forms.py               # Django forms
 │   ├── urls.py                # App-specific URL routing
 │   ├── admin.py               # Admin interface configuration
+│   ├── tasks.py               # Async task definitions
 │   └── migrations/            # Database migrations
 ├── templates/                  # HTML templates
 │   ├── base.html              # Base template
 │   └── hirevision/            # App-specific templates
-│       ├── home.html          # Home page
+│       ├── landing.html       # Landing page
 │       ├── dashboard.html     # User dashboard
 │       ├── resume_analyzer.html
 │       ├── learning_path_analyzer.html
 │       ├── resume_builder.html
+│       ├── threads_list.html  # Community forums
+│       ├── messages_list.html # Messaging system
 │       └── ...                # Other templates
 ├── media/                      # Uploaded files
 │   ├── resumes/               # Uploaded resumes
-│   └── generated_resumes/     # Generated PDFs
+│   ├── generated_resumes/     # Generated PDFs
+│   ├── profile_pictures/      # User profile images
+│   ├── thread_images/         # Forum images
+│   ├── comment_images/        # Comment images
+│   └── message_images/        # Message images
 ├── static/                     # Static files (CSS, JS, images)
 ├── resume_analyzer.py          # Resume analysis logic
 ├── learning_path_analyzer.py   # Learning path logic
@@ -260,6 +293,7 @@ HireVision/
 ├── pdf_generator.py            # PDF generation utilities
 ├── utils.py                    # Utility functions
 ├── config.py                   # Configuration settings
+├── logging_config.py           # Logging configuration
 ├── requirements.txt            # Python dependencies
 ├── manage.py                   # Django management script
 └── README.md                   # This file
@@ -289,9 +323,29 @@ HireVision/
 5. Click **"Generate Resume"** to create a professional LaTeX resume
 6. Download the generated PDF for your job applications
 
+### Community Forums
+1. Navigate to **"Forums"** to see all discussion threads
+2. **Create new threads** on career topics, job search tips, or industry insights
+3. **Add images or article links** to enrich your posts
+4. **Engage in discussions** by commenting on threads
+5. **Edit or delete** your own content as needed
+
+### Private Messaging
+1. Navigate to **"Messages"** to see your conversations
+2. **Search for users** to start new conversations
+3. **Send private messages** with text and images
+4. **Start conversations from forum threads** for networking
+5. **Manage your conversations** with delete options
+
 ## 🔧 Configuration
 
-### OpenAI API Setup
+### OpenRouter API Setup (Recommended)
+1. Visit [OpenRouter Platform](https://openrouter.ai/)
+2. Create an account or sign in
+3. Generate a new API key
+4. Add the key to your `.env` file: `OPENROUTER_API_KEY=your_key_here`
+
+### OpenAI API Setup (Alternative)
 1. Visit [OpenAI Platform](https://platform.openai.com/api-keys)
 2. Create an account or sign in
 3. Generate a new API key
@@ -351,6 +405,7 @@ gunicorn hirevision_django.wsgi:application
 | `/login/` | User login | GET, POST |
 | `/logout/` | User logout | GET |
 | `/dashboard/` | User dashboard | GET |
+| `/profile/` | User profile management | GET, POST |
 | `/resume-analyzer/` | Resume analysis form | GET, POST |
 | `/resume-analysis/<id>/` | Analysis results | GET |
 | `/learning-path/` | Learning path form | GET, POST |
@@ -358,6 +413,18 @@ gunicorn hirevision_django.wsgi:application
 | `/resume-builder/` | Resume builder form | GET, POST |
 | `/resume-builder/<id>/` | Resume builder results | GET |
 | `/download-pdf/<id>/` | Download generated PDF | GET |
+| `/threads/` | Community forums | GET |
+| `/threads/create/` | Create new thread | GET, POST |
+| `/threads/<id>/` | Thread detail | GET |
+| `/threads/<id>/edit/` | Edit thread | GET, POST |
+| `/threads/<id>/delete/` | Delete thread | GET, POST |
+| `/comments/<id>/edit/` | Edit comment | GET, POST |
+| `/comments/<id>/delete/` | Delete comment | GET, POST |
+| `/messages/` | Messages list | GET |
+| `/messages/new/` | New message | GET, POST |
+| `/messages/conversation/<id>/` | Conversation detail | GET, POST |
+| `/messages/start/<user_id>/` | Start conversation | GET, POST |
+| `/messages/search-users/` | Search users (AJAX) | GET |
 | `/admin/` | Django admin interface | GET |
 | `/api/resume-analysis/<id>/status/` | Check resume analysis task status | GET |
 | `/api/learning-path/<id>/status/` | Check learning path task status | GET |
@@ -367,8 +434,9 @@ gunicorn hirevision_django.wsgi:application
 
 ### User Model
 - Custom user model with email-based authentication
-- Profile information (phone, bio, social links)
+- Profile information (phone, bio, social links, profile picture)
 - Verification status and timestamps
+- Comprehensive activity tracking
 
 ### ResumeAnalysis Model
 - Stores resume analysis results
@@ -388,8 +456,30 @@ gunicorn hirevision_django.wsgi:application
 - Resume data storage
 - LaTeX content generation
 - PDF file management
-- Multiple section support
+- Multiple section support (Education, Experience, Projects, Skills, Research Papers, Achievements)
 - **Background processing** for LaTeX compilation
+
+### Thread Model
+- Discussion forum threads
+- User-generated content with rich media support
+- Image and article link attachments
+- Edit tracking and timestamps
+
+### Comment Model
+- Comments on forum threads
+- Image attachments
+- Edit tracking and user association
+
+### Conversation Model
+- Private messaging conversations
+- Multi-user participant support
+- Message history and timestamps
+
+### Message Model
+- Individual messages in conversations
+- Text and image content
+- Read status tracking
+- Sender and conversation association
 
 ## 🤝 Contributing
 
@@ -416,13 +506,14 @@ We welcome contributions! Please follow these steps:
 - Add docstrings to new functions
 - Update documentation for new features
 - Test your changes thoroughly
+- Use the logging system for debugging
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
 **"Analysis failed" errors:**
-- Check your OpenAI API key in `.env` file
+- Check your OpenRouter/OpenAI API key in `.env` file
 - Ensure you have sufficient API credits
 - Verify the API key is correct and active
 
@@ -455,7 +546,7 @@ We welcome contributions! Please follow these steps:
 
 **Tasks failing with errors:**
 - Check Dramatiq worker logs for detailed error messages
-- Verify OpenAI API key is configured correctly
+- Verify OpenRouter/OpenAI API key is configured correctly
 - Ensure file permissions for media uploads are correct
 
 **Redis connection issues:**
@@ -474,10 +565,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **OpenAI** for providing the GPT-4 API
+- **OpenRouter** for providing AI API access
+- **OpenAI** for GPT models and API
 - **Django** community for the excellent web framework
 - **Bootstrap** for the responsive UI components
 - **LaTeX** community for document formatting capabilities
+- **Redis** and **Dramatiq** for async processing capabilities
 
 ## 📞 Support
 
@@ -493,14 +586,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **v1.2.0** - Enhanced AI analysis capabilities
 - **v1.3.0** - Improved resume builder with LaTeX support
 - **v1.4.0** - **🚀 MAJOR UPDATE**: Added asynchronous processing with Dramatiq
-  - Enterprise-grade async task processing
-  - Real-time status updates and loading states
-  - Background AI analysis with Redis message broker
-  - Improved scalability and user experience
-  - No more timeout errors during long operations
+- **v1.5.0** - **🌟 COMMUNITY UPDATE**: Added discussion forums and messaging system
+  - Community discussion forums with threaded conversations
+  - Private messaging system between users
+  - Rich media support (images, article links)
+  - User search and networking features
+  - Enhanced user profiles with social links
+  - Comprehensive content management (edit/delete)
+  - Real-time conversation tracking
+  - Advanced logging and performance monitoring
 
 ---
 
 **Made with ❤️ by the HireVision Team**
 
-*Empowering careers through AI-driven insights and professional development tools.* 
+*Empowering careers through AI-driven insights, professional development tools, and community networking.* 
