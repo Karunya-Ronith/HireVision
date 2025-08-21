@@ -1,651 +1,678 @@
-{% extends 'base.html' %}
-
-{% block title %}Resume ATS Analyzer - HireVision{% endblock %}
-
-{% block extra_css %}
+{% extends 'base.html' %} {% block title %}Resume ATS Analyzer -
+HireVision{%endblock %} {% block extra_css %}
 <style>
-    .analyzer-container {
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        min-height: 100vh;
-        padding: 2rem 0;
-    }
+  .analyzer-container {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+  }
 
-    .analyzer-header {
-        text-align: center;
-        margin-bottom: 3rem;
-        padding: 2rem 0;
-    }
+  .analyzer-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+  }
 
+  .analyzer-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin-bottom: 1rem;
+    background: linear-gradient(
+      135deg,
+      var(--primary-color) 0%,
+      var(--accent-color) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .analyzer-subtitle {
+    font-size: 1.25rem;
+    color: var(--secondary-color);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .upload-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: none;
+    margin-bottom: 2rem;
+  }
+
+  .upload-header {
+    background: linear-gradient(
+      135deg,
+      var(--primary-color) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .upload-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+  }
+
+  .upload-header-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .upload-header h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .upload-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+  }
+
+  .upload-content {
+    padding: 2rem;
+  }
+
+  .form-section {
+    margin-bottom: 2rem;
+  }
+
+  .form-section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .form-section-title i {
+    margin-right: 0.75rem;
+    color: var(--primary-color);
+    width: 20px;
+    text-align: center;
+  }
+
+  .file-upload-area {
+    border: 3px dashed var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    background: var(--light-color);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .file-upload-area:hover {
+    border-color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.05);
+  }
+
+  .file-upload-area.dragover {
+    border-color: var(--primary-color);
+    background: rgba(37, 99, 235, 0.1);
+  }
+
+  .file-upload-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+  }
+
+  .file-upload-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+  }
+
+  .file-upload-hint {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+  }
+
+  .file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .selected-file {
+    background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .form-control {
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+  }
+
+  .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    outline: none;
+  }
+
+  .form-text {
+    font-size: 0.875rem;
+    color: var(--secondary-color);
+    margin-top: 0.5rem;
+  }
+
+  .btn-analyze {
+    background: linear-gradient(
+      135deg,
+      var(--primary-color) 0%,
+      var(--primary-dark) 100%
+    );
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .btn-analyze:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+    color: white;
+  }
+
+  .info-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: none;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+  }
+
+  .info-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .info-header {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .info-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .info-content {
+    padding: 2rem;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--light-color);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .feature-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .feature-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .feature-icon.primary {
+    background: linear-gradient(
+      135deg,
+      var(--primary-color) 0%,
+      var(--primary-dark) 100%
+    );
+  }
+
+  .feature-icon.success {
+    background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+  }
+
+  .feature-icon.warning {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
+  }
+
+  .feature-icon.info {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  }
+
+  .feature-icon.danger {
+    background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
+  }
+
+  .feature-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.25rem;
+  }
+
+  .feature-content p {
+    font-size: 0.875rem;
+    color: var(--secondary-color);
+    margin-bottom: 0;
+    line-height: 1.4;
+  }
+
+  .tips-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .tips-list li {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--light-color);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .tips-list li:hover {
+    transform: translateX(4px);
+    background: rgba(37, 99, 235, 0.05);
+  }
+
+  .tips-list li:last-child {
+    margin-bottom: 0;
+  }
+
+  .tips-list i {
+    color: var(--success-color);
+    font-size: 1.2rem;
+    width: 20px;
+    text-align: center;
+  }
+
+  .tips-list span {
+    font-weight: 500;
+    color: var(--dark-color);
+  }
+
+  @media (max-width: 768px) {
     .analyzer-title {
-        font-size: 3rem;
-        font-weight: 700;
-        color: var(--dark-color);
-        margin-bottom: 1rem;
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .analyzer-subtitle {
-        font-size: 1.25rem;
-        color: var(--secondary-color);
-        max-width: 600px;
-        margin: 0 auto;
-        line-height: 1.6;
-    }
-
-    .upload-card {
-        background: white;
-        border-radius: 20px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        border: none;
-        margin-bottom: 2rem;
-    }
-
-    .upload-header {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-        color: white;
-        padding: 2rem;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .upload-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-        opacity: 0.3;
-    }
-
-    .upload-header-content {
-        position: relative;
-        z-index: 2;
-    }
-
-    .upload-header h2 {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-
-    .upload-header p {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        margin-bottom: 0;
+      font-size: 2.5rem;
     }
 
     .upload-content {
-        padding: 2rem;
-    }
-
-    .form-section {
-        margin-bottom: 2rem;
-    }
-
-    .form-section-title {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: var(--dark-color);
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-    }
-
-    .form-section-title i {
-        margin-right: 0.75rem;
-        color: var(--primary-color);
-        width: 20px;
-        text-align: center;
-    }
-
-    .file-upload-area {
-        border: 3px dashed var(--border-color);
-        border-radius: 12px;
-        padding: 2rem;
-        text-align: center;
-        background: var(--light-color);
-        transition: all 0.3s ease;
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .file-upload-area:hover {
-        border-color: var(--primary-color);
-        background: rgba(37, 99, 235, 0.05);
-    }
-
-    .file-upload-area.dragover {
-        border-color: var(--primary-color);
-        background: rgba(37, 99, 235, 0.1);
-    }
-
-    .file-upload-icon {
-        font-size: 3rem;
-        color: var(--primary-color);
-        margin-bottom: 1rem;
-    }
-
-    .file-upload-text {
-        font-size: 1.1rem;
-        font-weight: 500;
-        color: var(--dark-color);
-        margin-bottom: 0.5rem;
-    }
-
-    .file-upload-hint {
-        font-size: 0.9rem;
-        color: var(--secondary-color);
-        margin-bottom: 1rem;
-    }
-
-    .file-input {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        cursor: pointer;
-    }
-
-    .selected-file {
-        background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
-        color: white;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-top: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .form-control {
-        border: 2px solid var(--border-color);
-        border-radius: 12px;
-        padding: 1rem;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        background: white;
-    }
-
-    .form-control:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        outline: none;
-    }
-
-    .form-text {
-        font-size: 0.875rem;
-        color: var(--secondary-color);
-        margin-top: 0.5rem;
-    }
-
-    .btn-analyze {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-        border: none;
-        border-radius: 12px;
-        padding: 1rem 2rem;
-        font-weight: 600;
-        font-size: 1.1rem;
-        color: white;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        width: 100%;
-    }
-
-    .btn-analyze:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
-        color: white;
-    }
-
-    .info-card {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        border: none;
-        margin-bottom: 2rem;
-        transition: all 0.3s ease;
-    }
-
-    .info-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-    }
-
-    .info-header {
-        background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
-        color: white;
-        padding: 1.5rem;
-        text-align: center;
-    }
-
-    .info-header h3 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-
-    .info-content {
-        padding: 2rem;
+      padding: 1.5rem;
     }
 
     .feature-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
+      grid-template-columns: 1fr;
     }
 
-    .feature-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 1rem;
-        padding: 1rem;
-        background: var(--light-color);
-        border-radius: 12px;
-        transition: all 0.3s ease;
+    .file-upload-area {
+      padding: 1.5rem;
     }
-
-    .feature-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .feature-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        color: white;
-        flex-shrink: 0;
-    }
-
-    .feature-icon.primary {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-    }
-
-    .feature-icon.success {
-        background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
-    }
-
-    .feature-icon.warning {
-        background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
-    }
-
-    .feature-icon.info {
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    }
-
-    .feature-icon.danger {
-        background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
-    }
-
-    .feature-content h4 {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--dark-color);
-        margin-bottom: 0.25rem;
-    }
-
-    .feature-content p {
-        font-size: 0.875rem;
-        color: var(--secondary-color);
-        margin-bottom: 0;
-        line-height: 1.4;
-    }
-
-    .tips-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .tips-list li {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 1rem;
-        background: var(--light-color);
-        border-radius: 12px;
-        margin-bottom: 1rem;
-        transition: all 0.3s ease;
-    }
-
-    .tips-list li:hover {
-        transform: translateX(4px);
-        background: rgba(37, 99, 235, 0.05);
-    }
-
-    .tips-list li:last-child {
-        margin-bottom: 0;
-    }
-
-    .tips-list i {
-        color: var(--success-color);
-        font-size: 1.2rem;
-        width: 20px;
-        text-align: center;
-    }
-
-    .tips-list span {
-        font-weight: 500;
-        color: var(--dark-color);
-    }
-
-    @media (max-width: 768px) {
-        .analyzer-title {
-            font-size: 2.5rem;
-        }
-        
-        .upload-content {
-            padding: 1.5rem;
-        }
-        
-        .feature-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .file-upload-area {
-            padding: 1.5rem;
-        }
-    }
+  }
 </style>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="analyzer-container">
-    <div class="container">
-        <!-- Header -->
-        <div class="analyzer-header">
-            <h1 class="analyzer-title">Resume ATS Analyzer</h1>
-            <p class="analyzer-subtitle">AI-Powered Resume Analysis for Applicant Tracking Systems</p>
-        </div>
-
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <!-- Upload Card -->
-                <div class="upload-card">
-                    <div class="upload-header">
-                        <div class="upload-header-content">
-                            <h2><i class="fas fa-file-upload me-2"></i>Upload Your Resume</h2>
-                            <p>Get instant AI-powered analysis and optimization recommendations</p>
-                        </div>
-                    </div>
-                    
-                    <div class="upload-content">
-                        {% if messages %}
-                            {% for message in messages %}
-                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-
-                        <form method="post" enctype="multipart/form-data" id="resumeForm">
-                            {% csrf_token %}
-                            
-                            <!-- File Upload Section -->
-                            <div class="form-section">
-                                <h3 class="form-section-title">
-                                    <i class="fas fa-upload"></i>
-                                    Resume File
-                                </h3>
-                                
-                                <div class="file-upload-area" id="fileUploadArea">
-                                    <div class="file-upload-icon">
-                                        <i class="fas fa-cloud-upload-alt"></i>
-                                    </div>
-                                    <div class="file-upload-text">Choose your resume file</div>
-                                    <div class="file-upload-hint">PDF, DOCX, or DOC (Max 10MB)</div>
-                                    {{ form.resume_file }}
-                                    {% if form.resume_file.errors %}
-                                        <div class="text-danger mt-2">
-                                            {% for error in form.resume_file.errors %}
-                                                <small>{{ error }}</small>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                <div id="selectedFile" class="selected-file" style="display: none;">
-                                    <i class="fas fa-file-alt"></i>
-                                    <span id="fileName"></span>
-                                </div>
-                            </div>
-                            
-                            <!-- Job Description Section -->
-                            <div class="form-section">
-                                <h3 class="form-section-title">
-                                    <i class="fas fa-briefcase"></i>
-                                    Job Description
-                                </h3>
-                                
-                                {{ form.job_description }}
-                                {% if form.job_description.errors %}
-                                    <div class="text-danger mt-2">
-                                        {% for error in form.job_description.errors %}
-                                            <small>{{ error }}</small>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Paste the complete job description to get accurate analysis
-                                </div>
-                            </div>
-                            
-                            <!-- Submit Button -->
-                            <button type="submit" class="btn-analyze">
-                                <i class="fas fa-search"></i>
-                                Analyze Resume
-                            </button>
-                        </form>
-                    </div>
-                </div>
-                
-                <!-- What You'll Get Card -->
-                <div class="info-card">
-                    <div class="info-header">
-                        <h3><i class="fas fa-chart-line me-2"></i>What You'll Get</h3>
-                        <p>Comprehensive analysis and actionable insights</p>
-                    </div>
-                    <div class="info-content">
-                        <div class="feature-grid">
-                            <div class="feature-item">
-                                <div class="feature-icon primary">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <div class="feature-content">
-                                    <h4>ATS Score (0-100)</h4>
-                                    <p>How well your resume matches job requirements</p>
-                                </div>
-                            </div>
-                            <div class="feature-item">
-                                <div class="feature-icon success">
-                                    <i class="fas fa-plus-circle"></i>
-                                </div>
-                                <div class="feature-content">
-                                    <h4>Strengths Analysis</h4>
-                                    <p>What you're doing right and should highlight</p>
-                                </div>
-                            </div>
-                            <div class="feature-item">
-                                <div class="feature-icon warning">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                </div>
-                                <div class="feature-content">
-                                    <h4>Areas for Improvement</h4>
-                                    <p>Specific feedback on what needs enhancement</p>
-                                </div>
-                            </div>
-                            <div class="feature-item">
-                                <div class="feature-icon info">
-                                    <i class="fas fa-lightbulb"></i>
-                                </div>
-                                <div class="feature-content">
-                                    <h4>Smart Recommendations</h4>
-                                    <p>Actionable advice to improve your resume</p>
-                                </div>
-                            </div>
-                            <div class="feature-item">
-                                <div class="feature-icon danger">
-                                    <i class="fas fa-gap"></i>
-                                </div>
-                                <div class="feature-content">
-                                    <h4>Skills Gap Analysis</h4>
-                                    <p>Identify missing competencies and requirements</p>
-                                </div>
-                            </div>
-                            <div class="feature-item">
-                                <div class="feature-icon success">
-                                    <i class="fas fa-graduation-cap"></i>
-                                </div>
-                                <div class="feature-content">
-                                    <h4>Upskilling Suggestions</h4>
-                                    <p>Learning recommendations to bridge gaps</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Pro Tips Card -->
-                <div class="info-card">
-                    <div class="info-header">
-                        <h3><i class="fas fa-lightbulb me-2"></i>Pro Tips for Better Results</h3>
-                        <p>Follow these guidelines for optimal analysis</p>
-                    </div>
-                    <div class="info-content">
-                        <ul class="tips-list">
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span>Use a text-based PDF (not scanned images)</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span>Include the complete job description</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span>Make sure your resume is up-to-date</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span>Use standard section headers (Experience, Education, Skills)</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span>Include relevant keywords from the job description</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="container">
+    <!-- Header -->
+    <div class="analyzer-header">
+      <h1 class="analyzer-title">Resume ATS Analyzer</h1>
+      <p class="analyzer-subtitle">
+        AI-Powered Resume Analysis for Applicant Tracking Systems
+      </p>
     </div>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <!-- Upload Card -->
+        <div class="upload-card">
+          <div class="upload-header">
+            <div class="upload-header-content">
+              <h2><i class="fas fa-file-upload me-2"></i>Upload Your Resume</h2>
+              <p>
+                Get instant AI-powered analysis and optimization recommendations
+              </p>
+            </div>
+          </div>
+
+          <div class="upload-content">
+            {% if messages %} {% for message in messages %}
+            <div
+              class="alert alert-{{ message.tags }} alert-dismissible fade show"
+              role="alert"
+            >
+              {{ message }}
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+              ></button>
+            </div>
+            {% endfor %} {% endif %}
+
+            <form method="post" enctype="multipart/form-data" id="resumeForm">
+              {% csrf_token %}
+
+              <!-- File Upload Section -->
+              <div class="form-section">
+                <h3 class="form-section-title">
+                  <i class="fas fa-upload"></i>
+                  Resume File
+                </h3>
+
+                <div class="file-upload-area" id="fileUploadArea">
+                  <div class="file-upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                  </div>
+                  <div class="file-upload-text">Choose your resume file</div>
+                  <div class="file-upload-hint">PDF (Max 10MB)</div>
+                  {{ form.resume_file }} {% if form.resume_file.errors %}
+                  <div class="text-danger mt-2">
+                    {% for error in form.resume_file.errors %}
+                    <small>{{ error }}</small>
+                    {% endfor %}
+                  </div>
+                  {% endif %}
+                </div>
+                <div
+                  id="selectedFile"
+                  class="selected-file"
+                  style="display: none"
+                >
+                  <i class="fas fa-file-alt"></i>
+                  <span id="fileName"></span>
+                </div>
+              </div>
+
+              <!-- Job Description Section -->
+              <div class="form-section">
+                <h3 class="form-section-title">
+                  <i class="fas fa-briefcase"></i>
+                  Job Description
+                </h3>
+
+                {{ form.job_description }} {% if form.job_description.errors %}
+                <div class="text-danger mt-2">
+                  {% for error in form.job_description.errors %}
+                  <small>{{ error }}</small>
+                  {% endfor %}
+                </div>
+                {% endif %}
+                <div class="form-text">
+                  <i class="fas fa-info-circle me-1"></i>
+                  Paste the complete job description to get accurate analysis
+                </div>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="btn-analyze">
+                <i class="fas fa-search"></i>
+                Analyze Resume
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- What You'll Get Card -->
+        <div class="info-card">
+          <div class="info-header">
+            <h3><i class="fas fa-chart-line me-2"></i>What You'll Get</h3>
+            <p>Comprehensive analysis and actionable insights</p>
+          </div>
+          <div class="info-content">
+            <div class="feature-grid">
+              <div class="feature-item">
+                <div class="feature-icon primary">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>ATS Score (0-100)</h4>
+                  <p>How well your resume matches job requirements</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon success">
+                  <i class="fas fa-plus-circle"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>Strengths Analysis</h4>
+                  <p>What you're doing right and should highlight</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon warning">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>Areas for Improvement</h4>
+                  <p>Specific feedback on what needs enhancement</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon info">
+                  <i class="fas fa-lightbulb"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>Smart Recommendations</h4>
+                  <p>Actionable advice to improve your resume</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon danger">
+                  <i class="fas fa-gap"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>Skills Gap Analysis</h4>
+                  <p>Identify missing competencies and requirements</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon success">
+                  <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>Upskilling Suggestions</h4>
+                  <p>Learning recommendations to bridge gaps</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pro Tips Card -->
+        <div class="info-card">
+          <div class="info-header">
+            <h3>
+              <i class="fas fa-lightbulb me-2"></i>Pro Tips for Better Results
+            </h3>
+            <p>Follow these guidelines for optimal analysis</p>
+          </div>
+          <div class="info-content">
+            <ul class="tips-list">
+              <li>
+                <i class="fas fa-check-circle"></i>
+                <span>Use a text-based PDF (not scanned images)</span>
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i>
+                <span>Include the complete job description</span>
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i>
+                <span>Make sure your resume is up-to-date</span>
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i>
+                <span
+                  >Use standard section headers (Experience, Education,
+                  Skills)</span
+                >
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i>
+                <span>Include relevant keywords from the job description</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-// File upload handling
-document.addEventListener('DOMContentLoaded', function() {
+  // File upload handling
+  document.addEventListener("DOMContentLoaded", function () {
     const fileInput = document.querySelector('input[type="file"]');
-    const fileUploadArea = document.getElementById('fileUploadArea');
-    const selectedFile = document.getElementById('selectedFile');
-    const fileName = document.getElementById('fileName');
-    
+    const fileUploadArea = document.getElementById("fileUploadArea");
+    const selectedFile = document.getElementById("selectedFile");
+    const fileName = document.getElementById("fileName");
+
     // Flag to prevent multiple file dialogs
     let isFileDialogOpen = false;
 
     // Handle file selection
-    fileInput.addEventListener('change', function(e) {
-        isFileDialogOpen = false;
-        const file = e.target.files[0];
-        if (file) {
-            fileName.textContent = file.name;
-            selectedFile.style.display = 'flex';
-            fileUploadArea.style.borderColor = 'var(--success-color)';
-            fileUploadArea.style.background = 'rgba(16, 185, 129, 0.1)';
-        } else {
-            selectedFile.style.display = 'none';
-            fileUploadArea.style.borderColor = 'var(--border-color)';
-            fileUploadArea.style.background = 'var(--light-color)';
-        }
+    fileInput.addEventListener("change", function (e) {
+      isFileDialogOpen = false;
+      const file = e.target.files[0];
+      if (file) {
+        fileName.textContent = file.name;
+        selectedFile.style.display = "flex";
+        fileUploadArea.style.borderColor = "var(--success-color)";
+        fileUploadArea.style.background = "rgba(16, 185, 129, 0.1)";
+      } else {
+        selectedFile.style.display = "none";
+        fileUploadArea.style.borderColor = "var(--border-color)";
+        fileUploadArea.style.background = "var(--light-color)";
+      }
     });
 
     // Drag and drop functionality
-    fileUploadArea.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        fileUploadArea.classList.add('dragover');
+    fileUploadArea.addEventListener("dragover", function (e) {
+      e.preventDefault();
+      fileUploadArea.classList.add("dragover");
     });
 
-    fileUploadArea.addEventListener('dragleave', function(e) {
-        e.preventDefault();
-        fileUploadArea.classList.remove('dragover');
+    fileUploadArea.addEventListener("dragleave", function (e) {
+      e.preventDefault();
+      fileUploadArea.classList.remove("dragover");
     });
 
-    fileUploadArea.addEventListener('drop', function(e) {
-        e.preventDefault();
-        fileUploadArea.classList.remove('dragover');
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            fileInput.files = files;
-            fileInput.dispatchEvent(new Event('change'));
-        }
+    fileUploadArea.addEventListener("drop", function (e) {
+      e.preventDefault();
+      fileUploadArea.classList.remove("dragover");
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        fileInput.files = files;
+        fileInput.dispatchEvent(new Event("change"));
+      }
     });
 
     // Click to upload - prevent double dialog
-    fileUploadArea.addEventListener('click', function(e) {
-        // Prevent if clicking on the file input itself or if dialog is already open
-        if (e.target === fileInput || isFileDialogOpen) {
-            return;
-        }
-        
-        // Set flag to prevent multiple dialogs
-        isFileDialogOpen = true;
-        
-        // Prevent default to avoid double triggering
+    fileUploadArea.addEventListener("click", function (e) {
+      // Prevent if clicking on the file input itself or if dialog is already open
+      if (e.target === fileInput || isFileDialogOpen) {
+        return;
+      }
+
+      // Set flag to prevent multiple dialogs
+      isFileDialogOpen = true;
+
+      // Prevent default to avoid double triggering
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Trigger file input click
+      fileInput.click();
+
+      // Reset flag after a short delay
+      setTimeout(() => {
+        isFileDialogOpen = false;
+      }, 1000);
+    });
+
+    // Also handle direct file input clicks to prevent double dialogs
+    fileInput.addEventListener("click", function (e) {
+      if (isFileDialogOpen) {
         e.preventDefault();
         e.stopPropagation();
-        
-        // Trigger file input click
-        fileInput.click();
-        
-        // Reset flag after a short delay
-        setTimeout(() => {
-            isFileDialogOpen = false;
-        }, 1000);
+        return;
+      }
+      isFileDialogOpen = true;
+      setTimeout(() => {
+        isFileDialogOpen = false;
+      }, 1000);
     });
-    
-    // Also handle direct file input clicks to prevent double dialogs
-    fileInput.addEventListener('click', function(e) {
-        if (isFileDialogOpen) {
-            e.preventDefault();
-            e.stopPropagation();
-            return;
-        }
-        isFileDialogOpen = true;
-        setTimeout(() => {
-            isFileDialogOpen = false;
-        }, 1000);
-    });
-});
+  });
 </script>
-{% endblock %} 
+{% endblock %}
