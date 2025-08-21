@@ -1,672 +1,721 @@
-{% extends 'base.html' %}
-
-{% block title %}Learning Path Analyzer - HireVision{% endblock %}
-
-{% block extra_css %}
+{% extends 'base.html' %} {% block title %}Personalized Learning Path-
+HireVision{% endblock %} {% block extra_css %}
 <style>
-    .learning-container {
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        min-height: 100vh;
-        padding: 2rem 0;
-    }
+  .learning-container {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+  }
 
-    .learning-header {
-        text-align: center;
-        margin-bottom: 3rem;
-        padding: 2rem 0;
-    }
+  .learning-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+  }
 
+  .learning-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin-bottom: 1rem;
+    background: linear-gradient(
+      135deg,
+      var(--primary-color) 0%,
+      var(--accent-color) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .learning-subtitle {
+    font-size: 1.25rem;
+    color: var(--secondary-color);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .journey-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: none;
+    margin-bottom: 2rem;
+  }
+
+  .journey-header {
+    background: linear-gradient(
+      135deg,
+      var(--primary-color) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .journey-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+  }
+
+  .journey-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .journey-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .journey-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+    line-height: 1.6;
+  }
+
+  .journey-body {
+    padding: 2rem;
+  }
+
+  .form-section {
+    margin-bottom: 2rem;
+  }
+
+  .form-section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .form-section-title i {
+    margin-right: 0.75rem;
+    color: var(--primary-color);
+    width: 20px;
+    text-align: center;
+  }
+
+  .form-control {
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+    resize: vertical;
+  }
+
+  .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    outline: none;
+  }
+
+  .form-text {
+    font-size: 0.875rem;
+    color: var(--secondary-color);
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .form-text i {
+    margin-right: 0.5rem;
+    color: var(--primary-color);
+  }
+
+  .btn-generate {
+    background: linear-gradient(
+      135deg,
+      var(--primary-color) 0%,
+      var(--primary-dark) 100%
+    );
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .btn-generate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+    color: white;
+  }
+
+  .info-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: none;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+  }
+
+  .info-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .info-header {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .info-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .info-content {
+    padding: 2rem;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--light-color);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .feature-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .feature-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .feature-icon.primary {
+    background: linear-gradient(
+      135deg,
+      var(--primary-color) 0%,
+      var(--primary-dark) 100%
+    );
+  }
+
+  .feature-icon.success {
+    background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+  }
+
+  .feature-icon.danger {
+    background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
+  }
+
+  .feature-icon.info {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  }
+
+  .feature-icon.warning {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
+  }
+
+  .feature-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.25rem;
+  }
+
+  .feature-content p {
+    font-size: 0.875rem;
+    color: var(--secondary-color);
+    margin-bottom: 0;
+    line-height: 1.4;
+  }
+
+  .tips-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .tips-list li {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--light-color);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .tips-list li:hover {
+    transform: translateX(4px);
+    background: rgba(37, 99, 235, 0.05);
+  }
+
+  .tips-list li:last-child {
+    margin-bottom: 0;
+  }
+
+  .tips-list i {
+    color: var(--success-color);
+    font-size: 1.2rem;
+    width: 20px;
+    text-align: center;
+  }
+
+  .tips-list span {
+    font-weight: 500;
+    color: var(--dark-color);
+  }
+
+  .example-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: none;
+    margin-bottom: 2rem;
+  }
+
+  .example-header {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .example-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .example-content {
+    padding: 2rem;
+  }
+
+  .example-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+
+  .example-section {
+    background: var(--light-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 4px solid var(--primary-color);
+  }
+
+  .example-section h4 {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .example-section h4 i {
+    margin-right: 0.5rem;
+  }
+
+  .example-text {
+    color: var(--secondary-color);
+    line-height: 1.6;
+    font-size: 0.9rem;
+    margin-bottom: 0;
+  }
+
+  .progress-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(37, 99, 235, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(37, 99, 235, 0.1);
+  }
+
+  .progress-step {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--secondary-color);
+    font-size: 0.875rem;
+  }
+
+  .progress-step.active {
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+
+  .progress-step i {
+    width: 20px;
+    text-align: center;
+  }
+
+  @media (max-width: 768px) {
     .learning-title {
-        font-size: 3rem;
-        font-weight: 700;
-        color: var(--dark-color);
-        margin-bottom: 1rem;
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .learning-subtitle {
-        font-size: 1.25rem;
-        color: var(--secondary-color);
-        max-width: 600px;
-        margin: 0 auto;
-        line-height: 1.6;
-    }
-
-    .journey-card {
-        background: white;
-        border-radius: 20px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        border: none;
-        margin-bottom: 2rem;
-    }
-
-    .journey-header {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-        color: white;
-        padding: 2rem;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .journey-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-        opacity: 0.3;
-    }
-
-    .journey-content {
-        position: relative;
-        z-index: 2;
-    }
-
-    .journey-title {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-
-    .journey-subtitle {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        margin-bottom: 0;
-        line-height: 1.6;
+      font-size: 2.5rem;
     }
 
     .journey-body {
-        padding: 2rem;
-    }
-
-    .form-section {
-        margin-bottom: 2rem;
-    }
-
-    .form-section-title {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: var(--dark-color);
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-    }
-
-    .form-section-title i {
-        margin-right: 0.75rem;
-        color: var(--primary-color);
-        width: 20px;
-        text-align: center;
-    }
-
-    .form-control {
-        border: 2px solid var(--border-color);
-        border-radius: 12px;
-        padding: 1rem;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        background: white;
-        resize: vertical;
-    }
-
-    .form-control:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        outline: none;
-    }
-
-    .form-text {
-        font-size: 0.875rem;
-        color: var(--secondary-color);
-        margin-top: 0.5rem;
-        display: flex;
-        align-items: center;
-    }
-
-    .form-text i {
-        margin-right: 0.5rem;
-        color: var(--primary-color);
-    }
-
-    .btn-generate {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-        border: none;
-        border-radius: 12px;
-        padding: 1rem 2rem;
-        font-weight: 600;
-        font-size: 1.1rem;
-        color: white;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        width: 100%;
-    }
-
-    .btn-generate:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
-        color: white;
-    }
-
-    .info-card {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        border: none;
-        margin-bottom: 2rem;
-        transition: all 0.3s ease;
-    }
-
-    .info-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-    }
-
-    .info-header {
-        background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
-        color: white;
-        padding: 1.5rem;
-        text-align: center;
-    }
-
-    .info-header h3 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-
-    .info-content {
-        padding: 2rem;
+      padding: 1.5rem;
     }
 
     .feature-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .feature-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 1rem;
-        padding: 1rem;
-        background: var(--light-color);
-        border-radius: 12px;
-        transition: all 0.3s ease;
-    }
-
-    .feature-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .feature-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        color: white;
-        flex-shrink: 0;
-    }
-
-    .feature-icon.primary {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-    }
-
-    .feature-icon.success {
-        background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
-    }
-
-    .feature-icon.danger {
-        background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
-    }
-
-    .feature-icon.info {
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    }
-
-    .feature-icon.warning {
-        background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
-    }
-
-    .feature-content h4 {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--dark-color);
-        margin-bottom: 0.25rem;
-    }
-
-    .feature-content p {
-        font-size: 0.875rem;
-        color: var(--secondary-color);
-        margin-bottom: 0;
-        line-height: 1.4;
-    }
-
-    .tips-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .tips-list li {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 1rem;
-        background: var(--light-color);
-        border-radius: 12px;
-        margin-bottom: 1rem;
-        transition: all 0.3s ease;
-    }
-
-    .tips-list li:hover {
-        transform: translateX(4px);
-        background: rgba(37, 99, 235, 0.05);
-    }
-
-    .tips-list li:last-child {
-        margin-bottom: 0;
-    }
-
-    .tips-list i {
-        color: var(--success-color);
-        font-size: 1.2rem;
-        width: 20px;
-        text-align: center;
-    }
-
-    .tips-list span {
-        font-weight: 500;
-        color: var(--dark-color);
-    }
-
-    .example-card {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        border: none;
-        margin-bottom: 2rem;
-    }
-
-    .example-header {
-        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-        color: white;
-        padding: 1.5rem;
-        text-align: center;
-    }
-
-    .example-header h3 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-
-    .example-content {
-        padding: 2rem;
+      grid-template-columns: 1fr;
     }
 
     .example-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-    }
-
-    .example-section {
-        background: var(--light-color);
-        border-radius: 12px;
-        padding: 1.5rem;
-        border-left: 4px solid var(--primary-color);
-    }
-
-    .example-section h4 {
-        color: var(--primary-color);
-        font-weight: 600;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-    }
-
-    .example-section h4 i {
-        margin-right: 0.5rem;
-    }
-
-    .example-text {
-        color: var(--secondary-color);
-        line-height: 1.6;
-        font-size: 0.9rem;
-        margin-bottom: 0;
+      grid-template-columns: 1fr;
     }
 
     .progress-indicator {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 1rem;
-        margin-top: 1rem;
-        padding: 1rem;
-        background: rgba(37, 99, 235, 0.05);
-        border-radius: 12px;
-        border: 1px solid rgba(37, 99, 235, 0.1);
+      flex-direction: column;
+      gap: 0.5rem;
     }
-
-    .progress-step {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: var(--secondary-color);
-        font-size: 0.875rem;
-    }
-
-    .progress-step.active {
-        color: var(--primary-color);
-        font-weight: 600;
-    }
-
-    .progress-step i {
-        width: 20px;
-        text-align: center;
-    }
-
-    @media (max-width: 768px) {
-        .learning-title {
-            font-size: 2.5rem;
-        }
-        
-        .journey-body {
-            padding: 1.5rem;
-        }
-        
-        .feature-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .example-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .progress-indicator {
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-    }
+  }
 </style>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="learning-container">
-    <div class="container">
-        <!-- Header -->
-        <div class="learning-header">
-            <h1 class="learning-title">Learning Path Analyzer</h1>
-            <p class="learning-subtitle">AI-Powered Career Roadmap to Your Dream Role</p>
-        </div>
-
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <!-- Journey Planning Card -->
-                <div class="journey-card">
-                    <div class="journey-header">
-                        <div class="journey-content">
-                            <h2 class="journey-title">
-                                <i class="fas fa-road me-2"></i>Plan Your Learning Journey
-                            </h2>
-                            <p class="journey-subtitle">Tell us about your current skills and dream role to get a personalized roadmap</p>
-                        </div>
-                    </div>
-                    
-                    <div class="journey-body">
-                        {% if messages %}
-                            {% for message in messages %}
-                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-
-                        <form method="post" id="learningForm">
-                            {% csrf_token %}
-                            
-                            <!-- Current Skills Section -->
-                            <div class="form-section">
-                                <h3 class="form-section-title">
-                                    <i class="fas fa-user-graduate"></i>
-                                    Your Current Skills & Background
-                                </h3>
-                                
-                                {{ form.current_skills }}
-                                {% if form.current_skills.errors %}
-                                    <div class="text-danger mt-2">
-                                        {% for error in form.current_skills.errors %}
-                                            <small>{{ error }}</small>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle"></i>
-                                    Describe your current skills, experience, education, and background in detail
-                                </div>
-                            </div>
-                            
-                            <!-- Dream Role Section -->
-                            <div class="form-section">
-                                <h3 class="form-section-title">
-                                    <i class="fas fa-briefcase"></i>
-                                    Your Dream Role
-                                </h3>
-                                
-                                {{ form.dream_role }}
-                                {% if form.dream_role.errors %}
-                                    <div class="text-danger mt-2">
-                                        {% for error in form.dream_role.errors %}
-                                            <small>{{ error }}</small>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle"></i>
-                                    Be specific about the role you want to achieve (e.g., Senior Software Engineer, Data Scientist)
-                                </div>
-                            </div>
-                            
-                            <!-- Progress Indicator -->
-                            <div class="progress-indicator">
-                                <div class="progress-step active">
-                                    <i class="fas fa-edit"></i>
-                                    <span>Input Details</span>
-                                </div>
-                                <i class="fas fa-arrow-right text-muted"></i>
-                                <div class="progress-step">
-                                    <i class="fas fa-cog"></i>
-                                    <span>AI Analysis</span>
-                                </div>
-                                <i class="fas fa-arrow-right text-muted"></i>
-                                <div class="progress-step">
-                                    <i class="fas fa-road"></i>
-                                    <span>Get Roadmap</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Submit Button -->
-                            <button type="submit" class="btn-generate">
-                                <i class="fas fa-magic"></i>
-                                Generate Learning Path
-                            </button>
-                        </form>
-                    </div>
-                </div>
-                
-                <!-- What You'll Get Card -->
-                <div class="info-card">
-                    <div class="info-header">
-                        <h3><i class="fas fa-gift me-2"></i>What You'll Get</h3>
-                        <p>Comprehensive career roadmap and actionable insights</p>
-                    </div>
-                    <div class="info-content">
-                        <div class="feature-grid">
-                            <div class="feature-item">
-                                <div class="feature-icon primary">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <div class="feature-content">
-                                    <h4>Role Analysis</h4>
-                                    <p>Detailed breakdown of your target role requirements and expectations</p>
-                                </div>
-                            </div>
-                            <div class="feature-item">
-                                <div class="feature-icon danger">
-                                    <i class="fas fa-gap"></i>
-                                </div>
-                                <div class="feature-content">
-                                    <h4>Skills Gap Analysis</h4>
-                                    <p>Identify exactly what skills and knowledge you need to acquire</p>
-                                </div>
-                            </div>
-                            <div class="feature-item">
-                                <div class="feature-icon success">
-                                    <i class="fas fa-road"></i>
-                                </div>
-                                <div class="feature-content">
-                                    <h4>Phase-by-Phase Plan</h4>
-                                    <p>Structured learning approach with clear milestones and timelines</p>
-                                </div>
-                            </div>
-                            <div class="feature-item">
-                                <div class="feature-icon info">
-                                    <i class="fas fa-book"></i>
-                                </div>
-                                <div class="feature-content">
-                                    <h4>Curated Resources</h4>
-                                    <p>Specific courses, books, and materials tailored to your goals</p>
-                                </div>
-                            </div>
-                            <div class="feature-item">
-                                <div class="feature-icon success">
-                                    <i class="fas fa-code"></i>
-                                </div>
-                                <div class="feature-content">
-                                    <h4>Hands-on Projects</h4>
-                                    <p>Portfolio-building opportunities to showcase your skills</p>
-                                </div>
-                            </div>
-                            <div class="feature-item">
-                                <div class="feature-icon warning">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                                <div class="feature-content">
-                                    <h4>Timeline & Metrics</h4>
-                                    <p>Track your progress with realistic timelines and success metrics</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Tips Card -->
-                <div class="info-card">
-                    <div class="info-header">
-                        <h3><i class="fas fa-lightbulb me-2"></i>Tips for Better Results</h3>
-                        <p>Follow these guidelines for optimal analysis</p>
-                    </div>
-                    <div class="info-content">
-                        <ul class="tips-list">
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span>Be detailed about your current skills and experience</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span>Specify the exact role title you're targeting</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span>Include your educational background and certifications</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span>Mention any relevant projects or achievements</span>
-                            </li>
-                            <li>
-                                <i class="fas fa-check-circle"></i>
-                                <span>Describe your current industry and experience level</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <!-- Example Card -->
-                <div class="example-card">
-                    <div class="example-header">
-                        <h3><i class="fas fa-eye me-2"></i>Example Input</h3>
-                        <p>See how others structure their information for better results</p>
-                    </div>
-                    <div class="example-content">
-                        <div class="example-grid">
-                            <div class="example-section">
-                                <h4>
-                                    <i class="fas fa-user-graduate"></i>
-                                    Current Skills & Background
-                                </h4>
-                                <p class="example-text">
-                                    "I have a Bachelor's in Computer Science with 2 years of experience as a Junior Developer. 
-                                    I know Python, JavaScript, HTML/CSS, and basic SQL. I've worked on web applications using 
-                                    Django and React. I'm comfortable with Git and have some experience with AWS. I've completed 
-                                    a few personal projects including a task management app and a weather dashboard."
-                                </p>
-                            </div>
-                            <div class="example-section">
-                                <h4>
-                                    <i class="fas fa-briefcase"></i>
-                                    Dream Role
-                                </h4>
-                                <p class="example-text">
-                                    "Senior Software Engineer specializing in backend development with expertise in 
-                                    microservices architecture, cloud technologies, and team leadership. I want to work 
-                                    at a tech company that values innovation and continuous learning."
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="container">
+    <!-- Header -->
+    <div class="learning-header">
+      <h1 class="learning-title">Personalized Pathway Generator</h1>
+      <p class="learning-subtitle">
+        AI-Powered Career Roadmap to Your Dream Role
+      </p>
     </div>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <!-- Journey Planning Card -->
+        <div class="journey-card">
+          <div class="journey-header">
+            <div class="journey-content">
+              <h2 class="journey-title">
+                <i class="fas fa-road me-2"></i>Plan Your Learning Journey
+              </h2>
+              <p class="journey-subtitle">
+                Tell us about your current skills and dream role to get a
+                personalized roadmap
+              </p>
+            </div>
+          </div>
+
+          <div class="journey-body">
+            {% if messages %} {% for message in messages %}
+            <div
+              class="alert alert-{{ message.tags }} alert-dismissible fade show"
+              role="alert"
+            >
+              {{ message }}
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+              ></button>
+            </div>
+            {% endfor %} {% endif %}
+
+            <form method="post" id="learningForm">
+              {% csrf_token %}
+
+              <!-- Current Skills Section -->
+              <div class="form-section">
+                <h3 class="form-section-title">
+                  <i class="fas fa-user-graduate"></i>
+                  Your Current Skills & Background
+                </h3>
+
+                {{ form.current_skills }} {% if form.current_skills.errors %}
+                <div class="text-danger mt-2">
+                  {% for error in form.current_skills.errors %}
+                  <small>{{ error }}</small>
+                  {% endfor %}
+                </div>
+                {% endif %}
+                <div class="form-text">
+                  <i class="fas fa-info-circle"></i>
+                  Describe your current skills, experience, education, and
+                  background in detail
+                </div>
+              </div>
+
+              <!-- Dream Role Section -->
+              <div class="form-section">
+                <h3 class="form-section-title">
+                  <i class="fas fa-briefcase"></i>
+                  Your Dream Role
+                </h3>
+
+                {{ form.dream_role }} {% if form.dream_role.errors %}
+                <div class="text-danger mt-2">
+                  {% for error in form.dream_role.errors %}
+                  <small>{{ error }}</small>
+                  {% endfor %}
+                </div>
+                {% endif %}
+                <div class="form-text">
+                  <i class="fas fa-info-circle"></i>
+                  Be specific about the role you want to achieve (e.g., Senior
+                  Software Engineer, Data Scientist)
+                </div>
+              </div>
+
+              <!-- Progress Indicator -->
+              <div class="progress-indicator">
+                <div class="progress-step active">
+                  <i class="fas fa-edit"></i>
+                  <span>Input Details</span>
+                </div>
+                <i class="fas fa-arrow-right text-muted"></i>
+                <div class="progress-step">
+                  <i class="fas fa-cog"></i>
+                  <span>AI Analysis</span>
+                </div>
+                <i class="fas fa-arrow-right text-muted"></i>
+                <div class="progress-step">
+                  <i class="fas fa-road"></i>
+                  <span>Get Roadmap</span>
+                </div>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="btn-generate">
+                <i class="fas fa-magic"></i>
+                Generate Learning Path
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- What You'll Get Card -->
+        <div class="info-card">
+          <div class="info-header">
+            <h3><i class="fas fa-gift me-2"></i>What You'll Get</h3>
+            <p>Comprehensive career roadmap and actionable insights</p>
+          </div>
+          <div class="info-content">
+            <div class="feature-grid">
+              <div class="feature-item">
+                <div class="feature-icon primary">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>Role Analysis</h4>
+                  <p>
+                    Detailed breakdown of your target role requirements and
+                    expectations
+                  </p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon danger">
+                  <i class="fas fa-gap"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>Skills Gap Analysis</h4>
+                  <p>
+                    Identify exactly what skills and knowledge you need to
+                    acquire
+                  </p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon success">
+                  <i class="fas fa-road"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>Phase-by-Phase Plan</h4>
+                  <p>
+                    Structured learning approach with clear milestones and
+                    timelines
+                  </p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon info">
+                  <i class="fas fa-book"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>Curated Resources</h4>
+                  <p>
+                    Specific courses, books, and materials tailored to your
+                    goals
+                  </p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon success">
+                  <i class="fas fa-code"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>Hands-on Projects</h4>
+                  <p>
+                    Portfolio-building opportunities to showcase your skills
+                  </p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon warning">
+                  <i class="fas fa-clock"></i>
+                </div>
+                <div class="feature-content">
+                  <h4>Timeline & Metrics</h4>
+                  <p>
+                    Track your progress with realistic timelines and success
+                    metrics
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tips Card -->
+        <div class="info-card">
+          <div class="info-header">
+            <h3>
+              <i class="fas fa-lightbulb me-2"></i>Tips for Better Results
+            </h3>
+            <p>Follow these guidelines for optimal analysis</p>
+          </div>
+          <div class="info-content">
+            <ul class="tips-list">
+              <li>
+                <i class="fas fa-check-circle"></i>
+                <span
+                  >Be detailed about your current skills and experience</span
+                >
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i>
+                <span>Specify the exact role title you're targeting</span>
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i>
+                <span
+                  >Include your educational background and certifications</span
+                >
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i>
+                <span>Mention any relevant projects or achievements</span>
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i>
+                <span>Describe your current industry and experience level</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Example Card -->
+        <div class="example-card">
+          <div class="example-header">
+            <h3><i class="fas fa-eye me-2"></i>Example Input</h3>
+            <p>See how others structure their information for better results</p>
+          </div>
+          <div class="example-content">
+            <div class="example-grid">
+              <div class="example-section">
+                <h4>
+                  <i class="fas fa-user-graduate"></i>
+                  Current Skills & Background
+                </h4>
+                <p class="example-text">
+                  "I have a Bachelor's in Computer Science with 2 years of
+                  experience as a Junior Developer. I know Python, JavaScript,
+                  HTML/CSS, and basic SQL. I've worked on web applications using
+                  Django and React. I'm comfortable with Git and have some
+                  experience with AWS. I've completed a few personal projects
+                  including a task management app and a weather dashboard."
+                </p>
+              </div>
+              <div class="example-section">
+                <h4>
+                  <i class="fas fa-briefcase"></i>
+                  Dream Role
+                </h4>
+                <p class="example-text">
+                  "Senior Software Engineer specializing in backend development
+                  with expertise in microservices architecture, cloud
+                  technologies, and team leadership. I want to work at a tech
+                  company that values innovation and continuous learning."
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('learningForm');
-    const submitBtn = document.querySelector('.btn-generate');
-    
-    form.addEventListener('submit', function() {
-        // Show loading state
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-        submitBtn.disabled = true;
-        
-        // Re-enable after a delay (in case of validation errors)
-        setTimeout(() => {
-            submitBtn.innerHTML = '<i class="fas fa-magic"></i> Generate Learning Path';
-            submitBtn.disabled = false;
-        }, 5000);
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("learningForm");
+    const submitBtn = document.querySelector(".btn-generate");
+
+    form.addEventListener("submit", function () {
+      // Show loading state
+      submitBtn.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i> Generating...';
+      submitBtn.disabled = true;
+
+      // Re-enable after a delay (in case of validation errors)
+      setTimeout(() => {
+        submitBtn.innerHTML =
+          '<i class="fas fa-magic"></i> Generate Learning Path';
+        submitBtn.disabled = false;
+      }, 5000);
     });
-});
+  });
 </script>
-{% endblock %} 
+{% endblock %}
