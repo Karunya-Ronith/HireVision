@@ -153,16 +153,40 @@ This will show you the interface without requiring an API key.
         You have hired thousands of candidates and have an exceptional eye for talent evaluation.
         
         Your task is to critically analyze the following resume against the job description with the expertise 
-        of a senior HR executive who has seen tens of thousands of resumes.
+        of a senior HR executive who has seen tens of thousands of resumes. You are a STRICT but FAIR judge 
+        who must differentiate clearly between strong and weak candidates.
         
-        **CRITICAL ANALYSIS REQUIREMENTS:**
-        1. **ATS Score (0-100)** - Be LENIENT and FAIR in your scoring. Consider that candidates often have 
-           transferable skills and potential that may not be immediately obvious. Don't be overly strict.
-        2. **Comprehensive Strengths Analysis** - Identify ALL strengths, including soft skills, potential, 
-           and transferable experience
-        3. **Constructive Weaknesses** - Provide specific, actionable feedback that helps the candidate improve
-        4. **Skills Gap Analysis** - Identify missing skills with realistic assessment of learning difficulty
-        5. **Strategic Recommendations** - Provide specific, actionable advice for improvement
+        **CRITICAL SCREENING REQUIREMENTS:**
+        1. **ATS Score (0-100)** - Be STRICT and DISCRIMINATING in your scoring:
+           - **0-20**: No resume provided, completely unacceptable
+           - **21-40**: Poor resume with major issues (formatting, missing key sections, irrelevant content)
+           - **41-60**: Below average resume with significant gaps or weak presentation
+           - **61-75**: Average resume with room for improvement
+           - **76-85**: Good resume with some strong points
+           - **86-95**: Excellent resume with minor areas for improvement
+           - **96-100**: Outstanding resume that clearly demonstrates exceptional qualifications
+        
+        2. **Severe Penalties**:
+           - NO RESUME PROVIDED: Automatic score of 0-10 with clear explanation
+           - Missing key sections (experience, education, skills): -20 points
+           - Poor formatting or unprofessional presentation: -15 points
+           - Irrelevant or generic content: -10 points
+           - Spelling/grammar errors: -5 points per major error
+        
+        3. **Score Differentiation**:
+           - Clearly distinguish between candidates with similar backgrounds
+           - Reward specific achievements, quantifiable results, and relevant experience
+           - Penalize generic statements, lack of specificity, and poor organization
+           - Consider industry standards and role requirements strictly
+        
+        4. **Comprehensive Strengths Analysis** - Identify ALL strengths, including soft skills, potential, 
+           and transferable experience, but be realistic about their impact
+        
+        5. **Constructive Weaknesses** - Provide specific, actionable feedback that helps the candidate improve
+        
+        6. **Skills Gap Analysis** - Identify missing skills with realistic assessment of learning difficulty
+        
+        7. **Strategic Recommendations** - Provide specific, actionable advice for improvement
         
         **RESUME TO ANALYZE:**
         {resume_text}
@@ -171,11 +195,14 @@ This will show you the interface without requiring an API key.
         {job_description}
         
         **ANALYSIS INSTRUCTIONS:**
-        - Be thorough but fair in your assessment
-        - Consider both explicit and implicit qualifications
-        - Provide constructive, actionable feedback
-        - Be encouraging while being honest about areas for improvement
-        - Consider the candidate's potential and growth trajectory
+        - Be STRICT and DISCRIMINATING in your assessment - differentiate clearly between candidates
+        - Apply severe penalties for missing resumes, poor formatting, and unprofessional content
+        - Consider both explicit and implicit qualifications, but prioritize demonstrated skills
+        - Provide constructive, actionable feedback that addresses specific deficiencies
+        - Be honest about areas for improvement - do not sugarcoat weaknesses
+        - Consider the candidate's potential but base scoring primarily on current qualifications
+        - Reward specific achievements, quantifiable results, and relevant experience
+        - Penalize generic statements, lack of specificity, and poor organization
         
         Please provide your analysis in the following JSON format:
         {{
@@ -189,7 +216,7 @@ This will show you the interface without requiring an API key.
             "overall_assessment": "<comprehensive_assessment_with_encouraging_tone>"
         }}
         
-        Remember: You are evaluating a real person's career prospects. Be thorough, fair, and constructive.
+        Remember: You are evaluating a real person's career prospects in a competitive job market. Be thorough, strict, and discriminating to help employers identify the best candidates. Apply penalties consistently and differentiate clearly between strong and weak resumes.
         """
 
         logger.debug(f"Prompt length: {len(prompt)} characters")
@@ -213,7 +240,7 @@ This will show you the interface without requiring an API key.
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are a top 1% HR manager with exceptional talent evaluation skills. Provide thorough, fair, and constructive resume analysis.",
+                        "content": "You are a top 1% HR manager with exceptional talent evaluation skills. You are a strict but fair judge who must differentiate clearly between strong and weak candidates. Apply severe penalties for missing resumes and poor quality content.",
                     },
                     {"role": "user", "content": prompt},
                 ],
