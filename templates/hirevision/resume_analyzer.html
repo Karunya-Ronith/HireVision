@@ -570,9 +570,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const fileUploadArea = document.getElementById('fileUploadArea');
     const selectedFile = document.getElementById('selectedFile');
     const fileName = document.getElementById('fileName');
+    
+    // Flag to prevent multiple file dialogs
+    let isFileDialogOpen = false;
 
     // Handle file selection
     fileInput.addEventListener('change', function(e) {
+        isFileDialogOpen = false;
         const file = e.target.files[0];
         if (file) {
             fileName.textContent = file.name;
@@ -607,9 +611,40 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Click to upload
-    fileUploadArea.addEventListener('click', function() {
+    // Click to upload - prevent double dialog
+    fileUploadArea.addEventListener('click', function(e) {
+        // Prevent if clicking on the file input itself or if dialog is already open
+        if (e.target === fileInput || isFileDialogOpen) {
+            return;
+        }
+        
+        // Set flag to prevent multiple dialogs
+        isFileDialogOpen = true;
+        
+        // Prevent default to avoid double triggering
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Trigger file input click
         fileInput.click();
+        
+        // Reset flag after a short delay
+        setTimeout(() => {
+            isFileDialogOpen = false;
+        }, 1000);
+    });
+    
+    // Also handle direct file input clicks to prevent double dialogs
+    fileInput.addEventListener('click', function(e) {
+        if (isFileDialogOpen) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
+        isFileDialogOpen = true;
+        setTimeout(() => {
+            isFileDialogOpen = false;
+        }, 1000);
     });
 });
 </script>
