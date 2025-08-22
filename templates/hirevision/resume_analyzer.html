@@ -435,14 +435,16 @@ HireVision{%endblock %} {% block extra_css %}
                     <i class="fas fa-cloud-upload-alt"></i>
                   </div>
                   <div class="file-upload-text">Choose your resume file</div>
-                  <div class="file-upload-hint">PDF (Max 10MB)</div>
-                  {{ form.resume_file }} {% if form.resume_file.errors %}
-                  <div class="text-danger mt-2">
-                    {% for error in form.resume_file.errors %}
-                    <small>{{ error }}</small>
-                    {% endfor %}
+                  <div class="file-upload-hint">PDF files only (Max 10MB)</div>
+                  {{ form.resume_file }}
+                  <!-- Hidden error container for JavaScript -->
+                  <div id="fileErrorContainer" style="display: none;">
+                    {% if form.resume_file.errors %}
+                      {% for error in form.resume_file.errors %}
+                        {{ error }}
+                      {% endfor %}
+                    {% endif %}
                   </div>
-                  {% endif %}
                 </div>
                 <div
                   id="selectedFile"
@@ -461,13 +463,15 @@ HireVision{%endblock %} {% block extra_css %}
                   Job Description
                 </h3>
 
-                {{ form.job_description }} {% if form.job_description.errors %}
-                <div class="text-danger mt-2">
-                  {% for error in form.job_description.errors %}
-                  <small>{{ error }}</small>
-                  {% endfor %}
+                {{ form.job_description }}
+                <!-- Hidden error container for JavaScript -->
+                <div id="jobDescriptionErrorContainer" style="display: none;">
+                  {% if form.job_description.errors %}
+                    {% for error in form.job_description.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  {% endif %}
                 </div>
-                {% endif %}
                 <div class="form-text">
                   <i class="fas fa-info-circle me-1"></i>
                   Paste the complete job description to get accurate analysis
@@ -597,19 +601,57 @@ HireVision{%endblock %} {% block extra_css %}
     const fileUploadArea = document.getElementById("fileUploadArea");
     const selectedFile = document.getElementById("selectedFile");
     const fileName = document.getElementById("fileName");
+    const resumeForm = document.getElementById("resumeForm");
 
     // Flag to prevent multiple file dialogs
     let isFileDialogOpen = false;
+
+    // Function to show notification
+    function showNotification(message, type = 'error') {
+      // Check if the notification function exists (from base.html)
+      if (typeof showToast === 'function') {
+        showToast('File Upload Error', message, type);
+      } else {
+        // Fallback: create a simple alert
+        alert(message);
+      }
+    }
 
     // Handle file selection
     fileInput.addEventListener("change", function (e) {
       isFileDialogOpen = false;
       const file = e.target.files[0];
       if (file) {
-        fileName.textContent = file.name;
+        // Validate file type
+        const fileName = file.name.toLowerCase();
+        if (!fileName.endsWith('.pdf')) {
+          showNotification('Only PDF files are allowed. Please select a PDF file.', 'error');
+          // Clear the file input
+          fileInput.value = '';
+          selectedFile.style.display = "none";
+          fileUploadArea.style.borderColor = "var(--border-color)";
+          fileUploadArea.style.background = "var(--light-color)";
+          return;
+        }
+
+        // Validate file size (10MB limit)
+        const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+        if (file.size > maxSize) {
+          showNotification('File size must be under 10MB. Please select a smaller file.', 'error');
+          // Clear the file input
+          fileInput.value = '';
+          selectedFile.style.display = "none";
+          fileUploadArea.style.borderColor = "var(--border-color)";
+          fileUploadArea.style.background = "var(--light-color)";
+          return;
+        }
+
+        // File is valid
+        document.getElementById("fileName").textContent = file.name;
         selectedFile.style.display = "flex";
         fileUploadArea.style.borderColor = "var(--success-color)";
         fileUploadArea.style.background = "rgba(16, 185, 129, 0.1)";
+        showNotification('PDF file selected successfully!', 'success');
       } else {
         selectedFile.style.display = "none";
         fileUploadArea.style.borderColor = "var(--border-color)";
@@ -671,8 +713,42 @@ HireVision{%endblock %} {% block extra_css %}
       isFileDialogOpen = true;
       setTimeout(() => {
         isFileDialogOpen = false;
-      }, 1000);
-    });
-  });
-</script>
+             }, 1000);
+     });
+
+     // Handle form submission and show server-side errors as notifications
+     resumeForm.addEventListener("submit", function (e) {
+       // Check for any hidden error containers with server-side errors
+       const fileErrorContainer = document.getElementById("fileErrorContainer");
+       const jobDescriptionErrorContainer = document.getElementById("jobDescriptionErrorContainer");
+       
+       // If there are server-side errors, show them as notifications
+       if (fileErrorContainer && fileErrorContainer.textContent.trim()) {
+         e.preventDefault();
+         showNotification(fileErrorContainer.textContent.trim(), 'error');
+         return;
+       }
+       
+       if (jobDescriptionErrorContainer && jobDescriptionErrorContainer.textContent.trim()) {
+         e.preventDefault();
+         showNotification(jobDescriptionErrorContainer.textContent.trim(), 'error');
+         return;
+       }
+     });
+
+     // Check for server-side errors on page load and show as notifications
+     window.addEventListener("load", function () {
+       const fileErrorContainer = document.getElementById("fileErrorContainer");
+       const jobDescriptionErrorContainer = document.getElementById("jobDescriptionErrorContainer");
+       
+       if (fileErrorContainer && fileErrorContainer.textContent.trim()) {
+         showNotification(fileErrorContainer.textContent.trim(), 'error');
+       }
+       
+       if (jobDescriptionErrorContainer && jobDescriptionErrorContainer.textContent.trim()) {
+         showNotification(jobDescriptionErrorContainer.textContent.trim(), 'error');
+       }
+     });
+   });
+ </script>
 {% endblock %}
