@@ -1,6 +1,7 @@
 import PyPDF2
 import os
 import time
+import io
 from openai import OpenAI
 from config import (
     OPENROUTER_API_KEY,
@@ -35,21 +36,38 @@ def validate_pdf_file(file):
     logger.info(f"Validating file type for: {file}")
     
     try:
-        # Check file extension
-        file_name = str(file).lower()
-        if not file_name.endswith('.pdf'):
-            logger.error(f"File is not a PDF: {file_name}")
-            return False, f"Only PDF files are supported. Uploaded file: {file_name}"
-        
-        # Check file magic bytes (PDF signature)
-        file.seek(0)  # Reset file pointer
-        magic_bytes = file.read(4)
-        file.seek(0)  # Reset file pointer back to beginning
-        
-        # PDF magic bytes: %PDF (25 50 44 46 in hex)
-        if magic_bytes != b'%PDF':
-            logger.error(f"File does not have PDF magic bytes: {magic_bytes}")
-            return False, "File appears to be corrupted or not a valid PDF file"
+        # Handle both file objects and file paths
+        if isinstance(file, str):
+            # It's a file path, open the file
+            file_path = file
+            file_name = os.path.basename(file_path).lower()
+            with open(file_path, 'rb') as f:
+                # Check file magic bytes (PDF signature)
+                magic_bytes = f.read(4)
+                # PDF magic bytes: %PDF (25 50 44 46 in hex)
+                if magic_bytes != b'%PDF':
+                    logger.error(f"File does not have PDF magic bytes: {magic_bytes}")
+                    return False, "File appears to be corrupted or not a valid PDF file"
+        else:
+            # It's a file object - check if it has a name attribute
+            if hasattr(file, 'name'):
+                file_name = file.name.lower()
+                if not file_name.endswith('.pdf'):
+                    logger.error(f"File is not a PDF: {file_name}")
+                    return False, f"Only PDF files are supported. Uploaded file: {file_name}"
+            else:
+                # For BytesIO objects without name, we'll check magic bytes directly
+                logger.debug("File object has no name attribute, checking magic bytes directly")
+            
+            # Check file magic bytes (PDF signature)
+            file.seek(0)  # Reset file pointer
+            magic_bytes = file.read(4)
+            file.seek(0)  # Reset file pointer back to beginning
+            
+            # PDF magic bytes: %PDF (25 50 44 46 in hex)
+            if magic_bytes != b'%PDF':
+                logger.error(f"File does not have PDF magic bytes: {magic_bytes}")
+                return False, "File appears to be corrupted or not a valid PDF file"
         
         logger.info("PDF file validation successful")
         return True, "PDF file validation passed"
@@ -84,7 +102,18 @@ def extract_text_from_pdf(pdf_file):
 
         logger.info("File validation successful, proceeding with text extraction")
         
-        pdf_reader = PyPDF2.PdfReader(pdf_file)
+        # Read the entire file into memory to avoid file closing issues
+        if isinstance(pdf_file, str):
+            with open(pdf_file, 'rb') as f:
+                pdf_bytes = f.read()
+            pdf_reader = PyPDF2.PdfReader(io.BytesIO(pdf_bytes))
+        else:
+            # For file objects, read into memory as well
+            pdf_file.seek(0)
+            pdf_bytes = pdf_file.read()
+            pdf_file.seek(0)
+            pdf_reader = PyPDF2.PdfReader(io.BytesIO(pdf_bytes))
+        
         text = ""
         total_pages = len(pdf_reader.pages)
         
