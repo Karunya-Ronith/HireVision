@@ -1,5 +1,5 @@
-{% extends 'base.html' %} {% block title %}HireVision{% endblock %} {% block
-content %}
+{% extends 'base.html' %} {% block title %}HireVision{% endblock %} 
+{% block content %}
 <!-- God-Level Dashboard with Modern UI/UX -->
 
 <!-- Animated Hero Section with Particle Effects -->
@@ -1297,12 +1297,11 @@ content %}
 
   // Add particle animation
   const style = document.createElement("style");
-  style.textContent = `
-    @keyframes float {
-        0%, 100% { transform: translateY(0px) rotate(0deg); }
-        50% { transform: translateY(-20px) rotate(180deg); }
-    }
-`;
+  style.textContent = 
+    "@keyframes float {" +
+        "0%, 100% { transform: translateY(0px) rotate(0deg); }" +
+        "50% { transform: translateY(-20px) rotate(180deg); }" +
+    "}";
   document.head.appendChild(style);
 </script>
 {% endblock %}
