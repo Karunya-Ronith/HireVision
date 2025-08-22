@@ -212,21 +212,12 @@ Without the API key, the system cannot generate personalized learning paths.
                 learning_path.save(update_fields=['task_status', 'task_error'])
                 return
             
-            # If it's a successful string result, parse it for structured data
-            logger.info(f"Processing string result for learning path {path_id}")
-            # Try to extract structured data from the markdown result
-            structured_data = _parse_markdown_to_structured_data(result)
-            if structured_data:
-                _update_learning_path_with_data(learning_path, structured_data)
-            else:
-                # Fallback: store the raw result
-                learning_path.career_advice = result
-                learning_path.role_analysis = "Analysis completed - see career advice below"
-                learning_path.skills_gap = ["Review the detailed analysis above"]
-                learning_path.learning_path_data = []
-                learning_path.timeline = "See detailed analysis"
-                learning_path.success_metrics = ["Complete the recommended learning path"]
-                learning_path.networking_tips = ["Follow the career advice provided"]
+            # If it's a string result (shouldn't happen with new structured approach)
+            logger.warning(f"Received string result instead of structured data for learning path {path_id}")
+            learning_path.task_status = 'failed'
+            learning_path.task_error = "## ❌ Unexpected Result Format\n\nReceived string result instead of structured data. Please try again."
+            learning_path.save(update_fields=['task_status', 'task_error'])
+            return
         
         elif isinstance(result, dict):
             # Validate the structured result
@@ -295,7 +286,7 @@ def _validate_learning_path_data(data: dict) -> bool:
         logger.warning("Skills gap must be a non-empty list")
         return False
     
-    # Validate learning_path
+    # Validate learning_path (the field name in the data, not the model field)
     if not isinstance(data.get('learning_path'), list):
         logger.warning("Learning path must be a list")
         return False
@@ -312,7 +303,7 @@ def _update_learning_path_with_data(learning_path: LearningPath, data: dict):
     # Update core fields
     learning_path.role_analysis = data.get('role_analysis', 'Role analysis completed')
     learning_path.skills_gap = data.get('skills_gap', [])
-    learning_path.learning_path_data = data.get('learning_path', [])
+    learning_path.learning_path_data = data.get('learning_path', [])  # Map 'learning_path' from data to 'learning_path_data' in model
     learning_path.timeline = data.get('timeline', 'Timeline to be determined')
     learning_path.success_metrics = data.get('success_metrics', [])
     learning_path.career_advice = data.get('career_advice', 'Career advice available in the detailed analysis')
@@ -376,6 +367,34 @@ def _parse_markdown_to_structured_data(markdown_text: str) -> dict:
                 skill = line[1:].strip()
                 if skill:
                     structured_data['skills_gap'].append(skill)
+            elif current_section == 'learning_path':
+                # Parse learning path phases
+                if line.startswith('### ') and 'Phase' in line:
+                    # Start of a new phase
+                    if current_phase:
+                        structured_data['learning_path'].append(current_phase)
+                    current_phase = {
+                        'phase': line.replace('### ', '').strip(),
+                        'description': '',
+                        'skills_to_learn': [],
+                        'resources': [],
+                        'projects': []
+                    }
+                elif current_phase and line and not line.startswith('#'):
+                    if 'Skills to Learn:' in line:
+                        # Skills section starts
+                        continue
+                    elif line.startswith('•') and current_phase:
+                        # Skill to learn
+                        skill = line[1:].strip()
+                        if skill and 'Skills to Learn:' not in skill:
+                            current_phase['skills_to_learn'].append(skill)
+                    elif current_phase and not line.startswith('•') and not line.startswith('**') and line.strip():
+                        # Description text
+                        if not current_phase['description']:
+                            current_phase['description'] = line.strip()
+                        else:
+                            current_phase['description'] += ' ' + line.strip()
             elif current_section == 'timeline' and line and not line.startswith('#'):
                 structured_data['timeline'] = line
             elif current_section == 'success_metrics' and line.startswith('•'):
@@ -389,6 +408,10 @@ def _parse_markdown_to_structured_data(markdown_text: str) -> dict:
                 if tip:
                     structured_data['networking_tips'].append(tip)
         
+        # Add the last phase if it exists
+        if current_phase:
+            structured_data['learning_path'].append(current_phase)
+        
         # Clean up text fields
         structured_data['role_analysis'] = structured_data['role_analysis'].strip()
         structured_data['career_advice'] = structured_data['career_advice'].strip()
@@ -396,7 +419,9 @@ def _parse_markdown_to_structured_data(markdown_text: str) -> dict:
         # Validate that we have meaningful data
         if (structured_data['role_analysis'] and 
             structured_data['skills_gap'] and 
-            len(structured_data['role_analysis']) > 50):
+            structured_data['learning_path'] and
+            len(structured_data['role_analysis']) > 50 and
+            len(structured_data['learning_path']) > 0):
             return structured_data
         
         return None

@@ -127,6 +127,12 @@ You are an expert career coach and learning path specialist. Analyze the user's 
 - Focus on actionable, measurable advice
 - If unsure about a resource, set verified: false or omit it
 - Return ONLY the JSON object, no additional text or markdown
+- Ensure all JSON is properly formatted with correct quotes and brackets
+- Keep descriptions concise but informative
+- Use realistic timeframes (2-4 months per phase)
+- Include 2-4 skills per phase
+- Provide 1-2 resources per phase
+- Include 1 hands-on project per phase
 """
 
         logger.debug(f"Prompt length: {len(prompt)} characters")
@@ -389,15 +395,14 @@ def process_learning_path_analysis(current_skills, dream_role):
         logger.info("Starting learning path analysis")
         analysis = analyze_learning_path(current_skills, dream_role)
 
-        # Format the output
-        logger.info("Formatting learning path output")
-        formatted_output = format_learning_path_output(analysis)
+        # Return structured data directly (no markdown formatting)
+        logger.info("Returning structured learning path data")
         
         duration = time.time() - start_time
         logger.info(f"Learning path analysis process completed successfully in {duration:.3f}s")
         log_performance("Complete learning path analysis process", duration, f"Processed {skills_length} characters of skills and {role_length} characters of role")
         
-        return formatted_output
+        return analysis
 
     except Exception as e:
         duration = time.time() - start_time
