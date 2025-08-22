@@ -122,7 +122,7 @@ class ResumeAnalysisForm(forms.ModelForm):
         widgets = {
             'resume_file': forms.FileInput(attrs={
                 'class': 'form-control',
-                'accept': '.pdf,.doc,.docx'
+                'accept': '.pdf'
             }),
             'job_description': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -145,11 +145,9 @@ class ResumeAnalysisForm(forms.ModelForm):
                 raise forms.ValidationError("File size must be under 5MB.")
             
             # Check file extension
-            allowed_extensions = ['.pdf', '.doc', '.docx']
-            file_extension = file.name.lower()
-            if not any(file_extension.endswith(ext) for ext in allowed_extensions):
+            if not file.name.lower().endswith('.pdf'):
                 logger.warning(f"Invalid file extension for resume: {file.name}")
-                raise forms.ValidationError("Only PDF, DOC, and DOCX files are allowed.")
+                raise forms.ValidationError("Only PDF files are allowed.")
             
             logger.info(f"Resume file validation successful: {file.name}")
         else:

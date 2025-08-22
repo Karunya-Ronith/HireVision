@@ -30,13 +30,51 @@ logger = get_logger(__name__)
 
 
 @log_function_call
+def validate_pdf_file(file):
+    """Validate that the uploaded file is a PDF file"""
+    logger.info(f"Validating file type for: {file}")
+    
+    try:
+        # Check file extension
+        file_name = str(file).lower()
+        if not file_name.endswith('.pdf'):
+            logger.error(f"File is not a PDF: {file_name}")
+            return False, f"Only PDF files are supported. Uploaded file: {file_name}"
+        
+        # Check file magic bytes (PDF signature)
+        file.seek(0)  # Reset file pointer
+        magic_bytes = file.read(4)
+        file.seek(0)  # Reset file pointer back to beginning
+        
+        # PDF magic bytes: %PDF (25 50 44 46 in hex)
+        if magic_bytes != b'%PDF':
+            logger.error(f"File does not have PDF magic bytes: {magic_bytes}")
+            return False, "File appears to be corrupted or not a valid PDF file"
+        
+        logger.info("PDF file validation successful")
+        return True, "PDF file validation passed"
+        
+    except Exception as e:
+        logger.error(f"PDF validation failed: {str(e)}")
+        return False, f"Error validating PDF file: {str(e)}"
+
+
+@log_function_call
 def extract_text_from_pdf(pdf_file):
     """Extract text from uploaded PDF file with comprehensive error handling"""
     start_time = time.time()
     logger.info(f"Starting PDF text extraction for file: {pdf_file}")
     
     try:
-        # Validate file content first
+        # Validate that it's a PDF file first
+        logger.debug("Validating PDF file type")
+        is_pdf, pdf_error_msg = validate_pdf_file(pdf_file)
+        if not is_pdf:
+            logger.error(f"PDF validation failed: {pdf_error_msg}")
+            log_file_operation("pdf_validation", pdf_file, success=False, error=pdf_error_msg)
+            return f"Error: {pdf_error_msg}"
+        
+        # Validate file content
         logger.debug("Validating file content")
         is_valid, error_msg = validate_file_content(pdf_file)
         if not is_valid:
@@ -98,6 +136,137 @@ def extract_text_from_pdf(pdf_file):
             return f"Error: Invalid or corrupted PDF file - {str(e)}"
         else:
             return f"Error extracting text from PDF: {str(e)}"
+
+
+@log_function_call
+def validate_document_type_with_llm(text):
+    """
+    Loop 1: Use LLM to validate if the uploaded document is actually a resume/CV
+    Returns (is_resume: bool, message: str)
+    """
+    logger.info("Starting LLM-based document type validation")
+    
+    if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "your_openrouter_api_key_here":
+        logger.warning("OpenRouter API key not configured, skipping document validation")
+        return True, "API key not configured, proceeding with analysis"
+    
+    def make_validation_call():
+        """Make the API call for document validation"""
+        logger.info("Making OpenRouter API call for document type validation")
+        
+        validation_prompt = f"""
+        You are an expert document classifier. Your task is to determine if the following document is a resume/CV or not.
+        
+        **DOCUMENT TO CLASSIFY:**
+        {text[:2000]}  # Limit to first 2000 characters for efficiency
+        
+        **CLASSIFICATION INSTRUCTIONS:**
+        - A resume/CV should contain sections like: Experience, Education, Skills, Objective, Summary, etc.
+        - A resume/CV typically describes a person's work history, education, and qualifications
+        - Common resume keywords: experience, education, skills, objective, summary, work history, employment
+        
+        **NON-RESUME DOCUMENTS INCLUDE:**
+        - Offer letters, employment contracts, salary documents
+        - Invoices, bills, financial documents
+        - Academic transcripts, course materials
+        - Medical records, prescriptions
+        - Government documents, certificates, licenses
+        - Manuals, guides, articles, research papers
+        - Letters of recommendation, reference letters
+        
+        **RESPONSE FORMAT:**
+        Return ONLY a JSON object with this exact structure:
+        {{
+            "is_resume": true/false,
+            "document_type": "resume/cv" or "offer_letter" or "invoice" or "transcript" or "other",
+            "confidence": "high/medium/low",
+            "explanation": "Brief explanation of why this is or is not a resume"
+        }}
+        
+        Be strict - only classify as resume if it clearly contains resume-like content and structure.
+        """
+        
+        logger.debug(f"Validation prompt length: {len(validation_prompt)} characters")
+        
+        client = OpenAI(
+            base_url=OPENROUTER_BASE_URL,
+            api_key=OPENROUTER_API_KEY,
+        )
+        
+        api_start_time = time.time()
+        try:
+            response = client.chat.completions.create(
+                extra_headers={
+                    "HTTP-Referer": OPENROUTER_SITE_URL,
+                    "X-Title": OPENROUTER_SITE_NAME,
+                },
+                extra_body={},
+                model=OPENROUTER_MODEL,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an expert document classifier. Analyze the document and return only valid JSON with the specified structure.",
+                    },
+                    {"role": "user", "content": validation_prompt},
+                ],
+                temperature=0.1,  # Low temperature for consistent classification
+                max_tokens=500,   # Shorter response for validation
+            )
+            
+            api_duration = time.time() - api_start_time
+            logger.info(f"Document validation API call successful in {api_duration:.3f}s")
+            log_api_call("Document Validation", 
+                        request_data={"model": OPENROUTER_MODEL, "temperature": 0.1, "max_tokens": 500},
+                        response_data={"response_length": len(response.choices[0].message.content)},
+                        success=True)
+            
+            return response.choices[0].message.content
+            
+        except Exception as e:
+            api_duration = time.time() - api_start_time
+            logger.error(f"Document validation API call failed after {api_duration:.3f}s: {str(e)}")
+            log_api_call("Document Validation", 
+                        request_data={"model": OPENROUTER_MODEL, "temperature": 0.1, "max_tokens": 500},
+                        success=False, error=str(e))
+            raise
+
+    try:
+        # Use retry logic for validation calls
+        logger.info("Starting retry logic for document validation")
+        validation_text = retry_with_backoff(make_validation_call)
+        
+        if not validation_text:
+            logger.error("Failed to get validation response from AI service")
+            return True, "Validation failed, proceeding with analysis"
+        
+        logger.info(f"Received validation text of length: {len(validation_text)}")
+        logger.debug(f"Validation text preview: {validation_text[:200]}...")
+        
+        # Extract JSON from validation response
+        validation_result = extract_json_from_text(validation_text)
+        if validation_result is None:
+            logger.warning("No JSON found in validation response, proceeding with analysis")
+            return True, "Validation response unclear, proceeding with analysis"
+        
+        logger.info("Successfully extracted validation JSON")
+        logger.debug(f"Validation result: {validation_result}")
+        
+        is_resume = validation_result.get('is_resume', True)  # Default to True if unclear
+        document_type = validation_result.get('document_type', 'unknown')
+        confidence = validation_result.get('confidence', 'low')
+        explanation = validation_result.get('explanation', 'No explanation provided')
+        
+        if is_resume:
+            logger.info(f"Document validated as resume (confidence: {confidence})")
+            return True, f"Document validated as resume/CV ({confidence} confidence)"
+        else:
+            logger.warning(f"Document classified as non-resume: {document_type} ({confidence} confidence)")
+            return False, f"This appears to be a {document_type} document, not a resume/CV. {explanation}"
+        
+    except Exception as e:
+        logger.error(f"Document validation failed: {str(e)}", exc_info=True)
+        # If validation fails, proceed with analysis to avoid blocking legitimate resumes
+        return True, f"Validation failed ({str(e)}), proceeding with analysis"
 
 
 @log_function_call
@@ -338,8 +507,15 @@ def process_resume_analysis(pdf_file, job_description):
             logger.warning(f"Extracted text too short: {text_length} characters")
             return "## ❌ Insufficient Content\n\nThe PDF appears to contain very little text. Please ensure you've uploaded a text-based PDF (not scanned images)."
 
-        # Analyze resume
-        logger.info("Starting resume analysis")
+        # Loop 1: Check if the uploaded document is actually a resume using LLM
+        logger.info("Loop 1: Validating document type using LLM")
+        is_resume, validation_message = validate_document_type_with_llm(resume_text)
+        if not is_resume:
+            logger.warning(f"Uploaded file is not a resume: {validation_message}")
+            return f"## ❌ Invalid Document Type\n\n{validation_message}\n\n**Please upload a proper resume/CV document.**"
+
+        # Loop 2: Analyze resume
+        logger.info("Loop 2: Starting resume analysis")
         analysis = analyze_resume(resume_text, job_description)
         
         duration = time.time() - start_time
