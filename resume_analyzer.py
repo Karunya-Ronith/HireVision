@@ -30,13 +30,51 @@ logger = get_logger(__name__)
 
 
 @log_function_call
+def validate_pdf_file(file):
+    """Validate that the uploaded file is a PDF file"""
+    logger.info(f"Validating file type for: {file}")
+    
+    try:
+        # Check file extension
+        file_name = str(file).lower()
+        if not file_name.endswith('.pdf'):
+            logger.error(f"File is not a PDF: {file_name}")
+            return False, f"Only PDF files are supported. Uploaded file: {file_name}"
+        
+        # Check file magic bytes (PDF signature)
+        file.seek(0)  # Reset file pointer
+        magic_bytes = file.read(4)
+        file.seek(0)  # Reset file pointer back to beginning
+        
+        # PDF magic bytes: %PDF (25 50 44 46 in hex)
+        if magic_bytes != b'%PDF':
+            logger.error(f"File does not have PDF magic bytes: {magic_bytes}")
+            return False, "File appears to be corrupted or not a valid PDF file"
+        
+        logger.info("PDF file validation successful")
+        return True, "PDF file validation passed"
+        
+    except Exception as e:
+        logger.error(f"PDF validation failed: {str(e)}")
+        return False, f"Error validating PDF file: {str(e)}"
+
+
+@log_function_call
 def extract_text_from_pdf(pdf_file):
     """Extract text from uploaded PDF file with comprehensive error handling"""
     start_time = time.time()
     logger.info(f"Starting PDF text extraction for file: {pdf_file}")
     
     try:
-        # Validate file content first
+        # Validate that it's a PDF file first
+        logger.debug("Validating PDF file type")
+        is_pdf, pdf_error_msg = validate_pdf_file(pdf_file)
+        if not is_pdf:
+            logger.error(f"PDF validation failed: {pdf_error_msg}")
+            log_file_operation("pdf_validation", pdf_file, success=False, error=pdf_error_msg)
+            return f"Error: {pdf_error_msg}"
+        
+        # Validate file content
         logger.debug("Validating file content")
         is_valid, error_msg = validate_file_content(pdf_file)
         if not is_valid:
