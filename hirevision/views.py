@@ -286,10 +286,10 @@ def learning_path_result(request, path_id):
             messages.error(request, "The learning path analysis failed. Please try again or contact support if the issue persists.")
         elif learning_path.task_status == 'pending':
             logger.info(f"Learning path {path_id} still pending for user {user_id}")
-            messages.info(request, "Your learning path is still being generated. Please wait a moment and refresh the page.")
+            # No notification needed - user already got success message when analysis started
         elif learning_path.task_status == 'running':
             logger.info(f"Learning path {path_id} running for user {user_id}")
-            messages.info(request, "Your learning path is currently being generated. This may take a few moments.")
+            # No notification needed - user already got success message when analysis started
         elif learning_path.task_status == 'completed':
             logger.info(f"Learning path {path_id} completed successfully for user {user_id}")
             # Check if we have meaningful data
