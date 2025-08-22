@@ -1,443 +1,475 @@
-{% extends 'base.html' %}
-
-{% block title %}Dashboard - HireVision{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% block title %}HireVision{% endblock %} {% block
+content %}
 <!-- God-Level Dashboard with Modern UI/UX -->
 
 <!-- Animated Hero Section with Particle Effects -->
 <div class="hero-section">
-    <div class="particles-container" id="particles-js"></div>
-    <div class="hero-content">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-8">
-                    <div class="hero-text">
-                        <div class="welcome-badge">
-                            <i class="fas fa-sparkles"></i>
-                            <span>Welcome back!</span>
-                        </div>
-                        <h1 class="hero-title">
-                            <span class="gradient-text">{{ user.first_name|default:user.username }}</span>
-                            <span class="typing-text" id="typing-text"></span>
-                        </h1>
-                        <p class="hero-subtitle">
-                            Your career journey is accelerating! Let's explore your next steps with AI-powered insights.
-                        </p>
-                        <div class="hero-stats">
-                            <div class="stat-card">
-                                <div class="stat-icon">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <div class="stat-content">
-                                    <div class="stat-number">{{ stats.resume_analyses_count }}</div>
-                                    <div class="stat-label">Resume Analyses</div>
-                                </div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon">
-                                    <i class="fas fa-road"></i>
-                                </div>
-                                <div class="stat-content">
-                                    <div class="stat-number">{{ stats.learning_paths_count }}</div>
-                                    <div class="stat-label">Learning Paths</div>
-                                </div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon">
-                                    <i class="fas fa-file-alt"></i>
-                                </div>
-                                <div class="stat-content">
-                                    <div class="stat-number">{{ stats.resume_builders_count }}</div>
-                                    <div class="stat-label">Resumes Built</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="hero-visual">
-                        <div class="floating-card">
-                            <div class="card-icon">
-                                <i class="fas fa-rocket"></i>
-                            </div>
-                            <div class="card-content">
-                                <h4>Career Growth</h4>
-                                <p>Your journey to success starts here</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  <div class="particles-container" id="particles-js"></div>
+  <div class="hero-content">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-8">
+          <div class="hero-text">
+            <div class="welcome-badge">
+              <i class="fas fa-sparkles"></i>
+              <span>Welcome back!</span>
             </div>
+            <h1 class="hero-title">
+              <span class="gradient-text"
+                >{{ user.first_name|default:user.username }}</span
+              >
+              <span class="typing-text" id="typing-text"></span>
+            </h1>
+            <p class="hero-subtitle">
+              Your career journey is accelerating! Let's explore your next steps
+              with AI-powered insights.
+            </p>
+            <div class="hero-stats">
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-number">
+                    {{ stats.resume_analyses_count }}
+                  </div>
+                  <div class="stat-label">Resume Analyses</div>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="fas fa-road"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-number">
+                    {{ stats.learning_paths_count }}
+                  </div>
+                  <div class="stat-label">Learning Paths</div>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-number">
+                    {{ stats.resume_builders_count }}
+                  </div>
+                  <div class="stat-label">Resumes Built</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+        <div class="col-lg-4">
+          <div class="hero-visual">
+            <div class="floating-card">
+              <div class="card-icon">
+                <i class="fas fa-rocket"></i>
+              </div>
+              <div class="card-content">
+                <h4>Career Growth</h4>
+                <p>Your journey to success starts here</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Performance Analytics Section - COMPLETELY REMOVED -->
 
 <!-- Quick Actions Section with Glassmorphism -->
 <div class="quick-actions-section">
-    <div class="container">
-        <div class="section-header">
-            <h2 class="section-title">
-                <i class="fas fa-bolt"></i>
-                Quick Actions
-            </h2>
-            <p class="section-subtitle">Jump into your next career milestone</p>
-        </div>
-        
-        <div class="actions-grid">
-            <!-- Analyze Resume Card -->
-            <div class="action-card primary-card" data-tilt>
-                <div class="card-glow"></div>
-                <div class="card-content">
-                    <div class="card-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <h3 class="card-title">Analyze Resume</h3>
-                    <p class="card-description">
-                        Upload your resume and get instant AI-powered feedback to improve your ATS score.
-                    </p>
-                    <div class="card-stats">
-                        <span class="stat">
-                            <i class="fas fa-chart-line"></i>
-                            Avg Score: {{ stats.avg_ats_score }}
-                        </span>
-                    </div>
-                    <a href="{% url 'hirevision:resume_analyzer' %}" class="action-btn">
-                        <span>Start Analysis</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Learning Path Card -->
-            <div class="action-card success-card" data-tilt>
-                <div class="card-glow"></div>
-                <div class="card-content">
-                    <div class="card-icon">
-                        <i class="fas fa-road"></i>
-                    </div>
-                    <h3 class="card-title">Learning Path</h3>
-                    <p class="card-description">
-                        Discover personalized learning paths to reach your dream career goals.
-                    </p>
-                    <div class="card-stats">
-                        <span class="stat">
-                            <i class="fas fa-check-circle"></i>
-                            {{ stats.successful_paths_count }} Completed
-                        </span>
-                    </div>
-                    <a href="{% url 'hirevision:learning_path_analyzer' %}" class="action-btn">
-                        <span>Explore Paths</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Build Resume Card -->
-            <div class="action-card info-card" data-tilt>
-                <div class="card-glow"></div>
-                <div class="card-content">
-                    <div class="card-icon">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <h3 class="card-title">Build Resume</h3>
-                    <p class="card-description">
-                        Create a professional resume with our AI-powered builder and templates.
-                    </p>
-                    <div class="card-stats">
-                        <span class="stat">
-                            <i class="fas fa-download"></i>
-                            {{ stats.resume_builders_count }} Created
-                        </span>
-                    </div>
-                    <a href="{% url 'hirevision:resume_builder' %}" class="action-btn">
-                        <span>Create Resume</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Community Cards -->
-            <div class="action-card warning-card" data-tilt>
-                <div class="card-glow"></div>
-                <div class="card-content">
-                    <div class="card-icon">
-                        <i class="fas fa-comments"></i>
-                    </div>
-                    <h3 class="card-title">Discussion Forum</h3>
-                    <p class="card-description">
-                        Join the community discussion. Share insights, ask questions, and connect with other professionals.
-                    </p>
-                    <div class="card-stats">
-                        <span class="stat">
-                            <i class="fas fa-thread"></i>
-                            {{ stats.total_threads }} Threads
-                        </span>
-                    </div>
-                    <a href="{% url 'hirevision:threads_list' %}" class="action-btn">
-                        <span>Join Discussion</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-            
-            <div class="action-card secondary-card" data-tilt>
-                <div class="card-glow"></div>
-                <div class="card-content">
-                    <div class="card-icon">
-                        <i class="fas fa-plus"></i>
-                    </div>
-                    <h3 class="card-title">Create Thread</h3>
-                    <p class="card-description">
-                        Start a new discussion thread. Share your thoughts, questions, or insights with the community.
-                    </p>
-                    <div class="card-stats">
-                        <span class="stat">
-                            <i class="fas fa-comment"></i>
-                            {{ stats.total_comments }} Comments
-                        </span>
-                    </div>
-                    <a href="{% url 'hirevision:create_thread' %}" class="action-btn">
-                        <span>Start Thread</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-            
-            <div class="action-card message-card" data-tilt>
-                <div class="card-glow"></div>
-                <div class="card-content">
-                    <div class="card-icon">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <h3 class="card-title">Messages</h3>
-                    <p class="card-description">
-                        View your conversations and stay connected with other professionals in the community.
-                    </p>
-                    <div class="card-stats">
-                        <span class="stat">
-                            <i class="fas fa-message"></i>
-                            {{ stats.total_messages }} Messages
-                        </span>
-                    </div>
-                    <a href="{% url 'hirevision:messages_list' %}" class="action-btn">
-                        <span>View Messages</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">
+        <i class="fas fa-bolt"></i>
+        Quick Actions
+      </h2>
+      <p class="section-subtitle">Jump into your next career milestone</p>
     </div>
+
+    <div class="actions-grid">
+      <!-- Analyze Resume Card -->
+      <div class="action-card primary-card" data-tilt>
+        <div class="card-glow"></div>
+        <div class="card-content">
+          <div class="card-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <h3 class="card-title">Analyze Resume</h3>
+          <p class="card-description">
+            Upload your resume and get instant AI-powered feedback to improve
+            your ATS score.
+          </p>
+          <div class="card-stats">
+            <span class="stat">
+              <i class="fas fa-chart-line"></i>
+              Avg Score: {{ stats.avg_ats_score }}
+            </span>
+          </div>
+          <a href="{% url 'hirevision:resume_analyzer' %}" class="action-btn">
+            <span>Start Analysis</span>
+            <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Learning Path Card -->
+      <div class="action-card success-card" data-tilt>
+        <div class="card-glow"></div>
+        <div class="card-content">
+          <div class="card-icon">
+            <i class="fas fa-road"></i>
+          </div>
+          <h3 class="card-title">Learning Path</h3>
+          <p class="card-description">
+            Discover personalized learning paths to reach your dream career
+            goals.
+          </p>
+          <div class="card-stats">
+            <span class="stat">
+              <i class="fas fa-check-circle"></i>
+              {{ stats.successful_paths_count }} Completed
+            </span>
+          </div>
+          <a
+            href="{% url 'hirevision:learning_path_analyzer' %}"
+            class="action-btn"
+          >
+            <span>Explore Paths</span>
+            <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Build Resume Card -->
+      <div class="action-card info-card" data-tilt>
+        <div class="card-glow"></div>
+        <div class="card-content">
+          <div class="card-icon">
+            <i class="fas fa-file-alt"></i>
+          </div>
+          <h3 class="card-title">Build Resume</h3>
+          <p class="card-description">
+            Create a professional resume with our AI-powered builder and
+            templates.
+          </p>
+          <div class="card-stats">
+            <span class="stat">
+              <i class="fas fa-download"></i>
+              {{ stats.resume_builders_count }} Created
+            </span>
+          </div>
+          <a href="{% url 'hirevision:resume_builder' %}" class="action-btn">
+            <span>Create Resume</span>
+            <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Community Cards -->
+      <div class="action-card warning-card" data-tilt>
+        <div class="card-glow"></div>
+        <div class="card-content">
+          <div class="card-icon">
+            <i class="fas fa-comments"></i>
+          </div>
+          <h3 class="card-title">Discussion Forum</h3>
+          <p class="card-description">
+            Join the community discussion. Share insights, ask questions, and
+            connect with other professionals.
+          </p>
+          <div class="card-stats">
+            <span class="stat">
+              <i class="fas fa-thread"></i>
+              {{ stats.total_threads }} Threads
+            </span>
+          </div>
+          <a href="{% url 'hirevision:threads_list' %}" class="action-btn">
+            <span>Join Discussion</span>
+            <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="action-card secondary-card" data-tilt>
+        <div class="card-glow"></div>
+        <div class="card-content">
+          <div class="card-icon">
+            <i class="fas fa-plus"></i>
+          </div>
+          <h3 class="card-title">Create Thread</h3>
+          <p class="card-description">
+            Start a new discussion thread. Share your thoughts, questions, or
+            insights with the community.
+          </p>
+          <div class="card-stats">
+            <span class="stat">
+              <i class="fas fa-comment"></i>
+              {{ stats.total_comments }} Comments
+            </span>
+          </div>
+          <a href="{% url 'hirevision:create_thread' %}" class="action-btn">
+            <span>Start Thread</span>
+            <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="action-card message-card" data-tilt>
+        <div class="card-glow"></div>
+        <div class="card-content">
+          <div class="card-icon">
+            <i class="fas fa-envelope"></i>
+          </div>
+          <h3 class="card-title">Messages</h3>
+          <p class="card-description">
+            View your conversations and stay connected with other professionals
+            in the community.
+          </p>
+          <div class="card-stats">
+            <span class="stat">
+              <i class="fas fa-message"></i>
+              {{ stats.total_messages }} Messages
+            </span>
+          </div>
+          <a href="{% url 'hirevision:messages_list' %}" class="action-btn">
+            <span>View Messages</span>
+            <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Recent Activity Section (Preserving the 3 Learning Paths) -->
 <div class="recent-activity-section">
-    <div class="container">
-        <div class="section-header">
-            <h2 class="section-title">
-                <i class="fas fa-history"></i>
-                Recent Activity
-            </h2>
-            <p class="section-subtitle">Your latest career development activities</p>
-        </div>
-        
-        <div class="row g-4">
-            <!-- Recent Resume Analyses -->
-            <div class="col-lg-6">
-                <div class="activity-card">
-                    <div class="card-header">
-                        <div class="header-icon">
-                            <i class="fas fa-search"></i>
-                        </div>
-                        <div class="header-content">
-                            <h3>Recent Resume Analyses</h3>
-                            <p>{{ stats.resume_analyses_count }} total analyses</p>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        {% if recent_analyses %}
-                            {% for analysis in recent_analyses %}
-                            <div class="activity-item">
-                                <div class="item-icon">
-                                    <i class="fas fa-file-pdf"></i>
-                                </div>
-                                <div class="item-content">
-                                    <h4>{{ analysis.resume_file.name|slice:"8:"|truncatechars:30 }}</h4>
-                                    <div class="item-meta">
-                                        <span class="date">
-                                            <i class="fas fa-calendar"></i>
-                                            {{ analysis.created_at|date:"M j, Y" }}
-                                        </span>
-                                        {% if analysis.ats_score %}
-                                            <span class="score">
-                                                <i class="fas fa-chart-line"></i>
-                                                ATS: {{ analysis.ats_score }}
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="item-action">
-                                    <a href="{% url 'hirevision:resume_analysis_result' analysis_id=analysis.id %}" 
-                                       class="view-btn">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="empty-state">
-                                <div class="empty-icon">
-                                    <i class="fas fa-inbox"></i>
-                                </div>
-                                <h4>No Resume Analyses Yet</h4>
-                                <p>Start your first analysis to see your results here</p>
-                                <a href="{% url 'hirevision:resume_analyzer' %}" class="btn btn-primary">
-                                    Start Analysis
-                                </a>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Recent Learning Paths (Preserved as requested) -->
-            <div class="col-lg-6">
-                <div class="activity-card">
-                    <div class="card-header">
-                        <div class="header-icon">
-                            <i class="fas fa-road"></i>
-                        </div>
-                        <div class="header-content">
-                            <h3>Recent Learning Paths</h3>
-                            <p>{{ stats.learning_paths_count }} total paths</p>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        {% if recent_paths %}
-                            {% for path in recent_paths %}
-                            <div class="activity-item">
-                                <div class="item-icon">
-                                    <i class="fas fa-map"></i>
-                                </div>
-                                <div class="item-content">
-                                    <h4>{{ path.dream_role|truncatechars:30 }}</h4>
-                                    <div class="item-meta">
-                                        <span class="date">
-                                            <i class="fas fa-calendar"></i>
-                                            {{ path.created_at|date:"M j, Y" }}
-                                        </span>
-                                        {% if path.timeline %}
-                                            <span class="duration">
-                                                <i class="fas fa-clock"></i>
-                                                {{ path.timeline }}
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="item-action">
-                                    <a href="{% url 'hirevision:learning_path_result' path_id=path.id %}" 
-                                       class="view-btn">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="empty-state">
-                                <div class="empty-icon">
-                                    <i class="fas fa-road"></i>
-                                </div>
-                                <h4>No Learning Paths Yet</h4>
-                                <p>Create your first learning path to see your journey here</p>
-                                <a href="{% url 'hirevision:learning_path_analyzer' %}" class="btn btn-success">
-                                    Create Path
-                                </a>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">
+        <i class="fas fa-history"></i>
+        Recent Activity
+      </h2>
+      <p class="section-subtitle">Your latest career development activities</p>
     </div>
+
+    <div class="row g-4">
+      <!-- Recent Resume Analyses -->
+      <div class="col-lg-6">
+        <div class="activity-card">
+          <div class="card-header">
+            <div class="header-icon">
+              <i class="fas fa-search"></i>
+            </div>
+            <div class="header-content">
+              <h3>Recent Resume Analyses</h3>
+              <p>{{ stats.resume_analyses_count }} total analyses</p>
+            </div>
+          </div>
+          <div class="card-body">
+            {% if recent_analyses %} {% for analysis in recent_analyses %}
+            <div class="activity-item">
+              <div class="item-icon">
+                <i class="fas fa-file-pdf"></i>
+              </div>
+              <div class="item-content">
+                <h4>
+                  {{ analysis.resume_file.name|slice:"8:"|truncatechars:30 }}
+                </h4>
+                <div class="item-meta">
+                  <span class="date">
+                    <i class="fas fa-calendar"></i>
+                    {{ analysis.created_at|date:"M j, Y" }}
+                  </span>
+                  {% if analysis.ats_score %}
+                  <span class="score">
+                    <i class="fas fa-chart-line"></i>
+                    ATS: {{ analysis.ats_score }}
+                  </span>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="item-action">
+                <a
+                  href="{% url 'hirevision:resume_analysis_result' analysis_id=analysis.id %}"
+                  class="view-btn"
+                >
+                  <i class="fas fa-eye"></i>
+                </a>
+              </div>
+            </div>
+            {% endfor %} {% else %}
+            <div class="empty-state">
+              <div class="empty-icon">
+                <i class="fas fa-inbox"></i>
+              </div>
+              <h4>No Resume Analyses Yet</h4>
+              <p>Start your first analysis to see your results here</p>
+              <a
+                href="{% url 'hirevision:resume_analyzer' %}"
+                class="btn btn-primary"
+              >
+                Start Analysis
+              </a>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Learning Paths (Preserved as requested) -->
+      <div class="col-lg-6">
+        <div class="activity-card">
+          <div class="card-header">
+            <div class="header-icon">
+              <i class="fas fa-road"></i>
+            </div>
+            <div class="header-content">
+              <h3>Recent Learning Paths</h3>
+              <p>{{ stats.learning_paths_count }} total paths</p>
+            </div>
+          </div>
+          <div class="card-body">
+            {% if recent_paths %} {% for path in recent_paths %}
+            <div class="activity-item">
+              <div class="item-icon">
+                <i class="fas fa-map"></i>
+              </div>
+              <div class="item-content">
+                <h4>{{ path.dream_role|truncatechars:30 }}</h4>
+                <div class="item-meta">
+                  <span class="date">
+                    <i class="fas fa-calendar"></i>
+                    {{ path.created_at|date:"M j, Y" }}
+                  </span>
+                  {% if path.timeline %}
+                  <span class="duration">
+                    <i class="fas fa-clock"></i>
+                    {{ path.timeline }}
+                  </span>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="item-action">
+                <a
+                  href="{% url 'hirevision:learning_path_result' path_id=path.id %}"
+                  class="view-btn"
+                >
+                  <i class="fas fa-eye"></i>
+                </a>
+              </div>
+            </div>
+            {% endfor %} {% else %}
+            <div class="empty-state">
+              <div class="empty-icon">
+                <i class="fas fa-road"></i>
+              </div>
+              <h4>No Learning Paths Yet</h4>
+              <p>Create your first learning path to see your journey here</p>
+              <a
+                href="{% url 'hirevision:learning_path_analyzer' %}"
+                class="btn btn-success"
+              >
+                Create Path
+              </a>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Career Tips Section -->
 <div class="tips-section">
-    <div class="container">
-        <div class="tips-card">
-            <div class="tips-header">
-                <div class="tips-icon">
-                    <i class="fas fa-lightbulb"></i>
-                </div>
-                <div class="tips-content">
-                    <h3>Career Tips</h3>
-                    <p>Expert advice to accelerate your career growth</p>
-                </div>
-            </div>
-            <div class="tips-grid">
-                <div class="tip-item">
-                    <div class="tip-icon">
-                        <i class="fas fa-sync-alt"></i>
-                    </div>
-                    <div class="tip-content">
-                        <h4>Keep Your Resume Updated</h4>
-                        <p>Regular updates help you stay ready for new opportunities and maintain relevance in your field.</p>
-                    </div>
-                </div>
-                <div class="tip-item">
-                    <div class="tip-icon">
-                        <i class="fas fa-graduation-cap"></i>
-                    </div>
-                    <div class="tip-content">
-                        <h4>Focus on Skills Development</h4>
-                        <p>Continuous learning is key to career advancement. Stay updated with industry trends and technologies.</p>
-                    </div>
-                </div>
-                <div class="tip-item">
-                    <div class="tip-icon">
-                        <i class="fas fa-network-wired"></i>
-                    </div>
-                    <div class="tip-content">
-                        <h4>Network Actively</h4>
-                        <p>Build professional relationships to open new doors and create opportunities for collaboration.</p>
-                    </div>
-                </div>
-            </div>
+  <div class="container">
+    <div class="tips-card">
+      <div class="tips-header">
+        <div class="tips-icon">
+          <i class="fas fa-lightbulb"></i>
         </div>
+        <div class="tips-content">
+          <h3>Career Tips</h3>
+          <p>Expert advice to accelerate your career growth</p>
+        </div>
+      </div>
+      <div class="tips-grid">
+        <div class="tip-item">
+          <div class="tip-icon">
+            <i class="fas fa-sync-alt"></i>
+          </div>
+          <div class="tip-content">
+            <h4>Keep Your Resume Updated</h4>
+            <p>
+              Regular updates help you stay ready for new opportunities and
+              maintain relevance in your field.
+            </p>
+          </div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon">
+            <i class="fas fa-graduation-cap"></i>
+          </div>
+          <div class="tip-content">
+            <h4>Focus on Skills Development</h4>
+            <p>
+              Continuous learning is key to career advancement. Stay updated
+              with industry trends and technologies.
+            </p>
+          </div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-icon">
+            <i class="fas fa-network-wired"></i>
+          </div>
+          <div class="tip-content">
+            <h4>Network Actively</h4>
+            <p>
+              Build professional relationships to open new doors and create
+              opportunities for collaboration.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Custom CSS for God-Level UI/UX -->
 <style>
-/* Hero Section */
-.hero-section {
+  /* Hero Section */
+  .hero-section {
     position: relative;
     min-height: 100vh;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     overflow: hidden;
     display: flex;
     align-items: center;
-}
+  }
 
-.particles-container {
+  .particles-container {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     z-index: 1;
-}
+  }
 
-.hero-content {
+  .hero-content {
     position: relative;
     z-index: 2;
     color: white;
     padding: 4rem 0;
-}
+  }
 
-.welcome-badge {
+  .welcome-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -448,42 +480,42 @@
     font-size: 0.9rem;
     margin-bottom: 1rem;
     animation: fadeInUp 0.8s ease-out;
-}
+  }
 
-.hero-title {
+  .hero-title {
     font-size: 4rem;
     font-weight: 800;
     margin-bottom: 1.5rem;
     line-height: 1.2;
     animation: fadeInUp 0.8s ease-out 0.2s both;
-}
+  }
 
-.gradient-text {
+  .gradient-text {
     background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-}
+  }
 
-.typing-text {
+  .typing-text {
     color: #ffd700;
     font-weight: 600;
-}
+  }
 
-.hero-subtitle {
+  .hero-subtitle {
     font-size: 1.25rem;
     opacity: 0.9;
     margin-bottom: 2rem;
     animation: fadeInUp 0.8s ease-out 0.4s both;
-}
+  }
 
-.hero-stats {
+  .hero-stats {
     display: flex;
     gap: 2rem;
     animation: fadeInUp 0.8s ease-out 0.6s both;
-}
+  }
 
-.stat-card {
+  .stat-card {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -493,37 +525,37 @@
     border-radius: 15px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
-}
+  }
 
-.stat-card:hover {
+  .stat-card:hover {
     transform: translateY(-5px);
     background: rgba(255, 255, 255, 0.2);
-}
+  }
 
-.stat-icon {
+  .stat-icon {
     font-size: 2rem;
     color: #ffd700;
-}
+  }
 
-.stat-number {
+  .stat-number {
     font-size: 2rem;
     font-weight: 700;
     line-height: 1;
-}
+  }
 
-.stat-label {
+  .stat-label {
     font-size: 0.9rem;
     opacity: 0.8;
-}
+  }
 
-.hero-visual {
+  .hero-visual {
     display: flex;
     justify-content: center;
     align-items: center;
     animation: fadeInUp 0.8s ease-out 0.8s both;
-}
+  }
 
-.floating-card {
+  .floating-card {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -531,26 +563,26 @@
     padding: 2rem;
     text-align: center;
     animation: float 6s ease-in-out infinite;
-}
+  }
 
-.card-icon {
+  .card-icon {
     font-size: 3rem;
     color: #ffd700;
     margin-bottom: 1rem;
-}
+  }
 
-/* Analytics Section */
-.analytics-section {
+  /* Analytics Section */
+  .analytics-section {
     padding: 5rem 0;
     background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-}
+  }
 
-.section-header {
+  .section-header {
     text-align: center;
     margin-bottom: 3rem;
-}
+  }
 
-.section-title {
+  .section-title {
     font-size: 2.5rem;
     font-weight: 700;
     color: #0f172a;
@@ -559,16 +591,16 @@
     align-items: center;
     justify-content: center;
     gap: 1rem;
-}
+  }
 
-.section-subtitle {
+  .section-subtitle {
     font-size: 1.1rem;
     color: #475569;
     max-width: 600px;
     margin: 0 auto;
-}
+  }
 
-.analytics-card {
+  .analytics-card {
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border-radius: 20px;
     padding: 2rem;
@@ -577,42 +609,42 @@
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-}
+  }
 
-.analytics-card::before {
-    content: '';
+  .analytics-card::before {
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     height: 4px;
-}
+  }
 
-.success-card::before {
+  .success-card::before {
     background: linear-gradient(135deg, #059669 0%, #047857 100%);
-}
+  }
 
-.path-card::before {
+  .path-card::before {
     background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-}
+  }
 
-.builder-card::before {
+  .builder-card::before {
     background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-}
+  }
 
-.analytics-card:hover {
+  .analytics-card:hover {
     transform: translateY(-10px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-}
+  }
 
-.card-header {
+  .card-header {
     display: flex;
     align-items: center;
     gap: 1rem;
     margin-bottom: 1.5rem;
-}
+  }
 
-.card-icon {
+  .card-icon {
     width: 50px;
     height: 50px;
     border-radius: 12px;
@@ -621,95 +653,95 @@
     justify-content: center;
     font-size: 1.5rem;
     color: white;
-}
+  }
 
-.success-card .card-icon {
+  .success-card .card-icon {
     background: linear-gradient(135deg, #059669 0%, #047857 100%);
-}
+  }
 
-.path-card .card-icon {
+  .path-card .card-icon {
     background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-}
+  }
 
-.builder-card .card-icon {
+  .builder-card .card-icon {
     background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-}
+  }
 
-.card-title {
+  .card-title {
     font-size: 1.1rem;
     font-weight: 600;
     color: #0f172a;
     margin: 0;
-}
+  }
 
-.metric-value {
+  .metric-value {
     font-size: 2.5rem;
     font-weight: 700;
     color: #0f172a;
     margin-bottom: 0.5rem;
-}
+  }
 
-.metric-label {
+  .metric-label {
     font-size: 0.9rem;
     color: #475569;
     margin-bottom: 1.5rem;
-}
+  }
 
-.progress-ring {
+  .progress-ring {
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-}
+  }
 
-.progress-ring-svg {
+  .progress-ring-svg {
     transform: rotate(-90deg);
-}
+  }
 
-.progress-ring-circle-bg {
+  .progress-ring-circle-bg {
     fill: none;
     stroke: #cbd5e1;
     stroke-width: 8;
-}
+  }
 
-.progress-ring-circle {
+  .progress-ring-circle {
     fill: none;
     stroke-width: 8;
     stroke-linecap: round;
     stroke-dasharray: 339.292;
     stroke-dashoffset: 339.292;
     transition: stroke-dashoffset 1s ease-in-out;
-}
+  }
 
-.success-card .progress-ring-circle {
+  .success-card .progress-ring-circle {
     stroke: url(#gradient-success);
-}
+  }
 
-.path-card .progress-ring-circle {
+  .path-card .progress-ring-circle {
     stroke: url(#gradient-warning);
-}
+  }
 
-.builder-card .progress-ring-circle {
+  .builder-card .progress-ring-circle {
     stroke: url(#gradient-info);
-}
+  }
 
-.progress-text {
+  .progress-text {
     position: absolute;
     font-size: 1.5rem;
     font-weight: 700;
     color: #0f172a;
-}
+  }
 
-/* Quick Actions Section */
-.quick-actions-section {
+  /* Quick Actions Section */
+  .quick-actions-section {
     padding: 5rem 0;
     background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
     position: relative;
     overflow: hidden;
-}
+  }
 
-.quick-actions-section::before {
-    content: '';
+  .quick-actions-section::before {
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -717,24 +749,24 @@
     bottom: 0;
     background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
     opacity: 0.3;
-}
+  }
 
-.quick-actions-section .section-title,
-.quick-actions-section .section-subtitle {
+  .quick-actions-section .section-title,
+  .quick-actions-section .section-subtitle {
     color: white;
     position: relative;
     z-index: 2;
-}
+  }
 
-.actions-grid {
+  .actions-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 2rem;
     position: relative;
     z-index: 2;
-}
+  }
 
-.action-card {
+  .action-card {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -744,73 +776,81 @@
     position: relative;
     overflow: hidden;
     cursor: pointer;
-}
+  }
 
-.action-card::before {
-    content: '';
+  .action-card::before {
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 100%
+    );
     opacity: 0;
     transition: opacity 0.3s ease;
-}
+  }
 
-.action-card:hover::before {
+  .action-card:hover::before {
     opacity: 1;
-}
+  }
 
-.action-card:hover {
+  .action-card:hover {
     transform: translateY(-10px) scale(1.02);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-}
+  }
 
-.card-glow {
+  .card-glow {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 70%);
+    background: radial-gradient(
+      circle at 50% 50%,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 70%
+    );
     opacity: 0;
     transition: opacity 0.3s ease;
-}
+  }
 
-.action-card:hover .card-glow {
+  .action-card:hover .card-glow {
     opacity: 1;
-}
+  }
 
-.card-content {
+  .card-content {
     position: relative;
     z-index: 2;
-}
+  }
 
-.card-icon {
+  .card-icon {
     font-size: 3rem;
     margin-bottom: 1.5rem;
     color: #ffd700;
-}
+  }
 
-.card-title {
+  .card-title {
     font-size: 1.5rem;
     font-weight: 600;
     color: white;
     margin-bottom: 1rem;
-}
+  }
 
-.card-description {
+  .card-description {
     color: rgba(255, 255, 255, 0.8);
     margin-bottom: 1.5rem;
     line-height: 1.6;
-}
+  }
 
-.card-stats {
+  .card-stats {
     margin-bottom: 1.5rem;
-}
+  }
 
-.stat {
+  .stat {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -819,9 +859,9 @@
     border-radius: 20px;
     font-size: 0.9rem;
     color: rgba(255, 255, 255, 0.9);
-}
+  }
 
-.action-btn {
+  .action-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -833,45 +873,45 @@
     font-weight: 500;
     transition: all 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.3);
-}
+  }
 
-.action-btn:hover {
+  .action-btn:hover {
     background: rgba(255, 255, 255, 0.3);
     transform: translateX(5px);
     color: white;
     text-decoration: none;
-}
+  }
 
-/* Recent Activity Section */
-.recent-activity-section {
+  /* Recent Activity Section */
+  .recent-activity-section {
     padding: 5rem 0;
     background: #f8fafc;
-}
+  }
 
-.activity-card {
+  .activity-card {
     background: white;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     border: 1px solid #e2e8f0;
     overflow: hidden;
     transition: all 0.3s ease;
-}
+  }
 
-.activity-card:hover {
+  .activity-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-}
+  }
 
-.card-header {
+  .card-header {
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
     padding: 1.5rem 2rem;
     border-bottom: 1px solid #e2e8f0;
     display: flex;
     align-items: center;
     gap: 1rem;
-}
+  }
 
-.header-icon {
+  .header-icon {
     width: 50px;
     height: 50px;
     border-radius: 12px;
@@ -881,26 +921,26 @@
     font-size: 1.5rem;
     color: white;
     background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-}
+  }
 
-.header-content h3 {
+  .header-content h3 {
     margin: 0;
     font-size: 1.25rem;
     font-weight: 600;
     color: #1e293b;
-}
+  }
 
-.header-content p {
+  .header-content p {
     margin: 0;
     color: #64748b;
     font-size: 0.9rem;
-}
+  }
 
-.card-body {
+  .card-body {
     padding: 2rem;
-}
+  }
 
-.activity-item {
+  .activity-item {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -908,18 +948,18 @@
     border-radius: 12px;
     transition: all 0.3s ease;
     margin-bottom: 1rem;
-}
+  }
 
-.activity-item:hover {
+  .activity-item:hover {
     background: #f8fafc;
     transform: translateX(5px);
-}
+  }
 
-.activity-item:last-child {
+  .activity-item:last-child {
     margin-bottom: 0;
-}
+  }
 
-.item-icon {
+  .item-icon {
     width: 50px;
     height: 50px;
     border-radius: 12px;
@@ -929,33 +969,33 @@
     font-size: 1.25rem;
     color: white;
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-}
+  }
 
-.item-content {
+  .item-content {
     flex: 1;
-}
+  }
 
-.item-content h4 {
+  .item-content h4 {
     margin: 0 0 0.5rem;
     font-size: 1rem;
     font-weight: 600;
     color: #1e293b;
-}
+  }
 
-.item-meta {
+  .item-meta {
     display: flex;
     gap: 1rem;
     font-size: 0.875rem;
     color: #64748b;
-}
+  }
 
-.item-meta span {
+  .item-meta span {
     display: flex;
     align-items: center;
     gap: 0.25rem;
-}
+  }
 
-.view-btn {
+  .view-btn {
     width: 40px;
     height: 40px;
     border-radius: 10px;
@@ -966,95 +1006,95 @@
     color: white;
     text-decoration: none;
     transition: all 0.3s ease;
-}
+  }
 
-.view-btn:hover {
+  .view-btn:hover {
     transform: scale(1.1);
     color: white;
     text-decoration: none;
-}
+  }
 
-.empty-state {
+  .empty-state {
     text-align: center;
     padding: 3rem 2rem;
-}
+  }
 
-.empty-icon {
+  .empty-icon {
     font-size: 3rem;
     color: #cbd5e1;
     margin-bottom: 1rem;
-}
+  }
 
-.empty-state h4 {
+  .empty-state h4 {
     color: #64748b;
     margin-bottom: 0.5rem;
-}
+  }
 
-.empty-state p {
+  .empty-state p {
     color: #94a3b8;
     margin-bottom: 1.5rem;
-}
+  }
 
-/* Tips Section */
-.tips-section {
+  /* Tips Section */
+  .tips-section {
     padding: 5rem 0;
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-}
+  }
 
-.tips-card {
+  .tips-card {
     background: white;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     border: 1px solid #e2e8f0;
     overflow: hidden;
-}
+  }
 
-.tips-header {
+  .tips-header {
     background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
     padding: 2rem;
     display: flex;
     align-items: center;
     gap: 1rem;
     color: white;
-}
+  }
 
-.tips-icon {
+  .tips-icon {
     font-size: 2rem;
-}
+  }
 
-.tips-content h3 {
+  .tips-content h3 {
     margin: 0;
     font-size: 1.5rem;
     font-weight: 600;
-}
+  }
 
-.tips-content p {
+  .tips-content p {
     margin: 0;
     opacity: 0.9;
-}
+  }
 
-.tips-grid {
+  .tips-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
     padding: 2rem;
-}
+  }
 
-.tip-item {
+  .tip-item {
     display: flex;
     gap: 1rem;
     padding: 1.5rem;
     border-radius: 12px;
     background: #f8fafc;
     transition: all 0.3s ease;
-}
+  }
 
-.tip-item:hover {
+  .tip-item:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
+  }
 
-.tip-icon {
+  .tip-icon {
     width: 50px;
     height: 50px;
     border-radius: 12px;
@@ -1065,162 +1105,171 @@
     color: white;
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     flex-shrink: 0;
-}
+  }
 
-.tip-content h4 {
+  .tip-content h4 {
     margin: 0 0 0.5rem;
     font-size: 1.1rem;
     font-weight: 600;
     color: #1e293b;
-}
+  }
 
-.tip-content p {
+  .tip-content p {
     margin: 0;
     color: #64748b;
     line-height: 1.6;
-}
+  }
 
-/* Animations */
-@keyframes fadeInUp {
+  /* Animations */
+  @keyframes fadeInUp {
     from {
-        opacity: 0;
-        transform: translateY(30px);
+      opacity: 0;
+      transform: translateY(30px);
     }
     to {
-        opacity: 1;
-        transform: translateY(0);
+      opacity: 1;
+      transform: translateY(0);
     }
-}
+  }
 
-@keyframes float {
-    0%, 100% {
-        transform: translateY(0px);
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px);
     }
     50% {
-        transform: translateY(-20px);
+      transform: translateY(-20px);
     }
-}
+  }
 
-/* Responsive Design */
-@media (max-width: 768px) {
+  /* Responsive Design */
+  @media (max-width: 768px) {
     .hero-title {
-        font-size: 2.5rem;
+      font-size: 2.5rem;
     }
-    
+
     .hero-stats {
-        flex-direction: column;
-        gap: 1rem;
+      flex-direction: column;
+      gap: 1rem;
     }
-    
-    .actions-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .tips-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .section-title {
-        font-size: 2rem;
-    }
-}
 
-@media (max-width: 576px) {
+    .actions-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .tips-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .section-title {
+      font-size: 2rem;
+    }
+  }
+
+  @media (max-width: 576px) {
     .hero-title {
-        font-size: 2rem;
+      font-size: 2rem;
     }
-    
+
     .hero-content {
-        padding: 2rem 0;
+      padding: 2rem 0;
     }
-    
+
     .analytics-section,
     .quick-actions-section,
     .recent-activity-section,
     .tips-section {
-        padding: 3rem 0;
+      padding: 3rem 0;
     }
-}
+  }
 </style>
 
 <!-- JavaScript for Enhanced Interactions -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener("DOMContentLoaded", function () {
     // Typing animation
-    const typingText = document.getElementById('typing-text');
-    const texts = ['Ready to grow?', 'Let\'s build your future!', 'Your success starts here!'];
+    const typingText = document.getElementById("typing-text");
+    const texts = [
+      "Ready to grow?",
+      "Let's build your future!",
+      "Your success starts here!",
+    ];
     let textIndex = 0;
     let charIndex = 0;
     let isDeleting = false;
-    
+
     function typeWriter() {
-        const currentText = texts[textIndex];
-        
-        if (isDeleting) {
-            typingText.textContent = currentText.substring(0, charIndex - 1);
-            charIndex--;
-        } else {
-            typingText.textContent = currentText.substring(0, charIndex + 1);
-            charIndex++;
-        }
-        
-        let typeSpeed = isDeleting ? 100 : 150;
-        
-        if (!isDeleting && charIndex === currentText.length) {
-            typeSpeed = 2000;
-            isDeleting = true;
-        } else if (isDeleting && charIndex === 0) {
-            isDeleting = false;
-            textIndex = (textIndex + 1) % texts.length;
-            typeSpeed = 500;
-        }
-        
-        setTimeout(typeWriter, typeSpeed);
+      const currentText = texts[textIndex];
+
+      if (isDeleting) {
+        typingText.textContent = currentText.substring(0, charIndex - 1);
+        charIndex--;
+      } else {
+        typingText.textContent = currentText.substring(0, charIndex + 1);
+        charIndex++;
+      }
+
+      let typeSpeed = isDeleting ? 100 : 150;
+
+      if (!isDeleting && charIndex === currentText.length) {
+        typeSpeed = 2000;
+        isDeleting = true;
+      } else if (isDeleting && charIndex === 0) {
+        isDeleting = false;
+        textIndex = (textIndex + 1) % texts.length;
+        typeSpeed = 500;
+      }
+
+      setTimeout(typeWriter, typeSpeed);
     }
-    
+
     typeWriter();
-    
+
     // Animate progress rings
-    const progressRings = document.querySelectorAll('.progress-ring-circle');
-    progressRings.forEach(ring => {
-        const progress = ring.getAttribute('data-progress');
-        const circumference = 2 * Math.PI * 54;
-        const offset = circumference - (progress / 100) * circumference;
-        
-        setTimeout(() => {
-            ring.style.strokeDashoffset = offset;
-        }, 500);
+    const progressRings = document.querySelectorAll(".progress-ring-circle");
+    progressRings.forEach((ring) => {
+      const progress = ring.getAttribute("data-progress");
+      const circumference = 2 * Math.PI * 54;
+      const offset = circumference - (progress / 100) * circumference;
+
+      setTimeout(() => {
+        ring.style.strokeDashoffset = offset;
+      }, 500);
     });
-    
+
     // Animate cards on scroll
     const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
+      threshold: 0.1,
+      rootMargin: "0px 0px -50px 0px",
     };
-    
+
     const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = "1";
+          entry.target.style.transform = "translateY(0)";
+        }
+      });
     }, observerOptions);
-    
+
     // Observe all cards
-    document.querySelectorAll('.analytics-card, .action-card, .activity-card, .tip-item').forEach(card => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        card.style.transition = 'all 0.6s ease';
+    document
+      .querySelectorAll(
+        ".analytics-card, .action-card, .activity-card, .tip-item"
+      )
+      .forEach((card) => {
+        card.style.opacity = "0";
+        card.style.transform = "translateY(30px)";
+        card.style.transition = "all 0.6s ease";
         observer.observe(card);
-    });
-    
+      });
+
     // Particle effect (simplified)
-    const particlesContainer = document.getElementById('particles-js');
+    const particlesContainer = document.getElementById("particles-js");
     for (let i = 0; i < 50; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.cssText = `
+      const particle = document.createElement("div");
+      particle.className = "particle";
+      particle.style.cssText = `
             position: absolute;
             width: 2px;
             height: 2px;
@@ -1231,29 +1280,29 @@ document.addEventListener('DOMContentLoaded', function() {
             animation: float ${3 + Math.random() * 4}s ease-in-out infinite;
             animation-delay: ${Math.random() * 2}s;
         `;
-        particlesContainer.appendChild(particle);
+      particlesContainer.appendChild(particle);
     }
-    
-    // Add hover effects to action cards
-    document.querySelectorAll('.action-card').forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-10px) scale(1.02)';
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
-    });
-});
 
-// Add particle animation
-const style = document.createElement('style');
-style.textContent = `
+    // Add hover effects to action cards
+    document.querySelectorAll(".action-card").forEach((card) => {
+      card.addEventListener("mouseenter", function () {
+        this.style.transform = "translateY(-10px) scale(1.02)";
+      });
+
+      card.addEventListener("mouseleave", function () {
+        this.style.transform = "translateY(0) scale(1)";
+      });
+    });
+  });
+
+  // Add particle animation
+  const style = document.createElement("style");
+  style.textContent = `
     @keyframes float {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         50% { transform: translateY(-20px) rotate(180deg); }
     }
 `;
-document.head.appendChild(style);
+  document.head.appendChild(style);
 </script>
-{% endblock %} 
+{% endblock %}
