@@ -1,508 +1,471 @@
-{% extends 'base.html' %}
-
-{% block title %}Profile - HireVision{% endblock %}
-
-{% block extra_css %}
+{% extends 'base.html' %} {% block title %}Profile - HireVision{% endblock %}
+{%block extra_css %}
 <style>
-    .profile-container {
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        min-height: 100vh;
-        padding: 2rem 0;
-    }
+  .profile-container {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+  }
 
-    .profile-card {
-        background: white;
-        border-radius: 20px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        border: none;
-    }
+  .profile-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: none;
+  }
 
-    .profile-header {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-        color: white;
-        padding: 2rem;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
+  .profile-header {
+    background: linear-gradient(
+      135deg,
+      var(--primary-color) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
 
-    .profile-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-        opacity: 0.3;
-    }
+  .profile-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+  }
 
-    .profile-header-content {
-        position: relative;
-        z-index: 2;
-    }
+  .profile-header-content {
+    position: relative;
+    z-index: 2;
+  }
 
+  .profile-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .profile-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+  }
+
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+
+  .profile-avatar i {
+    font-size: 3rem;
+    color: white;
+  }
+
+  .profile-content {
+    padding: 2rem;
+  }
+
+  .profile-section {
+    margin-bottom: 2rem;
+  }
+
+  .profile-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+  }
+
+  .profile-section-title i {
+    margin-right: 0.75rem;
+    color: var(--primary-color);
+  }
+
+  .profile-field {
+    background: var(--light-color);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+  }
+
+  .profile-field:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+  }
+
+  .profile-field-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--secondary-color);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .profile-field-label i {
+    margin-right: 0.5rem;
+    width: 16px;
+    text-align: center;
+  }
+
+  .profile-field-value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--dark-color);
+    margin-bottom: 0;
+  }
+
+  .profile-field-value a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .profile-field-value a:hover {
+    color: var(--primary-dark);
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .profile-actions {
+    background: var(--light-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .profile-actions-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .btn-profile {
+    flex: 1;
+    padding: 0.875rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    border: none;
+  }
+
+  .btn-edit {
+    background: linear-gradient(
+      135deg,
+      var(--primary-color) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  }
+
+  .btn-edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+    color: white;
+  }
+
+  .btn-signout {
+    background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+
+  .btn-signout:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+    color: white;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+    color: white;
+  }
+
+  .stat-icon.primary {
+    background: linear-gradient(
+      135deg,
+      var(--primary-color) 0%,
+      var(--primary-dark) 100%
+    );
+  }
+
+  .stat-icon.success {
+    background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+  }
+
+  .stat-icon.warning {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: var(--secondary-color);
+    font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
     .profile-header h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-
-    .profile-header p {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        margin-bottom: 0;
-    }
-
-    .profile-avatar {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        border: 4px solid rgba(255, 255, 255, 0.3);
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    }
-
-    .profile-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 50%;
-    }
-
-    .profile-avatar i {
-        font-size: 3rem;
-        color: white;
+      font-size: 2rem;
     }
 
     .profile-content {
-        padding: 2rem;
-    }
-
-    .profile-section {
-        margin-bottom: 2rem;
-    }
-
-    .profile-section-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--dark-color);
-        margin-bottom: 1.5rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 2px solid var(--border-color);
-        display: flex;
-        align-items: center;
-    }
-
-    .profile-section-title i {
-        margin-right: 0.75rem;
-        color: var(--primary-color);
-    }
-
-    .profile-field {
-        background: var(--light-color);
-        border-radius: 12px;
-        padding: 1rem 1.5rem;
-        margin-bottom: 1rem;
-        border: 1px solid var(--border-color);
-        transition: all 0.3s ease;
-    }
-
-    .profile-field:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        border-color: var(--primary-color);
-    }
-
-    .profile-field-label {
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: var(--secondary-color);
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-    }
-
-    .profile-field-label i {
-        margin-right: 0.5rem;
-        width: 16px;
-        text-align: center;
-    }
-
-    .profile-field-value {
-        font-size: 1rem;
-        font-weight: 500;
-        color: var(--dark-color);
-        margin-bottom: 0;
-    }
-
-    .profile-field-value a {
-        color: var(--primary-color);
-        text-decoration: none;
-        transition: color 0.3s ease;
-    }
-
-    .profile-field-value a:hover {
-        color: var(--primary-dark);
-    }
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .status-badge.verified {
-        background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
-        color: white;
-    }
-
-    .status-badge.unverified {
-        background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
-        color: white;
-    }
-
-    .profile-actions {
-        background: var(--light-color);
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-top: 2rem;
-    }
-
-    .profile-actions-title {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: var(--dark-color);
-        margin-bottom: 1rem;
-        text-align: center;
+      padding: 1.5rem;
     }
 
     .action-buttons {
-        display: flex;
-        gap: 1rem;
-    }
-
-    .btn-profile {
-        flex: 1;
-        padding: 0.875rem 1.5rem;
-        border-radius: 12px;
-        font-weight: 500;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        transition: all 0.3s ease;
-        border: none;
-    }
-
-    .btn-edit {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-        color: white;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-    }
-
-    .btn-edit:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
-        color: white;
-    }
-
-    .btn-signout {
-        background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
-        color: white;
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-    }
-
-    .btn-signout:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
-        color: white;
+      flex-direction: column;
     }
 
     .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
+      grid-template-columns: 1fr;
     }
-
-    .stat-card {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        text-align: center;
-        border: 1px solid var(--border-color);
-        transition: all 0.3s ease;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    .stat-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1rem;
-        font-size: 1.5rem;
-        color: white;
-    }
-
-    .stat-icon.primary {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-    }
-
-    .stat-icon.success {
-        background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
-    }
-
-    .stat-icon.warning {
-        background: linear-gradient(135deg, var(--accent-color) 0%, #d97706 100%);
-    }
-
-    .stat-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--dark-color);
-        margin-bottom: 0.25rem;
-    }
-
-    .stat-label {
-        font-size: 0.875rem;
-        color: var(--secondary-color);
-        font-weight: 500;
-    }
-
-    @media (max-width: 768px) {
-        .profile-header h1 {
-            font-size: 2rem;
-        }
-        
-        .profile-content {
-            padding: 1.5rem;
-        }
-        
-        .action-buttons {
-            flex-direction: column;
-        }
-        
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-    }
+  }
 </style>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="profile-container">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="profile-card">
-                    <!-- Profile Header -->
-                    <div class="profile-header">
-                        <div class="profile-header-content">
-                            <div class="profile-avatar">
-                                {% if user.profile_picture %}
-                                    <img src="{{ user.profile_picture.url }}" alt="Profile Picture">
-                                {% else %}
-                                    <i class="fas fa-user"></i>
-                                {% endif %}
-                            </div>
-                            <h1>{{ user.first_name|default:user.username }}</h1>
-                            <p>Welcome to your HireVision profile</p>
-                        </div>
-                    </div>
-
-                    <!-- Profile Content -->
-                    <div class="profile-content">
-                        {% if messages %}
-                            {% for message in messages %}
-                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-
-                        <!-- Stats Grid -->
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-icon primary">
-                                    <i class="fas fa-calendar"></i>
-                                </div>
-                                <div class="stat-value">{{ user.created_at|date:"M Y" }}</div>
-                                <div class="stat-label">Member Since</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon success">
-                                    <i class="fas fa-shield-alt"></i>
-                                </div>
-                                <div class="stat-value">
-                                    {% if user.is_verified %}Verified{% else %}Unverified{% endif %}
-                                </div>
-                                <div class="stat-label">Account Status</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon warning">
-                                    <i class="fas fa-user-circle"></i>
-                                </div>
-                                <div class="stat-value">{{ user.username }}</div>
-                                <div class="stat-label">Username</div>
-                            </div>
-                        </div>
-
-                        <!-- Personal Information -->
-                        <div class="profile-section">
-                            <h3 class="profile-section-title">
-                                <i class="fas fa-user"></i>
-                                Personal Information
-                            </h3>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="profile-field">
-                                        <div class="profile-field-label">
-                                            <i class="fas fa-user"></i>First Name
-                                        </div>
-                                        <div class="profile-field-value">{{ user.first_name|default:"Not provided" }}</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="profile-field">
-                                        <div class="profile-field-label">
-                                            <i class="fas fa-user"></i>Last Name
-                                        </div>
-                                        <div class="profile-field-value">{{ user.last_name|default:"Not provided" }}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="profile-field">
-                                <div class="profile-field-label">
-                                    <i class="fas fa-envelope"></i>Email Address
-                                </div>
-                                <div class="profile-field-value">{{ user.email }}</div>
-                            </div>
-
-                            <div class="profile-field">
-                                <div class="profile-field-label">
-                                    <i class="fas fa-phone"></i>Phone Number
-                                </div>
-                                <div class="profile-field-value">{{ user.phone|default:"Not provided" }}</div>
-                            </div>
-
-                            {% if user.date_of_birth %}
-                            <div class="profile-field">
-                                <div class="profile-field-label">
-                                    <i class="fas fa-birthday-cake"></i>Date of Birth
-                                </div>
-                                <div class="profile-field-value">{{ user.date_of_birth|date:"F j, Y" }}</div>
-                            </div>
-                            {% endif %}
-
-                            {% if user.bio %}
-                            <div class="profile-field">
-                                <div class="profile-field-label">
-                                    <i class="fas fa-info-circle"></i>Bio
-                                </div>
-                                <div class="profile-field-value">{{ user.bio }}</div>
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Social Links -->
-                        {% if user.linkedin_url or user.github_url %}
-                        <div class="profile-section">
-                            <h3 class="profile-section-title">
-                                <i class="fas fa-link"></i>
-                                Social Links
-                            </h3>
-                            {% if user.linkedin_url %}
-                            <div class="profile-field">
-                                <div class="profile-field-label">
-                                    <i class="fab fa-linkedin"></i>LinkedIn
-                                </div>
-                                <div class="profile-field-value">
-                                    <a href="{{ user.linkedin_url }}" target="_blank">
-                                        {{ user.linkedin_url }}
-                                    </a>
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            {% if user.github_url %}
-                            <div class="profile-field">
-                                <div class="profile-field-label">
-                                    <i class="fab fa-github"></i>GitHub
-                                </div>
-                                <div class="profile-field-value">
-                                    <a href="{{ user.github_url }}" target="_blank">
-                                        {{ user.github_url }}
-                                    </a>
-                                </div>
-                            </div>
-                            {% endif %}
-                        </div>
-                        {% endif %}
-
-                        <!-- Account Status -->
-                        <div class="profile-section">
-                            <h3 class="profile-section-title">
-                                <i class="fas fa-shield-alt"></i>
-                                Account Status
-                            </h3>
-                            <div class="profile-field">
-                                <div class="profile-field-label">
-                                    <i class="fas fa-shield-alt"></i>Verification Status
-                                </div>
-                                <div class="profile-field-value">
-                                    <span class="status-badge {% if user.is_verified %}verified{% else %}unverified{% endif %}">
-                                        {% if user.is_verified %}
-                                            <i class="fas fa-check-circle me-1"></i>Verified
-                                        {% else %}
-                                            <i class="fas fa-clock me-1"></i>Unverified
-                                        {% endif %}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Profile Actions -->
-                        <div class="profile-actions">
-                            <h4 class="profile-actions-title">Profile Actions</h4>
-                            <div class="action-buttons">
-                                <a href="#" class="btn-profile btn-edit">
-                                    <i class="fas fa-edit"></i>
-                                    Edit Profile
-                                </a>
-                                <a href="{% url 'hirevision:logout' %}" class="btn-profile btn-signout">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    Sign Out
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="profile-card">
+          <!-- Profile Header -->
+          <div class="profile-header">
+            <div class="profile-header-content">
+              <div class="profile-avatar">
+                {% if user.profile_picture %}
+                <img
+                  src="{{ user.profile_picture.url }}"
+                  alt="Profile Picture"
+                />
+                {% else %}
+                <i class="fas fa-user"></i>
+                {% endif %}
+              </div>
+              <h1>{{ user.first_name|default:user.username }}</h1>
+              <p>Welcome to your HireVision profile</p>
             </div>
+          </div>
+
+          <!-- Profile Content -->
+          <div class="profile-content">
+            {% if messages %} {% for message in messages %}
+            <div
+              class="alert alert-{{ message.tags }} alert-dismissible fade show"
+              role="alert"
+            >
+              {{ message }}
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+              ></button>
+            </div>
+            {% endfor %} {% endif %}
+
+            <!-- Personal Information -->
+            <div class="profile-section">
+              <h3 class="profile-section-title">
+                <i class="fas fa-user"></i>
+                Personal Information
+              </h3>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="profile-field">
+                    <div class="profile-field-label">
+                      <i class="fas fa-user"></i>First Name
+                    </div>
+                    <div class="profile-field-value">
+                      {{ user.first_name|default:"Not provided" }}
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="profile-field">
+                    <div class="profile-field-label">
+                      <i class="fas fa-user"></i>Last Name
+                    </div>
+                    <div class="profile-field-value">
+                      {{ user.last_name|default:"Not provided" }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="profile-field">
+                <div class="profile-field-label">
+                  <i class="fas fa-envelope"></i>Email Address
+                </div>
+                <div class="profile-field-value">{{ user.email }}</div>
+              </div>
+
+              <div class="profile-field">
+                <div class="profile-field-label">
+                  <i class="fas fa-phone"></i>Phone Number
+                </div>
+                <div class="profile-field-value">
+                  {{ user.phone|default:"Not provided" }}
+                </div>
+              </div>
+
+              {% if user.date_of_birth %}
+              <div class="profile-field">
+                <div class="profile-field-label">
+                  <i class="fas fa-birthday-cake"></i>Date of Birth
+                </div>
+                <div class="profile-field-value">
+                  {{ user.date_of_birth|date:"F j, Y" }}
+                </div>
+              </div>
+              {% endif %} {% if user.bio %}
+              <div class="profile-field">
+                <div class="profile-field-label">
+                  <i class="fas fa-info-circle"></i>Bio
+                </div>
+                <div class="profile-field-value">{{ user.bio }}</div>
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Social Links -->
+            {% if user.linkedin_url or user.github_url %}
+            <div class="profile-section">
+              <h3 class="profile-section-title">
+                <i class="fas fa-link"></i>
+                Social Links
+              </h3>
+              {% if user.linkedin_url %}
+              <div class="profile-field">
+                <div class="profile-field-label">
+                  <i class="fab fa-linkedin"></i>LinkedIn
+                </div>
+                <div class="profile-field-value">
+                  <a href="{{ user.linkedin_url }}" target="_blank">
+                    {{ user.linkedin_url }}
+                  </a>
+                </div>
+              </div>
+              {% endif %} {% if user.github_url %}
+              <div class="profile-field">
+                <div class="profile-field-label">
+                  <i class="fab fa-github"></i>GitHub
+                </div>
+                <div class="profile-field-value">
+                  <a href="{{ user.github_url }}" target="_blank">
+                    {{ user.github_url }}
+                  </a>
+                </div>
+              </div>
+              {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Profile Actions -->
+            <div class="profile-actions">
+              <h4 class="profile-actions-title">Profile Actions</h4>
+              <div class="action-buttons">
+                <a href="#" class="btn-profile btn-edit">
+                  <i class="fas fa-edit"></i>
+                  Edit Profile
+                </a>
+                <a
+                  href="{% url 'hirevision:logout' %}"
+                  class="btn-profile btn-signout"
+                >
+                  <i class="fas fa-sign-out-alt"></i>
+                  Sign Out
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
-{% endblock %} 
+{% endblock %}
