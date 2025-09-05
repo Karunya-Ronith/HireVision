@@ -179,6 +179,47 @@
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
 
+    .form-input.error {
+        border-color: var(--danger-color);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .form-input.success {
+        border-color: var(--success-color);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .error-message {
+        color: var(--danger-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+        font-weight: 500;
+    }
+
+    .error-message.show {
+        display: block;
+    }
+
+    .success-message {
+        color: var(--success-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+        font-weight: 500;
+    }
+
+    .success-message.show {
+        display: block;
+    }
+
+    .optional-label {
+        color: var(--secondary-color);
+        font-weight: 400;
+        font-size: 0.8em;
+        font-style: italic;
+    }
+
     .form-input.has-icon {
         padding-left: 3rem;
     }
@@ -530,26 +571,31 @@
                             <label class="form-label">Full Name *</label>
                             <input type="text" class="form-input has-icon" name="name" placeholder="Your Full Name" required>
                             <i class="fas fa-user input-icon"></i>
+                            <div class="error-message" id="name-error"></div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Email Address *</label>
                             <input type="email" class="form-input has-icon" name="email" placeholder="your.email@example.com" required>
                             <i class="fas fa-envelope input-icon"></i>
+                            <div class="error-message" id="email-error"></div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Phone Number</label>
+                            <label class="form-label">Phone Number <span class="optional-label">(Optional)</span></label>
                             <input type="tel" class="form-input has-icon" name="phone" placeholder="+1 (555) 123-4567">
                             <i class="fas fa-phone input-icon"></i>
+                            <div class="error-message" id="phone-error"></div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">LinkedIn Profile</label>
+                            <label class="form-label">LinkedIn Profile <span class="optional-label">(Optional)</span></label>
                             <input type="url" class="form-input has-icon" name="linkedin" placeholder="https://linkedin.com/in/yourprofile">
                             <i class="fab fa-linkedin input-icon"></i>
+                            <div class="error-message" id="linkedin-error"></div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">GitHub Profile</label>
+                            <label class="form-label">GitHub Profile <span class="optional-label">(Optional)</span></label>
                             <input type="url" class="form-input has-icon" name="github" placeholder="https://github.com/yourusername">
                             <i class="fab fa-github input-icon"></i>
+                            <div class="error-message" id="github-error"></div>
                         </div>
                     </div>
                 </div>
@@ -572,18 +618,22 @@
                                 <div class="form-group">
                                     <label class="form-label">Degree *</label>
                                     <input type="text" class="form-input" name="education_degree[]" placeholder="e.g., Bachelor of Science in Computer Science" required>
+                                    <div class="error-message" id="education_degree-error-0"></div>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Institution *</label>
                                     <input type="text" class="form-input" name="education_school[]" placeholder="University Name" required>
+                                    <div class="error-message" id="education_school-error-0"></div>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Graduation Year *</label>
                                     <input type="number" class="form-input" name="education_year[]" placeholder="2020" min="1950" max="2030" required>
+                                    <div class="error-message" id="education_year-error-0"></div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">GPA (Optional)</label>
+                                    <label class="form-label">GPA <span class="optional-label">(Optional)</span></label>
                                     <input type="text" class="form-input" name="education_gpa[]" placeholder="3.8">
+                                    <div class="error-message" id="education_gpa-error-0"></div>
                                 </div>
                             </div>
                         </div>
@@ -612,23 +662,28 @@
                                 <div class="form-group">
                                     <label class="form-label">Job Title *</label>
                                     <input type="text" class="form-input" name="experience_title[]" placeholder="e.g., Software Engineer" required>
+                                    <div class="error-message" id="experience_title-error-0"></div>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Company *</label>
                                     <input type="text" class="form-input" name="experience_company[]" placeholder="Company Name" required>
+                                    <div class="error-message" id="experience_company-error-0"></div>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Start Date *</label>
                                     <input type="month" class="form-input" name="experience_start[]" required>
+                                    <div class="error-message" id="experience_start-error-0"></div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">End Date</label>
+                                    <label class="form-label">End Date <span class="optional-label">(Optional)</span></label>
                                     <input type="month" class="form-input" name="experience_end[]" placeholder="Present">
+                                    <div class="error-message" id="experience_end-error-0"></div>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Job Description *</label>
-                                <textarea class="form-input form-textarea" name="experience_description[]" placeholder="Describe your responsibilities and achievements..." required></textarea>
+                                <textarea class="form-input form-textarea" name="experience_description[]" placeholder="Describe your responsibilities and achievements...&#10;&#10;Tip: Use * at the beginning of each line for bullet points:&#10;* Built scalable web applications&#10;* Led a team of 5 developers&#10;* Improved performance by 40%" required></textarea>
+                                <div class="error-message" id="experience_description-error-0"></div>
                             </div>
                         </div>
                     </div>
@@ -649,6 +704,7 @@
                     <div class="form-group">
                         <label class="form-label">Technical Skills *</label>
                         <textarea class="form-input form-textarea" name="skills" placeholder="Enter your technical skills (e.g., Python, JavaScript, React, AWS, Docker...)" required></textarea>
+                        <div class="error-message" id="skills-error"></div>
                     </div>
 
                     <!-- Projects Section -->
@@ -668,15 +724,18 @@
                                 <div class="form-group">
                                     <label class="form-label">Project Name *</label>
                                     <input type="text" class="form-input" name="project_name[]" placeholder="e.g., E-commerce Platform" required>
+                                    <div class="error-message" id="project_name-error-0"></div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Technologies Used</label>
+                                    <label class="form-label">Technologies Used <span class="optional-label">(Optional)</span></label>
                                     <input type="text" class="form-input" name="project_tech[]" placeholder="e.g., React, Node.js, MongoDB">
+                                    <div class="error-message" id="project_tech-error-0"></div>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Project Description *</label>
-                                <textarea class="form-input form-textarea" name="project_description[]" placeholder="Describe what the project does and your role..." required></textarea>
+                                <textarea class="form-input form-textarea" name="project_description[]" placeholder="Describe what the project does and your role...&#10;&#10;Tip: Use * at the beginning of each line for bullet points:&#10;* Developed full-stack web application&#10;* Implemented user authentication&#10;* Deployed on AWS cloud" required></textarea>
+                                <div class="error-message" id="project_description-error-0"></div>
                             </div>
                         </div>
                     </div>
@@ -684,6 +743,70 @@
                         <i class="fas fa-plus"></i>
                         Add Another Project
                     </button>
+
+                    <!-- Research Papers Section -->
+                    <h4 class="section-title-small" style="margin-top: 2rem; margin-bottom: 1rem;">
+                        <i class="fas fa-file-alt"></i>
+                        Research Papers (Optional)
+                    </h4>
+                    <div id="research-sections">
+                        <div class="dynamic-section research-item">
+                            <div class="section-header">
+                                <h4 class="section-title-small">Research Paper #1</h4>
+                                <button type="button" class="remove-section" onclick="removeSection(this)">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Paper Title <span class="optional-label">(Optional)</span></label>
+                                    <input type="text" class="form-input" name="research_title[]" placeholder="e.g., Machine Learning in Healthcare">
+                                    <div class="error-message" id="research_title-error-0"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Authors <span class="optional-label">(Optional)</span></label>
+                                    <input type="text" class="form-input" name="research_authors[]" placeholder="e.g., John Doe, Jane Smith">
+                                    <div class="error-message" id="research_authors-error-0"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Journal/Conference <span class="optional-label">(Optional)</span></label>
+                                    <input type="text" class="form-input" name="research_journal[]" placeholder="e.g., IEEE Transactions">
+                                    <div class="error-message" id="research_journal-error-0"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Year <span class="optional-label">(Optional)</span></label>
+                                    <input type="number" class="form-input" name="research_year[]" placeholder="2023" min="1950" max="2030">
+                                    <div class="error-message" id="research_year-error-0"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="add-section-btn" onclick="addResearchSection()">
+                        <i class="fas fa-plus"></i>
+                        Add Another Research Paper
+                    </button>
+
+                    <!-- Achievements Section -->
+                    <h4 class="section-title-small" style="margin-top: 2rem; margin-bottom: 1rem;">
+                        <i class="fas fa-trophy"></i>
+                        Achievements <span class="optional-label">(Optional)</span>
+                    </h4>
+                    <div class="form-group">
+                        <label class="form-label">Achievements <span class="optional-label">(Optional)</span></label>
+                        <textarea class="form-input form-textarea" name="achievements" placeholder="Enter your achievements (one per line):&#10;&#10;Tip: Use * at the beginning of each line for bullet points:&#10;* First Place in National Coding Competition&#10;* Published 3 research papers&#10;* Dean's List for 4 consecutive semesters"></textarea>
+                        <div class="error-message" id="achievements-error"></div>
+                    </div>
+
+                    <!-- Others Section -->
+                    <h4 class="section-title-small" style="margin-top: 2rem; margin-bottom: 1rem;">
+                        <i class="fas fa-plus-circle"></i>
+                        Additional Information <span class="optional-label">(Optional)</span>
+                    </h4>
+                    <div class="form-group">
+                        <label class="form-label">Other Information <span class="optional-label">(Optional)</span></label>
+                        <textarea class="form-input form-textarea" name="others" placeholder="Enter any additional information (one per line):&#10;&#10;Tip: Use * at the beginning of each line for bullet points:&#10;* Volunteer work at local shelter&#10;* Fluent in Spanish and French&#10;* Certified in AWS Cloud Practitioner"></textarea>
+                        <div class="error-message" id="others-error"></div>
+                    </div>
                 </div>
 
                 <!-- Step 5: Review & Generate -->
@@ -744,6 +867,9 @@ document.addEventListener('DOMContentLoaded', function() {
     updateProgress();
     updateNavigation();
     updateStepIndicators();
+    
+    // Add real-time validation to existing form fields
+    addRealTimeValidation(document);
 });
 
 function nextStep() {
@@ -863,24 +989,29 @@ function addEducationSection() {
             <div class="form-group">
                 <label class="form-label">Degree *</label>
                 <input type="text" class="form-input" name="education_degree[]" placeholder="e.g., Bachelor of Science in Computer Science" required>
+                <div class="error-message" id="education_degree-error-${sectionCount - 1}"></div>
             </div>
             <div class="form-group">
                 <label class="form-label">Institution *</label>
                 <input type="text" class="form-input" name="education_school[]" placeholder="University Name" required>
+                <div class="error-message" id="education_school-error-${sectionCount - 1}"></div>
             </div>
             <div class="form-group">
                 <label class="form-label">Graduation Year *</label>
                 <input type="number" class="form-input" name="education_year[]" placeholder="2020" min="1950" max="2030" required>
+                <div class="error-message" id="education_year-error-${sectionCount - 1}"></div>
             </div>
             <div class="form-group">
-                <label class="form-label">GPA (Optional)</label>
+                <label class="form-label">GPA <span class="optional-label">(Optional)</span></label>
                 <input type="text" class="form-input" name="education_gpa[]" placeholder="3.8">
+                <div class="error-message" id="education_gpa-error-${sectionCount - 1}"></div>
             </div>
         </div>
     `;
     
     container.appendChild(newSection);
     updateSectionNumbers('education-sections', 'Education Entry');
+    addRealTimeValidation(newSection);
 }
 
 function addExperienceSection() {
@@ -900,28 +1031,34 @@ function addExperienceSection() {
             <div class="form-group">
                 <label class="form-label">Job Title *</label>
                 <input type="text" class="form-input" name="experience_title[]" placeholder="e.g., Software Engineer" required>
+                <div class="error-message" id="experience_title-error-${sectionCount - 1}"></div>
             </div>
             <div class="form-group">
                 <label class="form-label">Company *</label>
                 <input type="text" class="form-input" name="experience_company[]" placeholder="Company Name" required>
+                <div class="error-message" id="experience_company-error-${sectionCount - 1}"></div>
             </div>
             <div class="form-group">
                 <label class="form-label">Start Date *</label>
                 <input type="month" class="form-input" name="experience_start[]" required>
+                <div class="error-message" id="experience_start-error-${sectionCount - 1}"></div>
             </div>
             <div class="form-group">
-                <label class="form-label">End Date</label>
+                <label class="form-label">End Date <span class="optional-label">(Optional)</span></label>
                 <input type="month" class="form-input" name="experience_end[]" placeholder="Present">
+                <div class="error-message" id="experience_end-error-${sectionCount - 1}"></div>
             </div>
         </div>
         <div class="form-group">
             <label class="form-label">Job Description *</label>
-            <textarea class="form-input form-textarea" name="experience_description[]" placeholder="Describe your responsibilities and achievements..." required></textarea>
+            <textarea class="form-input form-textarea" name="experience_description[]" placeholder="Describe your responsibilities and achievements...&#10;&#10;Tip: Use * at the beginning of each line for bullet points:&#10;* Built scalable web applications&#10;* Led a team of 5 developers&#10;* Improved performance by 40%" required></textarea>
+            <div class="error-message" id="experience_description-error-${sectionCount - 1}"></div>
         </div>
     `;
     
     container.appendChild(newSection);
     updateSectionNumbers('experience-sections', 'Experience Entry');
+    addRealTimeValidation(newSection);
 }
 
 function addProjectSection() {
@@ -941,20 +1078,66 @@ function addProjectSection() {
             <div class="form-group">
                 <label class="form-label">Project Name *</label>
                 <input type="text" class="form-input" name="project_name[]" placeholder="e.g., E-commerce Platform" required>
+                <div class="error-message" id="project_name-error-${sectionCount - 1}"></div>
             </div>
             <div class="form-group">
-                <label class="form-label">Technologies Used</label>
+                <label class="form-label">Technologies Used <span class="optional-label">(Optional)</span></label>
                 <input type="text" class="form-input" name="project_tech[]" placeholder="e.g., React, Node.js, MongoDB">
+                <div class="error-message" id="project_tech-error-${sectionCount - 1}"></div>
             </div>
         </div>
         <div class="form-group">
             <label class="form-label">Project Description *</label>
-            <textarea class="form-input form-textarea" name="project_description[]" placeholder="Describe what the project does and your role..." required></textarea>
+            <textarea class="form-input form-textarea" name="project_description[]" placeholder="Describe what the project does and your role...&#10;&#10;Tip: Use * at the beginning of each line for bullet points:&#10;* Developed full-stack web application&#10;* Implemented user authentication&#10;* Deployed on AWS cloud" required></textarea>
+            <div class="error-message" id="project_description-error-${sectionCount - 1}"></div>
         </div>
     `;
     
     container.appendChild(newSection);
     updateSectionNumbers('project-sections', 'Project');
+    addRealTimeValidation(newSection);
+}
+
+function addResearchSection() {
+    const container = document.getElementById('research-sections');
+    const sectionCount = container.children.length + 1;
+    
+    const newSection = document.createElement('div');
+    newSection.className = 'dynamic-section research-item';
+    newSection.innerHTML = `
+        <div class="section-header">
+            <h4 class="section-title-small">Research Paper #${sectionCount}</h4>
+            <button type="button" class="remove-section" onclick="removeSection(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Paper Title <span class="optional-label">(Optional)</span></label>
+                <input type="text" class="form-input" name="research_title[]" placeholder="e.g., Machine Learning in Healthcare">
+                <div class="error-message" id="research_title-error-${sectionCount - 1}"></div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Authors <span class="optional-label">(Optional)</span></label>
+                <input type="text" class="form-input" name="research_authors[]" placeholder="e.g., John Doe, Jane Smith">
+                <div class="error-message" id="research_authors-error-${sectionCount - 1}"></div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Journal/Conference <span class="optional-label">(Optional)</span></label>
+                <input type="text" class="form-input" name="research_journal[]" placeholder="e.g., IEEE Transactions">
+                <div class="error-message" id="research_journal-error-${sectionCount - 1}"></div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Year <span class="optional-label">(Optional)</span></label>
+                <input type="number" class="form-input" name="research_year[]" placeholder="2023" min="1950" max="2030">
+                <div class="error-message" id="research_year-error-${sectionCount - 1}"></div>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(newSection);
+    updateSectionNumbers('research-sections', 'Research Paper');
+    addRealTimeValidation(newSection);
 }
 
 function removeSection(button) {
@@ -980,9 +1163,21 @@ function getSectionType(containerId) {
     const types = {
         'education-sections': 'Education Entry',
         'experience-sections': 'Experience Entry',
-        'project-sections': 'Project'
+        'project-sections': 'Project',
+        'research-sections': 'Research Paper'
     };
     return types[containerId] || 'Section';
+}
+
+function convertBulletPoints(text) {
+    if (!text) return '';
+    return text.split('\n').map(line => {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('*')) {
+            return `• ${trimmed.substring(1).trim()}`;
+        }
+        return trimmed;
+    }).filter(line => line).join('<br>');
 }
 
 function updatePreview() {
@@ -999,6 +1194,7 @@ function updatePreview() {
                 ${formData.get('email') || 'email@example.com'} | 
                 ${formData.get('phone') || 'Phone'} | 
                 ${formData.get('linkedin') ? `<a href="${formData.get('linkedin')}" target="_blank">LinkedIn</a>` : ''}
+                ${formData.get('github') ? ` | <a href="${formData.get('github')}" target="_blank">GitHub</a>` : ''}
             </p>
             
             <h3 style="color: var(--dark-color); margin-top: 2rem;">Education</h3>
@@ -1012,7 +1208,7 @@ function updatePreview() {
             <div style="margin-bottom: 1rem;">
                 <strong>${formData.get('experience_title[]') || 'Job Title'}</strong><br>
                 ${formData.get('experience_company[]') || 'Company'} | ${formData.get('experience_start[]') || 'Start'} - ${formData.get('experience_end[]') || 'End'}<br>
-                ${formData.get('experience_description[]') || 'Description'}
+                ${convertBulletPoints(formData.get('experience_description[]') || 'Description')}
             </div>
             
             <h3 style="color: var(--dark-color); margin-top: 2rem;">Skills</h3>
@@ -1022,8 +1218,32 @@ function updatePreview() {
             <div style="margin-bottom: 1rem;">
                 <strong>${formData.get('project_name[]') || 'Project Name'}</strong><br>
                 ${formData.get('project_tech[]') ? `Technologies: ${formData.get('project_tech[]')}<br>` : ''}
-                ${formData.get('project_description[]') || 'Project description'}
+                ${convertBulletPoints(formData.get('project_description[]') || 'Project description')}
             </div>
+            
+            ${formData.get('research_title[]') ? `
+            <h3 style="color: var(--dark-color); margin-top: 2rem;">Research Papers</h3>
+            <div style="margin-bottom: 1rem;">
+                <strong>${formData.get('research_title[]')}</strong><br>
+                ${formData.get('research_authors[]') ? `Authors: ${formData.get('research_authors[]')}<br>` : ''}
+                ${formData.get('research_journal[]') ? `Journal: ${formData.get('research_journal[]')}<br>` : ''}
+                ${formData.get('research_year[]') ? `Year: ${formData.get('research_year[]')}` : ''}
+            </div>
+            ` : ''}
+            
+            ${formData.get('achievements') ? `
+            <h3 style="color: var(--dark-color); margin-top: 2rem;">Achievements</h3>
+            <div style="margin-bottom: 1rem;">
+                ${convertBulletPoints(formData.get('achievements'))}
+            </div>
+            ` : ''}
+            
+            ${formData.get('others') ? `
+            <h3 style="color: var(--dark-color); margin-top: 2rem;">Additional Information</h3>
+            <div style="margin-bottom: 1rem;">
+                ${convertBulletPoints(formData.get('others'))}
+            </div>
+            ` : ''}
         </div>
     `;
     
@@ -1033,6 +1253,11 @@ function updatePreview() {
 // Form submission
 document.getElementById('resume-form').addEventListener('submit', function(e) {
     e.preventDefault();
+    
+    // Validate required fields first
+    if (!validateForm()) {
+        return;
+    }
     
     // Show loading overlay
     document.getElementById('loading-overlay').style.display = 'flex';
@@ -1048,7 +1273,7 @@ document.getElementById('resume-form').addEventListener('submit', function(e) {
         education: [],
         experience: [],
         projects: [],
-        skills: formData.get('skills'),
+        skills: {},
         research_papers: [],
         achievements: [],
         others: []
@@ -1064,8 +1289,9 @@ document.getElementById('resume-form').addEventListener('submit', function(e) {
         if (degrees[i]) {
             jsonData.education.push({
                 degree: degrees[i],
-                school: schools[i] || '',
-                year: years[i] || '',
+                institution: schools[i] || '',
+                duration: years[i] || '',
+                location: '', // Add location field if needed
                 gpa: gpas[i] || ''
             });
         }
@@ -1083,9 +1309,9 @@ document.getElementById('resume-form').addEventListener('submit', function(e) {
             jsonData.experience.push({
                 title: titles[i],
                 company: companies[i] || '',
-                start: starts[i] || '',
-                end: ends[i] || '',
-                description: descriptions[i] || ''
+                duration: `${starts[i] || ''} - ${ends[i] || 'Present'}`,
+                location: '', // Add location field if needed
+                description: descriptions[i] ? [descriptions[i]] : []
             });
         }
     }
@@ -1099,10 +1325,81 @@ document.getElementById('resume-form').addEventListener('submit', function(e) {
         if (projectNames[i]) {
             jsonData.projects.push({
                 name: projectNames[i],
-                technologies: projectTechs[i] || '',
-                description: projectDescriptions[i] || ''
+                tech_stack: projectTechs[i] || '',
+                description: projectDescriptions[i] ? [projectDescriptions[i]] : []
             });
         }
+    }
+    
+    // Process research papers
+    const researchTitles = formData.getAll('research_title[]');
+    const researchAuthors = formData.getAll('research_authors[]');
+    const researchJournals = formData.getAll('research_journal[]');
+    const researchYears = formData.getAll('research_year[]');
+    
+    for (let i = 0; i < researchTitles.length; i++) {
+        if (researchTitles[i]) {
+            jsonData.research_papers.push({
+                title: researchTitles[i],
+                authors: researchAuthors[i] || '',
+                journal: researchJournals[i] || '',
+                year: researchYears[i] || ''
+            });
+        }
+    }
+    
+    // Process achievements
+    const achievementsText = formData.get('achievements');
+    if (achievementsText && achievementsText.trim()) {
+        jsonData.achievements = achievementsText.split('\n')
+            .map(line => line.trim())
+            .filter(line => line && !line.startsWith('•'))
+            .map(line => line.startsWith('•') ? line.substring(1).trim() : line);
+    }
+    
+    // Process others
+    const othersText = formData.get('others');
+    if (othersText && othersText.trim()) {
+        jsonData.others = othersText.split('\n')
+            .map(line => line.trim())
+            .filter(line => line && !line.startsWith('•'))
+            .map(line => line.startsWith('•') ? line.substring(1).trim() : line);
+    }
+    
+    // Process skills - convert to the expected format
+    const skillsText = formData.get('skills');
+    if (skillsText) {
+        // Parse skills text into categories
+        const skillsList = skillsText.split(',').map(s => s.trim()).filter(s => s);
+        jsonData.skills = {
+            'Programming Languages': skillsList.filter(s => 
+                ['Python', 'JavaScript', 'Java', 'C++', 'C#', 'Go', 'Rust', 'PHP', 'Ruby', 'Swift', 'Kotlin'].some(lang => 
+                    s.toLowerCase().includes(lang.toLowerCase())
+                )
+            ),
+            'Frameworks & Libraries': skillsList.filter(s => 
+                ['React', 'Django', 'Flask', 'Node.js', 'Express', 'Angular', 'Vue', 'Spring', 'Laravel', 'TensorFlow', 'PyTorch'].some(fw => 
+                    s.toLowerCase().includes(fw.toLowerCase())
+                )
+            ),
+            'Tools & Technologies': skillsList.filter(s => 
+                ['Git', 'Docker', 'AWS', 'Azure', 'GCP', 'Kubernetes', 'Jenkins', 'MongoDB', 'PostgreSQL', 'MySQL', 'Redis'].some(tool => 
+                    s.toLowerCase().includes(tool.toLowerCase())
+                )
+            ),
+            'Other Skills': skillsList.filter(s => 
+                !['Python', 'JavaScript', 'Java', 'C++', 'C#', 'Go', 'Rust', 'PHP', 'Ruby', 'Swift', 'Kotlin', 'React', 'Django', 'Flask', 'Node.js', 'Express', 'Angular', 'Vue', 'Spring', 'Laravel', 'TensorFlow', 'PyTorch', 'Git', 'Docker', 'AWS', 'Azure', 'GCP', 'Kubernetes', 'Jenkins', 'MongoDB', 'PostgreSQL', 'MySQL', 'Redis'].some(skill => 
+                    s.toLowerCase().includes(skill.toLowerCase())
+                )
+            )
+        };
+        
+        // Remove empty categories
+        Object.keys(jsonData.skills).forEach(key => {
+            if (jsonData.skills[key].length === 0) {
+                delete jsonData.skills[key];
+            }
+        });
     }
     
     // Add hidden fields with JSON data
@@ -1118,5 +1415,272 @@ document.getElementById('resume-form').addEventListener('submit', function(e) {
     // Submit the form
     this.submit();
 });
+
+function validateForm() {
+    let isValid = true;
+    
+    // Clear all previous errors
+    clearAllErrors();
+    
+    // Validate required fields
+    const requiredFields = [
+        { name: 'name', message: 'Please enter your full name' },
+        { name: 'email', message: 'Please enter your email address' },
+        { name: 'education_degree[]', message: 'Please enter at least one education entry' },
+        { name: 'project_name[]', message: 'Please enter at least one project' },
+        { name: 'skills', message: 'Please enter your skills' }
+    ];
+    
+    for (const field of requiredFields) {
+        const elements = document.querySelectorAll(`[name="${field.name}"]`);
+        let hasValue = false;
+        
+        for (const element of elements) {
+            if (element.value && element.value.trim()) {
+                hasValue = true;
+                break;
+            }
+        }
+        
+        if (!hasValue) {
+            showFieldError(field.name, field.message);
+            elements[0]?.focus();
+            isValid = false;
+        }
+    }
+    
+    // Validate email format
+    const email = document.querySelector('[name="email"]').value;
+    if (email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showFieldError('email', 'Please enter a valid email address (e.g., user@example.com)');
+            isValid = false;
+        }
+    }
+    
+    // Validate phone format (if provided)
+    const phone = document.querySelector('[name="phone"]').value;
+    if (phone && phone.trim() !== '') {
+        const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+        if (!phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))) {
+            showFieldError('phone', 'Please enter a valid phone number (e.g., +1 555 123 4567)');
+            isValid = false;
+        }
+    }
+    
+    // Validate graduation years
+    const graduationYears = document.querySelectorAll('[name="education_year[]"]');
+    const currentYear = new Date().getFullYear();
+    graduationYears.forEach((yearInput, index) => {
+        if (yearInput.value) {
+            const year = parseInt(yearInput.value);
+            if (year < 1950 || year > currentYear + 10) {
+                showFieldError(`education_year[]`, `Please enter a valid graduation year between 1950 and ${currentYear + 10}`, index);
+                isValid = false;
+            }
+        }
+    });
+    
+    // Validate experience dates
+    const startDates = document.querySelectorAll('[name="experience_start[]"]');
+    const endDates = document.querySelectorAll('[name="experience_end[]"]');
+    
+    for (let i = 0; i < startDates.length; i++) {
+        const startDate = startDates[i].value;
+        const endDate = endDates[i].value;
+        
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            
+            if (end < start) {
+                showFieldError('experience_end[]', 'End date cannot be before start date', i);
+                isValid = false;
+            }
+            
+            // Check if dates are too far in the future
+            const maxFutureDate = new Date();
+            maxFutureDate.setFullYear(maxFutureDate.getFullYear() + 2);
+            
+            if (start > maxFutureDate) {
+                showFieldError('experience_start[]', 'Start date cannot be more than 2 years in the future', i);
+                isValid = false;
+            }
+        }
+    }
+    
+    // Validate URLs (if provided)
+    const linkedin = document.querySelector('[name="linkedin"]').value;
+    const github = document.querySelector('[name="github"]').value;
+    
+    if (linkedin && !isValidUrl(linkedin)) {
+        showFieldError('linkedin', 'Please enter a valid LinkedIn URL (e.g., https://linkedin.com/in/yourprofile)');
+        isValid = false;
+    }
+    
+    if (github && !isValidUrl(github)) {
+        showFieldError('github', 'Please enter a valid GitHub URL (e.g., https://github.com/yourusername)');
+        isValid = false;
+    }
+    
+    return isValid;
+}
+
+function showFieldError(fieldName, message, index = 0) {
+    const field = document.querySelector(`[name="${fieldName}"]`);
+    if (!field) return;
+    
+    // Find the error element
+    let errorElement;
+    if (fieldName.includes('[]')) {
+        const fieldIndex = Array.from(document.querySelectorAll(`[name="${fieldName}"]`)).indexOf(field);
+        errorElement = document.getElementById(`${fieldName.replace('[]', '')}-error-${fieldIndex}`);
+    } else {
+        errorElement = document.getElementById(`${fieldName}-error`);
+    }
+    
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.classList.add('show');
+        field.classList.add('error');
+        field.classList.remove('success');
+    }
+}
+
+function clearFieldError(fieldName, index = 0) {
+    const field = document.querySelector(`[name="${fieldName}"]`);
+    if (!field) return;
+    
+    let errorElement;
+    if (fieldName.includes('[]')) {
+        const fieldIndex = Array.from(document.querySelectorAll(`[name="${fieldName}"]`)).indexOf(field);
+        errorElement = document.getElementById(`${fieldName.replace('[]', '')}-error-${fieldIndex}`);
+    } else {
+        errorElement = document.getElementById(`${fieldName}-error`);
+    }
+    
+    if (errorElement) {
+        errorElement.textContent = '';
+        errorElement.classList.remove('show');
+        field.classList.remove('error');
+        field.classList.add('success');
+    }
+}
+
+function clearAllErrors() {
+    document.querySelectorAll('.error-message').forEach(error => {
+        error.textContent = '';
+        error.classList.remove('show');
+    });
+    
+    document.querySelectorAll('.form-input').forEach(input => {
+        input.classList.remove('error', 'success');
+    });
+}
+
+function addRealTimeValidation(section) {
+    const inputs = section.querySelectorAll('input, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            validateField(this);
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.classList.contains('error')) {
+                validateField(this);
+            }
+        });
+    });
+}
+
+function validateField(field) {
+    const fieldName = field.name;
+    const value = field.value.trim();
+    
+    // Clear previous error
+    clearFieldError(fieldName);
+    
+    // Required field validation
+    if (field.hasAttribute('required') && !value) {
+        showFieldError(fieldName, 'This field is required');
+        return false;
+    }
+    
+    // Email validation
+    if (fieldName === 'email' && value) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+            showFieldError(fieldName, 'Please enter a valid email address (e.g., user@example.com)');
+            return false;
+        }
+    }
+    
+    // Phone validation
+    if (fieldName === 'phone' && value) {
+        const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+        if (!phoneRegex.test(value.replace(/[\s\-\(\)]/g, ''))) {
+            showFieldError(fieldName, 'Please enter a valid phone number (e.g., +1 555 123 4567)');
+            return false;
+        }
+    }
+    
+    // URL validation
+    if ((fieldName === 'linkedin' || fieldName === 'github') && value) {
+        if (!isValidUrl(value)) {
+            const example = fieldName === 'linkedin' ? 'https://linkedin.com/in/yourprofile' : 'https://github.com/yourusername';
+            showFieldError(fieldName, `Please enter a valid ${fieldName} URL (e.g., ${example})`);
+            return false;
+        }
+    }
+    
+    // Year validation
+    if (fieldName === 'education_year[]' && value) {
+        const year = parseInt(value);
+        const currentYear = new Date().getFullYear();
+        if (year < 1950 || year > currentYear + 10) {
+            showFieldError(fieldName, `Please enter a valid graduation year between 1950 and ${currentYear + 10}`);
+            return false;
+        }
+    }
+    
+    // Date validation for experience
+    if (fieldName === 'experience_start[]' && value) {
+        const start = new Date(value);
+        const maxFutureDate = new Date();
+        maxFutureDate.setFullYear(maxFutureDate.getFullYear() + 2);
+        
+        if (start > maxFutureDate) {
+            showFieldError(fieldName, 'Start date cannot be more than 2 years in the future');
+            return false;
+        }
+    }
+    
+    if (fieldName === 'experience_end[]' && value) {
+        const fieldIndex = Array.from(document.querySelectorAll(`[name="${fieldName}"]`)).indexOf(field);
+        const startField = document.querySelectorAll('[name="experience_start[]"]')[fieldIndex];
+        
+        if (startField && startField.value) {
+            const start = new Date(startField.value);
+            const end = new Date(value);
+            
+            if (end < start) {
+                showFieldError(fieldName, 'End date cannot be before start date');
+                return false;
+            }
+        }
+    }
+    
+    return true;
+}
+
+function isValidUrl(string) {
+    try {
+        new URL(string);
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
 </script>
 {% endblock %} 

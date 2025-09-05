@@ -184,57 +184,133 @@ def generate_pdf_alternative(latex_content: str, filename: str) -> Optional[str]
                 .replace("\\href{", "")
                 .replace("}{\\underline{", ": ")
                 .replace("}}", "")
+                .replace("\\underline{", "")
+                .replace("}", "")
             )
             story.append(Paragraph(contact, normal_style))
             story.append(Spacer(1, 20))
             logger.debug(f"Extracted contact: {contact}")
 
-        # Add sections
-        sections = ["Education", "Experience", "Projects", "Technical Skills"]
+        # Parse LaTeX content to extract actual sections
         sections_added = 0
-        for section in sections:
-            if section.lower() in latex_content.lower():
-                story.append(Paragraph(section, section_style))
-                sections_added += 1
-                logger.debug(f"Added section: {section}")
+        
+        # Extract Education section
+        education_match = re.search(r'\\section\{Education\}(.*?)(?=\\section\{|\Z)', latex_content, re.DOTALL)
+        if education_match:
+            story.append(Paragraph("Education", section_style))
+            sections_added += 1
+            education_content = education_match.group(1)
+            # Extract education entries
+            edu_entries = re.findall(r'\\resumeSubheading\s*\{([^}]+)\}\{([^}]+)\}\s*\{([^}]+)\}\{([^}]+)\}', education_content)
+            for entry in edu_entries:
+                story.append(Paragraph(f"• {entry[0]} - {entry[1]}", normal_style))
+                story.append(Paragraph(f"  {entry[2]} | {entry[3]}", normal_style))
+            story.append(Spacer(1, 12))
+            logger.debug(f"Added Education section with {len(edu_entries)} entries")
 
-                # Extract content for each section (simplified)
-                if section == "Education":
-                    story.append(
-                        Paragraph(
-                            "• Bachelor's Degree in Computer Science", normal_style
-                        )
-                    )
-                    story.append(
-                        Paragraph("• Master's Degree in Computer Science", normal_style)
-                    )
-                elif section == "Experience":
-                    story.append(
-                        Paragraph("• Software Engineer at Tech Company", normal_style)
-                    )
-                    story.append(
-                        Paragraph("• Led development of web applications", normal_style)
-                    )
-                elif section == "Projects":
-                    story.append(
-                        Paragraph("• AI Chatbot - Python, TensorFlow", normal_style)
-                    )
-                    story.append(
-                        Paragraph(
-                            "• E-commerce Platform - React, Node.js", normal_style
-                        )
-                    )
-                elif section == "Technical Skills":
-                    story.append(
-                        Paragraph("• Languages: Python, JavaScript, Java", normal_style)
-                    )
-                    story.append(
-                        Paragraph(
-                            "• Frameworks: React, Django, TensorFlow", normal_style
-                        )
-                    )
+        # Extract Experience section
+        experience_match = re.search(r'\\section\{Experience\}(.*?)(?=\\section\{|\Z)', latex_content, re.DOTALL)
+        if experience_match:
+            story.append(Paragraph("Experience", section_style))
+            sections_added += 1
+            experience_content = experience_match.group(1)
+            # Extract experience entries with better regex
+            exp_entries = re.findall(r'\\resumeSubheading\s*\{([^}]+)\}\{([^}]+)\}\s*\{([^}]+)\}\{([^}]+)\}', experience_content)
+            for entry in exp_entries:
+                story.append(Paragraph(f"<b>{entry[0]}</b> - {entry[1]}", normal_style))
+                story.append(Paragraph(f"  {entry[2]} | {entry[3]}", normal_style))
+                
+                # Extract bullet points from experience description
+                exp_desc_match = re.search(r'\\resumeItemListStart(.*?)\\resumeItemListEnd', experience_content, re.DOTALL)
+                if exp_desc_match:
+                    desc_content = exp_desc_match.group(1)
+                    bullet_points = re.findall(r'\\resumeItem\{([^}]+)\}', desc_content)
+                    for bullet in bullet_points:
+                        # Convert bullet points properly
+                        clean_bullet = bullet.replace('•', '').strip()
+                        if clean_bullet:
+                            story.append(Paragraph(f"  • {clean_bullet}", normal_style))
+            story.append(Spacer(1, 12))
+            logger.debug(f"Added Experience section with {len(exp_entries)} entries")
 
-                story.append(Spacer(1, 12))
+        # Extract Projects section
+        projects_match = re.search(r'\\section\{Projects\}(.*?)(?=\\section\{|\Z)', latex_content, re.DOTALL)
+        if projects_match:
+            story.append(Paragraph("Projects", section_style))
+            sections_added += 1
+            projects_content = projects_match.group(1)
+            # Extract project entries with better regex
+            project_entries = re.findall(r'\\resumeProjectHeading\s*\{([^}]+)\}', projects_content)
+            for entry in project_entries:
+                # Clean up project heading (remove LaTeX formatting)
+                clean_entry = entry.replace('\\textbf{', '').replace('}', '').replace('$|$', ' | ')
+                story.append(Paragraph(f"<b>{clean_entry}</b>", normal_style))
+                
+                # Extract bullet points from project description
+                proj_desc_match = re.search(r'\\resumeItemListStart(.*?)\\resumeItemListEnd', projects_content, re.DOTALL)
+                if proj_desc_match:
+                    desc_content = proj_desc_match.group(1)
+                    bullet_points = re.findall(r'\\resumeItem\{([^}]+)\}', desc_content)
+                    for bullet in bullet_points:
+                        # Convert bullet points properly
+                        clean_bullet = bullet.replace('•', '').strip()
+                        if clean_bullet:
+                            story.append(Paragraph(f"  • {clean_bullet}", normal_style))
+            story.append(Spacer(1, 12))
+            logger.debug(f"Added Projects section with {len(project_entries)} entries")
+
+        # Extract Technical Skills section
+        skills_match = re.search(r'\\section\{Technical Skills\}(.*?)(?=\\section\{|\Z)', latex_content, re.DOTALL)
+        if skills_match:
+            story.append(Paragraph("Technical Skills", section_style))
+            sections_added += 1
+            skills_content = skills_match.group(1)
+            # Extract skills
+            skills_entries = re.findall(r'\\textbf\{([^}]+)\}:\s*([^\\\\]+)', skills_content)
+            for entry in skills_entries:
+                story.append(Paragraph(f"• {entry[0]}: {entry[1].strip()}", normal_style))
+            story.append(Spacer(1, 12))
+            logger.debug(f"Added Technical Skills section with {len(skills_entries)} categories")
+
+        # Extract Research Papers section
+        research_match = re.search(r'\\section\{Research Papers\}(.*?)(?=\\section\{|\Z)', latex_content, re.DOTALL)
+        if research_match:
+            story.append(Paragraph("Research Papers", section_style))
+            sections_added += 1
+            research_content = research_match.group(1)
+            # Extract research entries
+            research_entries = re.findall(r'\\resumeSubheading\s*\{([^}]+)\}\{([^}]+)\}\s*\{([^}]+)\}\{([^}]+)\}', research_content)
+            for entry in research_entries:
+                story.append(Paragraph(f"• {entry[0]} ({entry[1]})", normal_style))
+                story.append(Paragraph(f"  {entry[2]} | {entry[3]}", normal_style))
+            story.append(Spacer(1, 12))
+            logger.debug(f"Added Research Papers section with {len(research_entries)} entries")
+
+        # Extract Achievements section
+        achievements_match = re.search(r'\\section\{Achievements\}(.*?)(?=\\section\{|\Z)', latex_content, re.DOTALL)
+        if achievements_match:
+            story.append(Paragraph("Achievements", section_style))
+            sections_added += 1
+            achievements_content = achievements_match.group(1)
+            # Extract achievement items
+            achievement_items = re.findall(r'\\item\{([^}]+)\}', achievements_content)
+            for item in achievement_items:
+                story.append(Paragraph(f"• {item.strip()}", normal_style))
+            story.append(Spacer(1, 12))
+            logger.debug(f"Added Achievements section with {len(achievement_items)} items")
+
+        # Extract Others section
+        others_match = re.search(r'\\section\{Others\}(.*?)(?=\\section\{|\Z)', latex_content, re.DOTALL)
+        if others_match:
+            story.append(Paragraph("Additional Information", section_style))
+            sections_added += 1
+            others_content = others_match.group(1)
+            # Extract other items
+            other_items = re.findall(r'\\item\{([^}]+)\}', others_content)
+            for item in other_items:
+                story.append(Paragraph(f"• {item.strip()}", normal_style))
+            story.append(Spacer(1, 12))
+            logger.debug(f"Added Others section with {len(other_items)} items")
 
         logger.info(f"Added {sections_added} sections to PDF")
 

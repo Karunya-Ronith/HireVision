@@ -200,7 +200,7 @@ class LearningPathForm(forms.ModelForm):
         return cleaned_data
 
 class ResumeBuilderForm(forms.ModelForm):
-    """Form for resume builder"""
+    """Form for resume builder with improved validation"""
     
     class Meta:
         model = ResumeBuilder
@@ -231,119 +231,96 @@ class ResumeBuilderForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'https://github.com/yourusername'
             }),
-            'education': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 4,
-                'placeholder': 'Enter your education details in JSON format...'
-            }),
-            'experience': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 6,
-                'placeholder': 'Enter your work experience in JSON format...'
-            }),
-            'projects': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 6,
-                'placeholder': 'Enter your projects in JSON format...'
-            }),
-            'skills': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 4,
-                'placeholder': 'Enter your skills in JSON format...'
-            }),
-            'research_papers': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Enter your research papers in JSON format...'
-            }),
-            'achievements': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Enter your achievements (one per line)...'
-            }),
-            'others': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Enter any other relevant information...'
-            })
+            'education': forms.HiddenInput(),  # Hidden field for JSON data
+            'experience': forms.HiddenInput(),  # Hidden field for JSON data
+            'projects': forms.HiddenInput(),  # Hidden field for JSON data
+            'skills': forms.HiddenInput(),  # Hidden field for JSON data
+            'research_papers': forms.HiddenInput(),  # Hidden field for JSON data
+            'achievements': forms.HiddenInput(),  # Hidden field for JSON data
+            'others': forms.HiddenInput()  # Hidden field for JSON data
         }
     
-    @log_function_call
-    def clean_education(self):
-        start_time = time.time()
-        education = self.cleaned_data.get('education')
-        logger.info("Validating education JSON format")
-        
-        try:
-            if education:
-                # Try to parse as JSON, if it's a string
-                if isinstance(education, str):
-                    json.loads(education)
-                    logger.info("Education JSON validation successful")
-        except json.JSONDecodeError as e:
-            logger.error(f"Education JSON validation failed: {str(e)}")
-            raise forms.ValidationError("Education must be in valid JSON format.")
-        
-        duration = time.time() - start_time
-        log_performance("Education JSON validation", duration)
-        return education
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make optional fields not required
+        self.fields['research_papers'].required = False
+        self.fields['achievements'].required = False
+        self.fields['others'].required = False
+        self.fields['phone'].required = False
+        self.fields['linkedin'].required = False
+        self.fields['github'].required = False
     
     @log_function_call
-    def clean_experience(self):
+    def clean(self):
         start_time = time.time()
-        experience = self.cleaned_data.get('experience')
-        logger.info("Validating experience JSON format")
+        cleaned_data = super().clean()
+        name = cleaned_data.get('name')
+        email = cleaned_data.get('email')
+        education = cleaned_data.get('education')
+        projects = cleaned_data.get('projects')
+        skills = cleaned_data.get('skills')
         
-        try:
-            if experience:
-                if isinstance(experience, str):
-                    json.loads(experience)
-                    logger.info("Experience JSON validation successful")
-        except json.JSONDecodeError as e:
-            logger.error(f"Experience JSON validation failed: {str(e)}")
-            raise forms.ValidationError("Experience must be in valid JSON format.")
+        logger.info(f"Validating resume builder form - Name: {name}, Email: {email}")
+        
+        # Validate required fields
+        if not name or len(name.strip()) < 2:
+            logger.warning("Resume builder validation failed: insufficient name")
+            raise forms.ValidationError("Please provide a valid full name.")
+        
+        if not email or len(email.strip()) < 5:
+            logger.warning("Resume builder validation failed: insufficient email")
+            raise forms.ValidationError("Please provide a valid email address.")
+        
+        # Validate JSON fields
+        json_fields = {
+            'education': education,
+            'projects': projects,
+            'skills': skills
+        }
+        
+        for field_name, field_value in json_fields.items():
+            if field_value:
+                try:
+                    if isinstance(field_value, str):
+                        parsed_data = json.loads(field_value)
+                        if field_name == 'education' and not isinstance(parsed_data, list):
+                            raise forms.ValidationError(f"{field_name.title()} must be a list.")
+                        elif field_name == 'projects' and not isinstance(parsed_data, list):
+                            raise forms.ValidationError(f"{field_name.title()} must be a list.")
+                        elif field_name == 'skills' and not isinstance(parsed_data, dict):
+                            raise forms.ValidationError(f"{field_name.title()} must be a dictionary.")
+                        logger.info(f"{field_name.title()} JSON validation successful")
+                except json.JSONDecodeError as e:
+                    logger.error(f"{field_name.title()} JSON validation failed: {str(e)}")
+                    raise forms.ValidationError(f"{field_name.title()} must be in valid JSON format.")
+        
+        # Validate that we have at least education and projects
+        if not education or (isinstance(education, str) and education.strip() == '[]'):
+            logger.warning("Resume builder validation failed: no education provided")
+            raise forms.ValidationError("Please provide at least one education entry.")
+        
+        if not projects or (isinstance(projects, str) and projects.strip() == '[]'):
+            logger.warning("Resume builder validation failed: no projects provided")
+            raise forms.ValidationError("Please provide at least one project.")
+        
+        if not skills or (isinstance(skills, str) and skills.strip() == '{}'):
+            logger.warning("Resume builder validation failed: no skills provided")
+            raise forms.ValidationError("Please provide your skills.")
+        
+        # Set default values for optional fields if they're empty
+        if not cleaned_data.get('research_papers') or (isinstance(cleaned_data.get('research_papers'), str) and cleaned_data.get('research_papers').strip() == '[]'):
+            cleaned_data['research_papers'] = '[]'
+        
+        if not cleaned_data.get('achievements') or (isinstance(cleaned_data.get('achievements'), str) and cleaned_data.get('achievements').strip() == '[]'):
+            cleaned_data['achievements'] = '[]'
+        
+        if not cleaned_data.get('others') or (isinstance(cleaned_data.get('others'), str) and cleaned_data.get('others').strip() == '[]'):
+            cleaned_data['others'] = '[]'
         
         duration = time.time() - start_time
-        log_performance("Experience JSON validation", duration)
-        return experience
-    
-    @log_function_call
-    def clean_projects(self):
-        start_time = time.time()
-        projects = self.cleaned_data.get('projects')
-        logger.info("Validating projects JSON format")
-        
-        try:
-            if projects:
-                if isinstance(projects, str):
-                    json.loads(projects)
-                    logger.info("Projects JSON validation successful")
-        except json.JSONDecodeError as e:
-            logger.error(f"Projects JSON validation failed: {str(e)}")
-            raise forms.ValidationError("Projects must be in valid JSON format.")
-        
-        duration = time.time() - start_time
-        log_performance("Projects JSON validation", duration)
-        return projects
-    
-    @log_function_call
-    def clean_skills(self):
-        start_time = time.time()
-        skills = self.cleaned_data.get('skills')
-        logger.info("Validating skills JSON format")
-        
-        try:
-            if skills:
-                if isinstance(skills, str):
-                    json.loads(skills)
-                    logger.info("Skills JSON validation successful")
-        except json.JSONDecodeError as e:
-            logger.error(f"Skills JSON validation failed: {str(e)}")
-            raise forms.ValidationError("Skills must be in valid JSON format.")
-        
-        duration = time.time() - start_time
-        log_performance("Skills JSON validation", duration)
-        return skills
+        log_performance("Resume builder form validation", duration, f"Name: {name}")
+        logger.info(f"Resume builder form validation successful")
+        return cleaned_data
 
 class ThreadForm(forms.ModelForm):
     """Form for creating and editing threads"""

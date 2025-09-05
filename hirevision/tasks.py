@@ -434,12 +434,18 @@ def _parse_markdown_to_structured_data(markdown_text: str) -> dict:
 @dramatiq.actor(max_retries=3, min_backoff=1000, max_backoff=30000)
 def process_resume_builder_task(resume_id: str):
     """
-    Async task to process resume building
+    Async task to process resume building with proper error handling and logging
     """
+    start_time = time.time()
+    logger.info(f"Starting resume builder task for resume ID: {resume_id}")
+    
     try:
         resume = ResumeBuilder.objects.get(id=resume_id)
+        logger.info(f"Found resume record: {resume_id}, user: {resume.user.id if resume.user else 'None'}")
+        
         resume.task_status = 'running'
         resume.save(update_fields=['task_status'])
+        logger.debug(f"Updated task status to 'running' for resume: {resume_id}")
         
         # Convert form data to the format expected by the existing function
         name = resume.name
@@ -448,14 +454,17 @@ def process_resume_builder_task(resume_id: str):
         linkedin = resume.linkedin
         github = resume.github
         
-        # Convert JSON fields to strings for processing
-        education = json.dumps(resume.education) if resume.education else ""
-        experience = json.dumps(resume.experience) if resume.experience else ""
-        projects = json.dumps(resume.projects) if resume.projects else ""
-        skills = json.dumps(resume.skills) if resume.skills else ""
-        research_papers = json.dumps(resume.research_papers) if resume.research_papers else ""
-        achievements = json.dumps(resume.achievements) if resume.achievements else ""
-        others = json.dumps(resume.others) if resume.others else ""
+        # Parse JSON fields properly for processing
+        education = json.dumps(resume.education) if resume.education else "[]"
+        experience = json.dumps(resume.experience) if resume.experience else "[]"
+        projects = json.dumps(resume.projects) if resume.projects else "[]"
+        skills = json.dumps(resume.skills) if resume.skills else "{}"
+        research_papers = json.dumps(resume.research_papers) if resume.research_papers else "[]"
+        achievements = json.dumps(resume.achievements) if resume.achievements else "[]"
+        others = json.dumps(resume.others) if resume.others else "[]"
+        
+        logger.info(f"Processing resume builder for user: {name}, email: {email}")
+        logger.debug(f"Data lengths - education: {len(education)}, experience: {len(experience)}, projects: {len(projects)}, skills: {len(skills)}")
         
         # Process the resume builder
         result = process_resume_builder(
@@ -464,8 +473,12 @@ def process_resume_builder_task(resume_id: str):
             research_papers, achievements, others
         )
         
+        logger.info(f"Resume builder result type: {type(result)}")
+        logger.debug(f"Result preview: {str(result)[:200]}...")
+        
         # Check if the result is an error message
         if isinstance(result, str) and result.startswith('## ❌'):
+            logger.error(f"Resume builder failed for {resume_id}: {result}")
             resume.task_status = 'failed'
             resume.task_error = result
             resume.save(update_fields=['task_status', 'task_error'])
@@ -473,54 +486,130 @@ def process_resume_builder_task(resume_id: str):
         
         # Check if it's the OpenRouter API key error - provide demo data
         if isinstance(result, str) and "OpenRouter API Key Not Configured" in result:
-            # Demo data - save the resume with demo content
-            resume.latex_content = "Demo LaTeX content for resume"
-            
-            # Create a demo PDF file
-            demo_pdf_path = get_sample_pdf_path()
-            if demo_pdf_path and os.path.exists(demo_pdf_path):
-                with open(demo_pdf_path, 'rb') as pdf_file:
-                    resume.pdf_file.save(f"demo_resume_{resume.id}.pdf", ContentFile(pdf_file.read()), save=False)
+            logger.info(f"Using demo data for resume {resume_id} (OpenRouter API key not configured)")
+            # Demo data - save the resume with demo LaTeX content
+            resume.latex_content = """\\documentclass[letterpaper,11pt]{article}
+\\usepackage{latexsym}
+\\usepackage[empty]{fullpage}
+\\usepackage{titlesec}
+\\usepackage{marvosym}
+\\usepackage[usenames,dvipsnames]{color}
+\\usepackage{verbatim}
+\\usepackage{enumitem}
+\\usepackage[hidelinks]{hyperref}
+\\usepackage{fancyhdr}
+\\usepackage[english]{babel}
+\\usepackage{tabularx}
+\\usepackage{fontawesome5}
+\\usepackage{multicol}
+\\setlength{\\multicolsep}{-3.0pt}
+\\setlength{\\columnsep}{-1pt}
+\\input{glyphtounicode}
+
+\\pagestyle{fancy}
+\\fancyhf{}
+\\fancyfoot{}
+\\renewcommand{\\headrulewidth}{0pt}
+\\renewcommand{\\footrulewidth}{0pt}
+
+\\addtolength{\\oddsidemargin}{-0.6in}
+\\addtolength{\\evensidemargin}{-0.5in}
+\\addtolength{\\textwidth}{1.19in}
+\\addtolength{\\topmargin}{-.7in}
+\\addtolength{\\textheight}{1.4in}
+
+\\urlstyle{same}
+
+\\raggedbottom
+\\raggedright
+\\setlength{\\tabcolsep}{0in}
+
+\\titleformat{\\section}{
+  \\vspace{-4pt}\\scshape\\raggedright\\large\\bfseries
+}{}{0em}{}[\\color{black}\\titlerule \\vspace{-5pt}]
+
+\\pdfgentounicode=1
+
+\\begin{document}
+
+\\textbf{\\Huge \\scshape Demo User} \\\\ \\vspace{1pt}
+\\small 123-456-7890 $|$ \\href{mailto:demo@example.com}{\\underline{demo@example.com}} $|$ 
+\\href{https://linkedin.com/in/demo}{\\underline{linkedin.com/in/demo}} $|$
+\\href{https://github.com/demo}{\\underline{github.com/demo}}
+
+\\section{Education}
+  \\resumeSubHeadingListStart
+    \\resumeSubheading
+      {Demo University}{Demo City, State}
+      {Bachelor of Science in Computer Science}{Jan 2020 -- May 2024}
+  \\resumeSubHeadingListEnd
+
+\\section{Experience}
+  \\resumeSubHeadingListStart
+    \\resumeSubheading
+      {Software Developer}{Jan 2023 -- Present}
+      {Demo Company}{Demo City, State}
+      \\resumeItemListStart
+        \\resumeItem{Developed web applications using modern technologies}
+        \\resumeItem{Collaborated with cross-functional teams}
+        \\resumeItem{Improved system performance by 40\\%}
+      \\resumeItemListEnd
+  \\resumeSubHeadingListEnd
+
+\\section{Projects}
+    \\resumeSubHeadingListStart
+      \\resumeProjectHeading
+          {\\textbf{Demo Project} $|$ \\emph{React, Node.js, MongoDB}}
+          \\resumeItemListStart
+            \\resumeItem{Full-stack web application for project management}
+            \\resumeItem{Implemented user authentication and real-time updates}
+          \\resumeItemListEnd
+    \\resumeSubHeadingListEnd
+
+\\section{Technical Skills}
+ \\begin{itemize}[leftmargin=0.15in, label={}]
+    \\small{\\item{
+     \\textbf{Languages}{: Python, JavaScript, Java, C++} \\
+     \\textbf{Frameworks}{: React, Django, Node.js, Express} \\
+     \\textbf{Tools}{: Git, Docker, AWS, MongoDB}
+    }}
+ \\end{itemize}
+
+\\end{document}"""
+            logger.info(f"Demo LaTeX content saved for resume {resume_id}")
         else:
             # Process the result
             if isinstance(result, tuple) and len(result) == 2:
                 latex_content, pdf_path = result
                 resume.latex_content = latex_content
+                logger.info(f"LaTeX content generated for resume {resume_id}, length: {len(latex_content)}")
                 
-                # Save PDF if generated
-                if pdf_path and os.path.exists(pdf_path):
-                    with open(pdf_path, 'rb') as pdf_file:
-                        resume.pdf_file.save(f"resume_{resume.id}.pdf", ContentFile(pdf_file.read()), save=False)
-                    # Clean up temporary file
-                    try:
-                        os.remove(pdf_path)
-                    except:
-                        pass
+                # Skip PDF generation - user will compile LaTeX themselves
+                logger.info(f"Skipping PDF generation for resume {resume_id} - user will compile LaTeX code")
             else:
                 # Fallback - assume it's LaTeX content
                 resume.latex_content = str(result)
+                logger.info(f"LaTeX content saved directly for resume {resume_id}, length: {len(str(result))}")
                 
-                # Try to generate PDF from LaTeX
-                try:
-                    pdf_path = generate_pdf_from_latex(str(result))
-                    if pdf_path and os.path.exists(pdf_path):
-                        with open(pdf_path, 'rb') as pdf_file:
-                            resume.pdf_file.save(f"resume_{resume.id}.pdf", ContentFile(pdf_file.read()), save=False)
-                        os.remove(pdf_path)
-                except Exception as e:
-                    print(f"PDF generation error: {e}")
+                # Skip PDF generation - user will compile LaTeX themselves
+                logger.info(f"Skipping PDF generation for resume {resume_id} - user will compile LaTeX code")
         
         resume.task_status = 'completed'
         resume.save()
+        logger.info(f"Resume builder task completed successfully for {resume_id}")
+        
+        duration = time.time() - start_time
+        log_performance("Resume builder task", duration, f"Completed resume {resume_id} for user {name}")
         
     except ResumeBuilder.DoesNotExist:
-        print(f"ResumeBuilder with id {resume_id} not found")
+        logger.error(f"ResumeBuilder with id {resume_id} not found")
     except Exception as e:
+        logger.error(f"Error processing resume builder task for {resume_id}: {str(e)}", exc_info=True)
         try:
             resume = ResumeBuilder.objects.get(id=resume_id)
             resume.task_status = 'failed'
-            resume.task_error = str(e)
+            resume.task_error = f"## ❌ Processing Error\n\nAn unexpected error occurred: {str(e)}"
             resume.save(update_fields=['task_status', 'task_error'])
-        except:
-            pass
-        print(f"Error processing resume builder task: {e}") 
+            logger.info(f"Updated resume {resume_id} status to 'failed'")
+        except Exception as save_error:
+            logger.error(f"Failed to update resume {resume_id} status: {str(save_error)}") 
