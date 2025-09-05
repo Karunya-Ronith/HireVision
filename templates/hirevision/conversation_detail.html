@@ -38,7 +38,7 @@
             <!-- Messages Container -->
             <div class="card shadow-sm">
                 <div class="card-body p-0">
-                    <div class="messages-container" id="messagesContainer" style="height: 500px; overflow-y: auto;">
+                    <div class="messages-container" id="messagesContainer" style="height: 60vh; overflow-y: auto;">
                         {% if messages %}
                             {% for message in messages %}
                                 <div class="message-item {% if message.sender == request.user %}message-sent{% else %}message-received{% endif %} p-3">
@@ -91,13 +91,13 @@
 
             <!-- Message Input -->
             <div class="card mt-3">
-                <div class="card-body">
+                <div class="card-body message-input-form">
                     <form method="post" enctype="multipart/form-data" id="messageForm">
                         {% csrf_token %}
-                        <div class="row align-items-end">
-                            <div class="col-md-9">
-                                <div class="mb-3">
-                                    <label for="{{ message_form.content.id_for_label }}" class="form-label">Message</label>
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-8">
+                                <div class="mb-0">
+                                    <label for="{{ message_form.content.id_for_label }}" class="form-label">Message <small class="text-muted">(optional if sending an image)</small></label>
                                     {{ message_form.content }}
                                     {% if message_form.content.errors %}
                                         <div class="invalid-feedback d-block">
@@ -108,10 +108,17 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            <div class="col-md-2">
-                                <div class="mb-3">
-                                    <label for="{{ message_form.image.id_for_label }}" class="form-label">Image (optional)</label>
+                            <div class="col-md-3">
+                                <div class="mb-0">
+                                    <label for="{{ message_form.image.id_for_label }}" class="form-label">Image <small class="text-muted">(can be sent alone)</small></label>
                                     {{ message_form.image }}
+                                    {% if message_form.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in message_form.non_field_errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                     {% if message_form.image.errors %}
                                         <div class="invalid-feedback d-block">
                                             {% for error in message_form.image.errors %}
@@ -122,12 +129,20 @@
                                 </div>
                             </div>
                             <div class="col-md-1">
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="fas fa-paper-plane"></i>
-                                </button>
+                                <div class="mb-0">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary w-100" id="submitBtn">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </form>
+                    <!-- Debug info -->
+                    <div class="mt-2">
+                        <small class="text-muted">Form ID: <span id="formDebug">Checking...</span></small>
+                        <button type="button" class="btn btn-sm btn-outline-info ms-2" onclick="testAsyncMessage()">Test Async</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -216,23 +231,333 @@
         height: 400px !important;
     }
     
-    .col-md-2, .col-md-1 {
+    .col-md-3, .col-md-1 {
         margin-top: 1rem;
+    }
+    
+    .message-input-form {
+        padding: 1rem;
+    }
+}
+
+/* Ensure proper form layout */
+.message-input-form .form-control {
+    border-radius: 0.5rem;
+}
+
+.message-input-form .btn {
+    height: 38px;
+    border-radius: 0.5rem;
+}
+
+/* Fix container overflow */
+.container-fluid {
+    max-width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* Ensure messages container doesn't overflow */
+.messages-container {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Image preview styling */
+#imagePreview {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    position: relative;
+}
+
+#imagePreview img {
+    display: block;
+}
+
+#imagePreview .btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* Message feedback alerts */
+.alert {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 0.5rem;
+}
+
+/* Smooth transitions */
+.message-item {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 </style>
 
 <script>
-// Auto-scroll to bottom of messages
+// Global variables for message handling
+let messageForm;
+let messagesContainer;
+let submitBtn;
+let contentInput;
+let imageInput;
+
+// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    const messagesContainer = document.getElementById('messagesContainer');
+    console.log('DOM loaded, initializing message system...');
+    initializeMessageSystem();
+    setupAutoHideAlerts();
+});
+
+function initializeMessageSystem() {
+    console.log('Initializing message system...');
+    messageForm = document.getElementById('messageForm');
+    messagesContainer = document.getElementById('messagesContainer');
+    submitBtn = messageForm.querySelector('button[type="submit"]');
+    
+    // Try to find form fields with different possible names
+    contentInput = messageForm.querySelector('textarea[name="content"]') || 
+                   messageForm.querySelector('textarea[name="message_form-content"]') ||
+                   messageForm.querySelector('textarea');
+    
+    imageInput = messageForm.querySelector('input[name="image"]') || 
+                 messageForm.querySelector('input[name="message_form-image"]') ||
+                 messageForm.querySelector('input[type="file"]');
+    
+    console.log('Form elements found:', {
+        form: messageForm,
+        container: messagesContainer,
+        submitBtn: submitBtn,
+        contentInput: contentInput,
+        imageInput: imageInput
+    });
+    
+    // Update debug info
+    const debugSpan = document.getElementById('formDebug');
+    if (debugSpan) {
+        debugSpan.textContent = `Form: ${messageForm ? 'Found' : 'Missing'}, Content: ${contentInput ? 'Found' : 'Missing'}, Image: ${imageInput ? 'Found' : 'Missing'}`;
+    }
+    
+    if (!messageForm || !messagesContainer || !submitBtn) {
+        console.error('Required form elements not found!');
+        if (debugSpan) debugSpan.textContent = 'ERROR: Required elements missing!';
+        return;
+    }
+    
+    // Set up form submission
+    messageForm.addEventListener('submit', handleMessageSubmit);
+    console.log('Form submit event listener added');
+    
+    // Auto-scroll to bottom
+    scrollToBottom();
+    
+    // Set up image preview
+    setupImagePreview();
+    
+    if (debugSpan) debugSpan.textContent = 'System initialized successfully!';
+}
+
+function handleMessageSubmit(e) {
+    console.log('Form submission intercepted!');
+    e.preventDefault();
+    
+    // Get form data
+    const formData = new FormData(messageForm);
+    
+    // Add CSRF token manually if needed
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    formData.append('csrfmiddlewaretoken', csrfToken);
+    
+    console.log('Form data:', {
+        content: formData.get('content'),
+        image: formData.get('image'),
+        csrf: formData.get('csrfmiddlewaretoken')
+    });
+    
+    // Show loading state
+    setSubmitButtonLoading(true);
+    
+    // Send message asynchronously
+    console.log('Sending AJAX request...');
+    fetch(window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        console.log('Response received:', response);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        if (data.success) {
+            // Add message to UI immediately
+            addMessageToUI(data.message);
+            
+            // Clear form
+            clearForm();
+            
+            // Scroll to bottom
+            scrollToBottom();
+            
+            // Show success feedback
+            showMessageFeedback('Message sent successfully!', 'success');
+        } else {
+            // Show error
+            showMessageFeedback(data.error || 'Failed to send message', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showMessageFeedback('Failed to send message. Please try again.', 'error');
+    })
+    .finally(() => {
+        // Reset button state
+        setSubmitButtonLoading(false);
+    });
+}
+
+function addMessageToUI(messageData) {
+    const messageHTML = createMessageHTML(messageData);
+    messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+}
+
+function createMessageHTML(messageData) {
+    const isOwnMessage = messageData.sender_id === '{{ request.user.id }}';
+    const messageClass = isOwnMessage ? 'message-sent' : 'message-received';
+    const justifyClass = isOwnMessage ? 'justify-content-end' : '';
+    
+    let contentHTML = '';
+    if (messageData.image_url) {
+        contentHTML += `<div class="message-image mb-2">
+            <img src="${messageData.image_url}" alt="Message image" class="img-fluid rounded" style="max-width: 300px;">
+        </div>`;
+    }
+    
+    if (messageData.content) {
+        contentHTML += `<div class="message-content">${messageData.content}</div>`;
+    }
+    
+    return `
+        <div class="message-item ${messageClass} p-3">
+            <div class="d-flex ${justifyClass}">
+                <div class="message-bubble ${isOwnMessage ? 'sent' : 'received'}">
+                    ${!isOwnMessage ? `<div class="message-sender mb-1">
+                        <small class="text-muted">${messageData.sender_name}</small>
+                    </div>` : ''}
+                    
+                    ${contentHTML}
+                    
+                    <div class="message-time mt-1">
+                        <small class="text-muted">
+                            ${messageData.created_at}
+                            ${isOwnMessage ? '<i class="fas fa-check text-muted ms-1"></i>' : ''}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function clearForm() {
+    contentInput.value = '';
+    imageInput.value = '';
+    
+    // Clear image preview if exists
+    const preview = document.getElementById('imagePreview');
+    if (preview) {
+        preview.remove();
+    }
+}
+
+function setSubmitButtonLoading(loading) {
+    if (loading) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    } else {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+    }
+}
+
+function scrollToBottom() {
     if (messagesContainer) {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
-});
+}
 
-// Auto-hide alerts
-document.addEventListener('DOMContentLoaded', function() {
+function showMessageFeedback(message, type) {
+    // Create feedback element
+    const feedback = document.createElement('div');
+    feedback.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    feedback.style.cssText = 'top: 20px; right: 20px; z-index: 1050; max-width: 300px;';
+    feedback.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Add to page
+    document.body.appendChild(feedback);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        feedback.remove();
+    }, 3000);
+}
+
+function setupImagePreview() {
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Remove existing preview
+            const existingPreview = document.getElementById('imagePreview');
+            if (existingPreview) {
+                existingPreview.remove();
+            }
+            
+            // Create new preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.createElement('div');
+                preview.id = 'imagePreview';
+                preview.className = 'mt-2 p-2 border rounded';
+                preview.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview" class="img-fluid rounded" style="max-width: 150px; max-height: 150px;">
+                    <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="removeImagePreview()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                imageInput.parentNode.appendChild(preview);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+function removeImagePreview() {
+    const preview = document.getElementById('imagePreview');
+    if (preview) {
+        preview.remove();
+    }
+    imageInput.value = '';
+}
+
+function setupAutoHideAlerts() {
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(function(alert) {
         setTimeout(function() {
@@ -243,21 +568,46 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 500);
         }, 5000);
     });
-});
+}
 
-// Form loading state
-document.getElementById('messageForm').addEventListener('submit', function() {
-    const submitBtn = this.querySelector('button[type="submit"]');
-    const originalContent = submitBtn.innerHTML;
+function testAsyncMessage() {
+    console.log('Testing asynchronous message sending...');
+    const formData = new FormData();
+    formData.append('content', 'This is a test message from the client.');
+    formData.append('image', null); // No image for this test
     
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    
-    // Re-enable after 10 seconds in case of error
-    setTimeout(function() {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalContent;
-    }, 10000);
-});
+    // Add CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    formData.append('csrfmiddlewaretoken', csrfToken);
+
+    setSubmitButtonLoading(true);
+
+    fetch(window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        console.log('Test response received:', response);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Test response data:', data);
+        if (data.success) {
+            showMessageFeedback('Test message sent successfully!', 'success');
+        } else {
+            showMessageFeedback(data.error || 'Failed to send test message', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error sending test message:', error);
+        showMessageFeedback('Failed to send test message. Please try again.', 'error');
+    })
+    .finally(() => {
+        setSubmitButtonLoading(false);
+    });
+}
 </script>
 {% endblock %} 

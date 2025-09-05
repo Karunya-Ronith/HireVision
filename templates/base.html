@@ -3,6 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="notifications" content="disabled" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-capable" content="no" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>{% block title %}HireVision - AI Career Coach{% endblock %}</title>
 
     {% load static %}
@@ -425,49 +429,7 @@
         border-left-color: var(--info-color);
       }
 
-      /* Enhanced Toast Notifications */
-      .toast {
-        border: none;
-        border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-xl);
-        backdrop-filter: blur(20px);
-        background: rgba(255, 255, 255, 0.98);
-        border: 1px solid rgba(0, 0, 0, 0.05);
-        overflow: hidden;
-      }
-
-      .toast-header {
-        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-        padding: 1rem 1.25rem;
-        font-weight: 600;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-      }
-
-      .toast-header.alert-success {
-        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-        color: #065f46;
-      }
-
-      .toast-header.alert-danger {
-        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-        color: #991b1b;
-      }
-
-      .toast-header.alert-warning {
-        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-        color: #92400e;
-      }
-
-      .toast-header.alert-info {
-        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-        color: #1e40af;
-      }
-
-      .toast-body {
-        padding: 1.25rem;
-        font-weight: 500;
-        color: var(--dark-color);
-      }
+      
 
       /* Enhanced Modal */
       .modal-content {
@@ -762,12 +724,7 @@
           font-size: 0.9rem;
         }
 
-        .toast-container {
-          left: 1rem;
-          right: 1rem;
-          top: auto !important;
-          bottom: 1rem;
-        }
+        
 
         .modal-body {
           padding: 1.5rem 1.25rem;
@@ -1019,41 +976,7 @@
       {% block content %}{% endblock %}
     </main>
 
-    <!-- Enhanced Toast Messages Container -->
-    <div
-      class="toast-container position-fixed top-0 end-0 p-3"
-      style="z-index: 1055; margin-top: 90px"
-    >
-      {% if messages %} {% for message in messages %}
-      <div
-        class="toast show fade-in-up"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-        data-bs-autohide="false"
-      >
-        <div class="toast-header alert-{{ message.tags }} border-0">
-          {% if message.tags == 'success' %}
-          <i class="fas fa-check-circle me-2"></i>
-          {% elif message.tags == 'error' or message.tags == 'danger' %}
-          <i class="fas fa-exclamation-triangle me-2"></i>
-          {% elif message.tags == 'warning' %}
-          <i class="fas fa-exclamation-circle me-2"></i>
-          {% else %}
-          <i class="fas fa-info-circle me-2"></i>
-          {% endif %}
-          <strong class="me-auto">Notification</strong>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="toast"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="toast-body">{{ message }}</div>
-      </div>
-      {% endfor %} {% endif %}
-    </div>
+
 
     <!-- Enhanced Footer -->
     <footer class="py-4 mt-5">
@@ -1170,6 +1093,32 @@
           const isAuthenticated = false;
           {% endif %}
 
+          // Completely disable browser notifications to prevent conflicts
+          if ('Notification' in window) {
+              // Override Notification constructor to prevent browser notifications
+              window.Notification = function() {
+                  console.log('Browser notification blocked - using in-app toasts instead');
+                  return {
+                      close: function() {},
+                      addEventListener: function() {},
+                      removeEventListener: function() {}
+                  };
+              };
+              
+              // Also override the permission request
+              if (Notification.requestPermission) {
+                  Notification.requestPermission = function() {
+                      return Promise.resolve('denied');
+                  };
+              }
+              
+              // Set permission to denied
+              Object.defineProperty(Notification, 'permission', {
+                  value: 'denied',
+                  writable: false
+              });
+          }
+
           // Enhanced authentication check
           const protectedLinks = document.querySelectorAll('[data-requires-auth="true"]');
 
@@ -1189,18 +1138,7 @@
               });
           });
 
-          // Enhanced toast management
-          const toasts = document.querySelectorAll('.toast');
-          toasts.forEach((toast, index) => {
-              // Stagger toast appearance
-              setTimeout(() => {
-                  const bsToast = new bootstrap.Toast(toast, {
-                      autohide: true,
-                      delay: 6000
-                  });
-                  bsToast.show();
-              }, index * 200);
-          });
+
 
           // Enhanced smooth scrolling
           document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -1261,19 +1199,19 @@
               input.addEventListener('change', function() {
                   const file = this.files[0];
                   if (file) {
-                      // Validate file size (max 10MB)
-                      if (file.size > 10 * 1024 * 1024) {
-                          showToast('File too large', 'Please select an image smaller than 10MB', 'warning');
-                          this.value = '';
-                          return;
-                      }
+                                             // Validate file size (max 10MB)
+                       if (file.size > 10 * 1024 * 1024) {
+                           alert('File too large. Please select an image smaller than 10MB');
+                           this.value = '';
+                           return;
+                       }
 
-                      // Validate file type
-                      if (!file.type.startsWith('image/')) {
-                          showToast('Invalid file type', 'Please select a valid image file', 'danger');
-                          this.value = '';
-                          return;
-                      }
+                       // Validate file type
+                       if (!file.type.startsWith('image/')) {
+                           alert('Invalid file type. Please select a valid image file');
+                           this.value = '';
+                           return;
+                       }
 
                       const reader = new FileReader();
                       reader.onload = function(e) {
@@ -1435,45 +1373,7 @@
           }, 300);
       }
 
-      function showToast(title, message, type = 'info') {
-          const toastContainer = document.querySelector('.toast-container');
-          const toastId = 'toast-' + Date.now();
-
-          const iconMap = {
-              success: 'fa-check-circle',
-              danger: 'fa-exclamation-triangle',
-              warning: 'fa-exclamation-circle',
-              info: 'fa-info-circle'
-          };
-
-          const toastHTML = `
-              <div id="${toastId}" class="toast fade-in-up" role="alert" aria-live="assertive" aria-atomic="true">
-                  <div class="toast-header alert-${type} border-0">
-                      <i class="fas ${iconMap[type] || iconMap.info} me-2"></i>
-                      <strong class="me-auto">${title}</strong>
-                      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                  </div>
-                  <div class="toast-body">
-                      ${message}
-                  </div>
-              </div>
-          `;
-
-          toastContainer.insertAdjacentHTML('beforeend', toastHTML);
-
-          const newToast = document.getElementById(toastId);
-          const bsToast = new bootstrap.Toast(newToast, {
-              autohide: true,
-              delay: 5000
-          });
-
-          bsToast.show();
-
-          // Remove toast element after it's hidden
-          newToast.addEventListener('hidden.bs.toast', function() {
-              this.remove();
-          });
-      }
+      
 
       function validateField(field) {
           const value = field.value.trim();

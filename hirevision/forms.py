@@ -473,7 +473,7 @@ class MessageForm(forms.ModelForm):
             'content': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
-                'placeholder': 'Type your message...'
+                'placeholder': 'Type your message..'
             }),
             'image': forms.FileInput(attrs={
                 'class': 'form-control',
@@ -514,13 +514,16 @@ class MessageForm(forms.ModelForm):
         start_time = time.time()
         cleaned_data = super().clean()
         content = cleaned_data.get('content')
+        image = cleaned_data.get('image')
         
         logger.info("Validating message form")
         logger.debug(f"Content length: {len(content) if content else 0} characters")
+        logger.debug(f"Image provided: {image is not None}")
         
-        if not content or len(content.strip()) < 1:
-            logger.warning("Message validation failed: empty content")
-            raise forms.ValidationError("Please provide content for your message.")
+        # Allow messages with either content OR image (or both)
+        if (not content or len(content.strip()) < 1) and not image:
+            logger.warning("Message validation failed: neither content nor image provided")
+            raise forms.ValidationError("Please provide either a message or an image.")
         
         duration = time.time() - start_time
         log_performance("Message form validation", duration)
