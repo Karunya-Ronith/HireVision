@@ -45,7 +45,7 @@ def validate_resume_data(data: Dict[str, Any]) -> tuple[bool, str]:
     logger.info("Validating resume data")
     logger.debug(f"Data keys: {list(data.keys())}")
     
-    required_fields = ["name", "education", "projects", "skills"]
+    required_fields = ["name", "education", "skills"]
 
     for field in required_fields:
         if not data.get(field):
@@ -66,12 +66,13 @@ def validate_resume_data(data: Dict[str, Any]) -> tuple[bool, str]:
         logger.error("Education must be a list with at least one entry")
         return False, "Education must be a list with at least one entry"
 
-    # Validate projects
-    projects_count = len(data["projects"]) if isinstance(data["projects"], list) else 0
-    logger.debug(f"Project entries: {projects_count}")
-    if not isinstance(data["projects"], list) or projects_count == 0:
-        logger.error("Projects must be a list with at least one entry")
-        return False, "Projects must be a list with at least one entry"
+    # Validate projects (optional)
+    if data.get("projects"):
+        projects_count = len(data["projects"]) if isinstance(data["projects"], list) else 0
+        logger.debug(f"Project entries: {projects_count}")
+        if not isinstance(data["projects"], list):
+            logger.error("Projects must be a list when provided")
+            return False, "Projects must be a list when provided"
 
     # Validate skills
     skills_count = len(data["skills"]) if isinstance(data["skills"], dict) else 0
@@ -117,7 +118,10 @@ def generate_latex_resume(data: Dict[str, Any]) -> str:
         logger.debug("Adding experience section")
         latex_content += generate_experience_section(data["experience"])
 
-    latex_content += generate_projects_section(data["projects"])
+    if data.get("projects"):
+        logger.debug("Adding projects section")
+        latex_content += generate_projects_section(data["projects"])
+    
     latex_content += generate_skills_section(data["skills"])
 
     if data.get("research_papers"):
@@ -558,25 +562,6 @@ def process_resume_builder(
                 None,
             )
 
-        # Parse projects
-        logger.info("Parsing projects data")
-        try:
-            if projects and projects.strip():
-                user_data["projects"] = json.loads(projects)
-                logger.debug(f"Project entries: {len(user_data['projects'])}")
-            else:
-                logger.error("Projects are required but not provided")
-                return (
-                    "## ❌ Error\n\nProjects are required. Please provide at least one project.",
-                    None,
-                )
-        except json.JSONDecodeError as e:
-            logger.error(f"Invalid JSON format in Projects field: {e}")
-            return (
-                "## ❌ Error\n\nInvalid JSON format in Projects field. Please check the format and try again.",
-                None,
-            )
-
         # Parse skills
         logger.info("Parsing skills data")
         try:
@@ -598,6 +583,21 @@ def process_resume_builder(
 
         # Parse optional sections
         logger.info("Parsing optional sections")
+        
+        # Parse projects (optional)
+        try:
+            if projects and projects.strip():
+                user_data["projects"] = json.loads(projects)
+                logger.debug(f"Project entries: {len(user_data['projects'])}")
+            else:
+                logger.info("No projects provided - this is optional")
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON format in Projects field: {e}")
+            return (
+                "## ❌ Error\n\nInvalid JSON format in Projects field. Please check the format and try again.",
+                None,
+            )
+        
         try:
             if research_papers and research_papers.strip():
                 user_data["research_papers"] = json.loads(research_papers)
