@@ -454,14 +454,14 @@ def process_resume_builder_task(resume_id: str):
         linkedin = resume.linkedin
         github = resume.github
         
-        # Convert JSON fields to strings for processing
-        education = json.dumps(resume.education) if resume.education else ""
-        experience = json.dumps(resume.experience) if resume.experience else ""
-        projects = json.dumps(resume.projects) if resume.projects else ""
-        skills = json.dumps(resume.skills) if resume.skills else ""
-        research_papers = json.dumps(resume.research_papers) if resume.research_papers else ""
-        achievements = json.dumps(resume.achievements) if resume.achievements else ""
-        others = json.dumps(resume.others) if resume.others else ""
+        # Parse JSON fields properly for processing
+        education = json.dumps(resume.education) if resume.education else "[]"
+        experience = json.dumps(resume.experience) if resume.experience else "[]"
+        projects = json.dumps(resume.projects) if resume.projects else "[]"
+        skills = json.dumps(resume.skills) if resume.skills else "{}"
+        research_papers = json.dumps(resume.research_papers) if resume.research_papers else "[]"
+        achievements = json.dumps(resume.achievements) if resume.achievements else "[]"
+        others = json.dumps(resume.others) if resume.others else "[]"
         
         logger.info(f"Processing resume builder for user: {name}, email: {email}")
         logger.debug(f"Data lengths - education: {len(education)}, experience: {len(experience)}, projects: {len(projects)}, skills: {len(skills)}")
@@ -487,15 +487,96 @@ def process_resume_builder_task(resume_id: str):
         # Check if it's the OpenRouter API key error - provide demo data
         if isinstance(result, str) and "OpenRouter API Key Not Configured" in result:
             logger.info(f"Using demo data for resume {resume_id} (OpenRouter API key not configured)")
-            # Demo data - save the resume with demo content
-            resume.latex_content = "Demo LaTeX content for resume"
-            
-            # Create a demo PDF file
-            demo_pdf_path = get_sample_pdf_path()
-            if demo_pdf_path and os.path.exists(demo_pdf_path):
-                with open(demo_pdf_path, 'rb') as pdf_file:
-                    resume.pdf_file.save(f"demo_resume_{resume.id}.pdf", ContentFile(pdf_file.read()), save=False)
-                logger.info(f"Demo PDF saved for resume {resume_id}")
+            # Demo data - save the resume with demo LaTeX content
+            resume.latex_content = """\\documentclass[letterpaper,11pt]{article}
+\\usepackage{latexsym}
+\\usepackage[empty]{fullpage}
+\\usepackage{titlesec}
+\\usepackage{marvosym}
+\\usepackage[usenames,dvipsnames]{color}
+\\usepackage{verbatim}
+\\usepackage{enumitem}
+\\usepackage[hidelinks]{hyperref}
+\\usepackage{fancyhdr}
+\\usepackage[english]{babel}
+\\usepackage{tabularx}
+\\usepackage{fontawesome5}
+\\usepackage{multicol}
+\\setlength{\\multicolsep}{-3.0pt}
+\\setlength{\\columnsep}{-1pt}
+\\input{glyphtounicode}
+
+\\pagestyle{fancy}
+\\fancyhf{}
+\\fancyfoot{}
+\\renewcommand{\\headrulewidth}{0pt}
+\\renewcommand{\\footrulewidth}{0pt}
+
+\\addtolength{\\oddsidemargin}{-0.6in}
+\\addtolength{\\evensidemargin}{-0.5in}
+\\addtolength{\\textwidth}{1.19in}
+\\addtolength{\\topmargin}{-.7in}
+\\addtolength{\\textheight}{1.4in}
+
+\\urlstyle{same}
+
+\\raggedbottom
+\\raggedright
+\\setlength{\\tabcolsep}{0in}
+
+\\titleformat{\\section}{
+  \\vspace{-4pt}\\scshape\\raggedright\\large\\bfseries
+}{}{0em}{}[\\color{black}\\titlerule \\vspace{-5pt}]
+
+\\pdfgentounicode=1
+
+\\begin{document}
+
+\\textbf{\\Huge \\scshape Demo User} \\\\ \\vspace{1pt}
+\\small 123-456-7890 $|$ \\href{mailto:demo@example.com}{\\underline{demo@example.com}} $|$ 
+\\href{https://linkedin.com/in/demo}{\\underline{linkedin.com/in/demo}} $|$
+\\href{https://github.com/demo}{\\underline{github.com/demo}}
+
+\\section{Education}
+  \\resumeSubHeadingListStart
+    \\resumeSubheading
+      {Demo University}{Demo City, State}
+      {Bachelor of Science in Computer Science}{Jan 2020 -- May 2024}
+  \\resumeSubHeadingListEnd
+
+\\section{Experience}
+  \\resumeSubHeadingListStart
+    \\resumeSubheading
+      {Software Developer}{Jan 2023 -- Present}
+      {Demo Company}{Demo City, State}
+      \\resumeItemListStart
+        \\resumeItem{Developed web applications using modern technologies}
+        \\resumeItem{Collaborated with cross-functional teams}
+        \\resumeItem{Improved system performance by 40\\%}
+      \\resumeItemListEnd
+  \\resumeSubHeadingListEnd
+
+\\section{Projects}
+    \\resumeSubHeadingListStart
+      \\resumeProjectHeading
+          {\\textbf{Demo Project} $|$ \\emph{React, Node.js, MongoDB}}
+          \\resumeItemListStart
+            \\resumeItem{Full-stack web application for project management}
+            \\resumeItem{Implemented user authentication and real-time updates}
+          \\resumeItemListEnd
+    \\resumeSubHeadingListEnd
+
+\\section{Technical Skills}
+ \\begin{itemize}[leftmargin=0.15in, label={}]
+    \\small{\\item{
+     \\textbf{Languages}{: Python, JavaScript, Java, C++} \\
+     \\textbf{Frameworks}{: React, Django, Node.js, Express} \\
+     \\textbf{Tools}{: Git, Docker, AWS, MongoDB}
+    }}
+ \\end{itemize}
+
+\\end{document}"""
+            logger.info(f"Demo LaTeX content saved for resume {resume_id}")
         else:
             # Process the result
             if isinstance(result, tuple) and len(result) == 2:
@@ -503,33 +584,15 @@ def process_resume_builder_task(resume_id: str):
                 resume.latex_content = latex_content
                 logger.info(f"LaTeX content generated for resume {resume_id}, length: {len(latex_content)}")
                 
-                # Save PDF if generated
-                if pdf_path and os.path.exists(pdf_path):
-                    with open(pdf_path, 'rb') as pdf_file:
-                        resume.pdf_file.save(f"resume_{resume.id}.pdf", ContentFile(pdf_file.read()), save=False)
-                    logger.info(f"PDF saved for resume {resume_id}")
-                    # Clean up temporary file
-                    try:
-                        os.remove(pdf_path)
-                        logger.debug(f"Cleaned up temporary PDF file: {pdf_path}")
-                    except Exception as cleanup_error:
-                        logger.warning(f"Failed to clean up temporary PDF file {pdf_path}: {cleanup_error}")
+                # Skip PDF generation - user will compile LaTeX themselves
+                logger.info(f"Skipping PDF generation for resume {resume_id} - user will compile LaTeX code")
             else:
                 # Fallback - assume it's LaTeX content
                 resume.latex_content = str(result)
                 logger.info(f"LaTeX content saved directly for resume {resume_id}, length: {len(str(result))}")
                 
-                # Try to generate PDF from LaTeX
-                try:
-                    pdf_path = generate_pdf_from_latex(str(result))
-                    if pdf_path and os.path.exists(pdf_path):
-                        with open(pdf_path, 'rb') as pdf_file:
-                            resume.pdf_file.save(f"resume_{resume.id}.pdf", ContentFile(pdf_file.read()), save=False)
-                        logger.info(f"PDF generated and saved for resume {resume_id}")
-                        os.remove(pdf_path)
-                        logger.debug(f"Cleaned up generated PDF file: {pdf_path}")
-                except Exception as pdf_error:
-                    logger.warning(f"PDF generation error for resume {resume_id}: {pdf_error}")
+                # Skip PDF generation - user will compile LaTeX themselves
+                logger.info(f"Skipping PDF generation for resume {resume_id} - user will compile LaTeX code")
         
         resume.task_status = 'completed'
         resume.save()

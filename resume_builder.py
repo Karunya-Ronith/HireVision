@@ -16,6 +16,25 @@ from utils import retry_with_backoff, handle_api_error, sanitize_input
 from pdf_generator import generate_pdf_from_latex, get_sample_pdf_path
 from logging_config import get_logger, log_function_call, log_file_operation, log_performance
 
+
+def convert_bullet_points(text: str) -> str:
+    """Convert * bullet points to proper bullet points"""
+    if not text:
+        return ""
+    
+    lines = text.split('\n')
+    converted_lines = []
+    
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith('*'):
+            # Convert * to proper bullet point
+            converted_lines.append(f"• {stripped[1:].strip()}")
+        elif stripped:  # Non-empty line that doesn't start with *
+            converted_lines.append(stripped)
+    
+    return '\n'.join(converted_lines)
+
 # Initialize logger
 logger = get_logger(__name__)
 
@@ -297,9 +316,23 @@ def generate_experience_section(experience: List[Dict[str, Any]]) -> str:
 
             if description:
                 latex += "      \\resumeItemListStart\n"
-                for item in description:
-                    if isinstance(item, str):
-                        latex += f"        \\resumeItem{{{sanitize_input(item)}}}\n"
+                # Handle both string and list descriptions
+                if isinstance(description, str):
+                    # If description is a string, split by newlines and process each line
+                    lines = description.split('\n')
+                    for line in lines:
+                        line = line.strip()
+                        if line:
+                            # Convert bullet points and sanitize
+                            converted_item = convert_bullet_points(line)
+                            latex += f"        \\resumeItem{{{sanitize_input(converted_item)}}}\n"
+                elif isinstance(description, list):
+                    # If description is a list, process each item
+                    for item in description:
+                        if isinstance(item, str):
+                            # Convert bullet points and sanitize
+                            converted_item = convert_bullet_points(item)
+                            latex += f"        \\resumeItem{{{sanitize_input(converted_item)}}}\n"
                 latex += "      \\resumeItemListEnd\n"
 
             # Handle multiple positions at the same company
@@ -317,9 +350,19 @@ def generate_experience_section(experience: List[Dict[str, Any]]) -> str:
                         latex += f"     {{{pos_title}}}{{{pos_duration}}}\n"
                         if pos_description:
                             latex += "     \\resumeItemListStart\n"
-                            for item in pos_description:
-                                if isinstance(item, str):
-                                    latex += f"        \\resumeItem{{{sanitize_input(item)}}}\n"
+                            # Handle both string and list descriptions
+                            if isinstance(pos_description, str):
+                                lines = pos_description.split('\n')
+                                for line in lines:
+                                    line = line.strip()
+                                    if line:
+                                        converted_item = convert_bullet_points(line)
+                                        latex += f"        \\resumeItem{{{sanitize_input(converted_item)}}}\n"
+                            elif isinstance(pos_description, list):
+                                for item in pos_description:
+                                    if isinstance(item, str):
+                                        converted_item = convert_bullet_points(item)
+                                        latex += f"        \\resumeItem{{{sanitize_input(converted_item)}}}\n"
                             latex += "     \\resumeItemListEnd\n"
                         latex += "    \\resumeSubHeadingListEnd\n"
                         latex += "%-------------------------------------------\n"
@@ -343,9 +386,19 @@ def generate_projects_section(projects: List[Dict[str, Any]]) -> str:
 
             if description:
                 latex += "          \\resumeItemListStart\n"
-                for item in description:
-                    if isinstance(item, str):
-                        latex += f"            \\resumeItem{{{sanitize_input(item)}}}\n"
+                # Handle both string and list descriptions
+                if isinstance(description, str):
+                    lines = description.split('\n')
+                    for line in lines:
+                        line = line.strip()
+                        if line:
+                            converted_item = convert_bullet_points(line)
+                            latex += f"            \\resumeItem{{{sanitize_input(converted_item)}}}\n"
+                elif isinstance(description, list):
+                    for item in description:
+                        if isinstance(item, str):
+                            converted_item = convert_bullet_points(item)
+                            latex += f"            \\resumeItem{{{sanitize_input(converted_item)}}}\n"
                 latex += "          \\resumeItemListEnd\n"
 
     latex += "    \\resumeSubHeadingListEnd\n"
@@ -409,7 +462,9 @@ def generate_achievements_section(achievements: List[str]) -> str:
 
     for achievement in achievements:
         if isinstance(achievement, str) and achievement.strip():
-            latex += f"    \\small{{\\item{{{sanitize_input(achievement)}}}}}\n"
+            # Convert bullet points and sanitize
+            converted_achievement = convert_bullet_points(achievement)
+            latex += f"    \\small{{\\item{{{sanitize_input(converted_achievement)}}}}}\n"
 
     latex += " \\end{itemize}\n"
     return latex
@@ -426,7 +481,9 @@ def generate_others_section(others: List[str]) -> str:
 
     for item in others:
         if isinstance(item, str) and item.strip():
-            latex += f"    \\small{{\\item{{{sanitize_input(item)}}}}}\n"
+            # Convert bullet points and sanitize
+            converted_item = convert_bullet_points(item)
+            latex += f"    \\small{{\\item{{{sanitize_input(converted_item)}}}}}\n"
 
     latex += " \\end{itemize}\n"
     return latex

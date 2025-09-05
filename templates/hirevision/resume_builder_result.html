@@ -364,6 +364,39 @@
         line-height: 1.6;
     }
 
+    /* Instruction Steps */
+    .instruction-step {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--primary-color);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease;
+    }
+
+    .instruction-step:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .instruction-step h5 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--dark-color);
+    }
+
+    .instruction-step p {
+        color: var(--secondary-color);
+        margin-bottom: 0;
+        line-height: 1.5;
+    }
+
+    .instruction-step i {
+        margin-right: 0.5rem;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
         .result-title {
@@ -381,6 +414,10 @@
         .action-btn {
             width: 100%;
             justify-content: center;
+        }
+
+        .instruction-step {
+            margin-bottom: 1rem;
         }
     }
 </style>
@@ -490,24 +527,44 @@
                             <i class="fas fa-check-circle me-2"></i>
                             Resume Generated Successfully!
                         </h2>
-                        <p class="success-subtitle">Your professional resume is ready for download</p>
+                        <p class="success-subtitle">Your professional LaTeX resume code is ready</p>
                     </div>
                 
                 <div class="success-content">
-                    <!-- Download Section -->
-                    {% if resume.pdf_file %}
-                        <div class="download-section">
-                            <h4 class="mb-3">
-                                <i class="fas fa-download me-2"></i>
-                                Download Your Resume
-                            </h4>
-                            <p class="mb-4">Get your professional PDF resume ready for immediate use in job applications.</p>
-                            <a href="{% url 'hirevision:download_pdf' resume.id %}" class="download-btn">
-                                <i class="fas fa-file-pdf"></i>
-                                Download PDF Resume
-                            </a>
+                    <!-- Instructions Section -->
+                    <div class="download-section">
+                        <h4 class="mb-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            How to Convert to PDF
+                        </h4>
+                        <p class="mb-4">Your LaTeX code is ready! Follow these steps to convert it to a professional PDF resume:</p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="instruction-step">
+                                    <h5><i class="fas fa-copy text-primary"></i> Step 1: Copy the Code</h5>
+                                    <p>Click the "Copy Code" button below to copy the LaTeX source code to your clipboard.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="instruction-step">
+                                    <h5><i class="fas fa-edit text-success"></i> Step 2: Use LaTeX Editor</h5>
+                                    <p>Paste the code into any LaTeX editor like Overleaf, TeXstudio, or VS Code with LaTeX Workshop.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="instruction-step">
+                                    <h5><i class="fas fa-play text-warning"></i> Step 3: Compile</h5>
+                                    <p>Compile the LaTeX code using pdflatex to generate your professional PDF resume.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="instruction-step">
+                                    <h5><i class="fas fa-download text-info"></i> Step 4: Download</h5>
+                                    <p>Download the generated PDF and use it for your job applications!</p>
+                                </div>
+                            </div>
                         </div>
-                    {% endif %}
+                    </div>
 
                     <!-- LaTeX Code Section -->
                     {% if resume.latex_content %}
@@ -522,7 +579,10 @@
                                     Copy Code
                                 </button>
                             </div>
-                            <p class="text-muted mb-3">Copy this LaTeX code for customization and compilation in your preferred LaTeX editor.</p>
+                            <p class="text-muted mb-3">
+                                <strong>Professional LaTeX Resume Code:</strong> This code generates a clean, ATS-friendly resume. 
+                                Copy it to any LaTeX editor (Overleaf, TeXstudio, VS Code) and compile to PDF.
+                            </p>
                             <div class="latex-code" id="latex-code">
                                 {{ resume.latex_content }}
                             </div>
