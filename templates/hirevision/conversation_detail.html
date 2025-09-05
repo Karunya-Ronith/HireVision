@@ -313,13 +313,11 @@ let messagesContainer;
 let submitBtn;
 let contentInput;
 let imageInput;
+let lastMessageTime = null;
+let pollingInterval = null;
+let isPolling = false;
 
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, initializing message system...');
-    initializeMessageSystem();
-    setupAutoHideAlerts();
-});
+// This will be handled by the main initialization below
 
 function initializeMessageSystem() {
     console.log('Initializing message system...');
@@ -609,5 +607,177 @@ function testAsyncMessage() {
         setSubmitButtonLoading(false);
     });
 }
+
+// Real-time messaging functions
+function startMessagePolling() {
+    console.log('Starting message polling...');
+    if (isPolling) {
+        console.log('Polling already active');
+        return;
+    }
+    
+    isPolling = true;
+    // Poll every 2 seconds for new messages
+    pollingInterval = setInterval(checkForNewMessages, 2000);
+    console.log('Message polling started (every 2 seconds)');
+}
+
+function stopMessagePolling() {
+    console.log('Stopping message polling...');
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+    isPolling = false;
+    console.log('Message polling stopped');
+}
+
+function checkForNewMessages() {
+    if (!isPolling) return;
+    
+    console.log('Checking for new messages...');
+    
+    // Get the conversation ID from the URL
+    const conversationId = window.location.pathname.split('/').slice(-2, -1)[0];
+    const apiUrl = `/messages/conversation/${conversationId}/new-messages/`;
+    
+    // Add timestamp parameter if we have it
+    let url = apiUrl;
+    if (lastMessageTime) {
+        url += `?last_message_time=${encodeURIComponent(lastMessageTime)}`;
+    }
+    
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Polling response:', data);
+        if (data.success && data.messages && data.messages.length > 0) {
+            console.log(`Found ${data.messages.length} new messages`);
+            
+            // Add each new message to the UI
+            data.messages.forEach(messageData => {
+                addMessageToUI(messageData);
+            });
+            
+            // Update last message time
+            if (data.messages.length > 0) {
+                const lastMessage = data.messages[data.messages.length - 1];
+                lastMessageTime = new Date().toISOString();
+            }
+            
+            // Scroll to bottom
+            scrollToBottom();
+            
+            // Show notification if user is not focused on this tab
+            if (document.hidden) {
+                showNotification(`New message from ${data.messages[0].sender_name}`);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error checking for new messages:', error);
+        // Don't show error to user for polling failures
+    });
+}
+
+function showNotification(message) {
+    // Check if browser supports notifications
+    if ('Notification' in window) {
+        if (Notification.permission === 'granted') {
+            new Notification('New Message', {
+                body: message,
+                icon: '/static/icon.png'
+            });
+        } else if (Notification.permission !== 'denied') {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    new Notification('New Message', {
+                        body: message,
+                        icon: '/static/icon.png'
+                    });
+                }
+            });
+        }
+    }
+}
+
+// Initialize last message time when page loads
+function initializeLastMessageTime() {
+    const messageItems = document.querySelectorAll('.message-item');
+    if (messageItems.length > 0) {
+        // Get the timestamp from the last message
+        const lastMessage = messageItems[messageItems.length - 1];
+        const timeElement = lastMessage.querySelector('.message-time small');
+        if (timeElement) {
+            // Parse the time and convert to ISO string
+            const timeText = timeElement.textContent.trim();
+            // This is a simplified approach - you might want to parse the actual time
+            lastMessageTime = new Date().toISOString();
+            console.log('Initialized last message time:', lastMessageTime);
+        }
+    }
+}
+
+// Update the addMessageToUI function to also update lastMessageTime
+function addMessageToUI(messageData) {
+    const messageHTML = createMessageHTML(messageData);
+    messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+    
+    // Update last message time
+    lastMessageTime = new Date().toISOString();
+}
+
+// Pause polling when user is typing
+function pausePollingWhileTyping() {
+    if (contentInput) {
+        contentInput.addEventListener('focus', () => {
+            console.log('User started typing, pausing polling...');
+            stopMessagePolling();
+        });
+        
+        contentInput.addEventListener('blur', () => {
+            console.log('User stopped typing, resuming polling...');
+            setTimeout(() => {
+                startMessagePolling();
+            }, 1000); // Resume after 1 second
+        });
+    }
+}
+
+// Initialize everything when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing real-time messaging...');
+    initializeMessageSystem();
+    setupAutoHideAlerts();
+    initializeLastMessageTime();
+    startMessagePolling();
+    pausePollingWhileTyping();
+});
+
+// Clean up when page is unloaded
+window.addEventListener('beforeunload', function() {
+    stopMessagePolling();
+});
+
+// Pause polling when tab is not visible
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        console.log('Tab hidden, pausing polling...');
+        stopMessagePolling();
+    } else {
+        console.log('Tab visible, resuming polling...');
+        startMessagePolling();
+    }
+});
 </script>
 {% endblock %} 

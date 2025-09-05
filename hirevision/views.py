@@ -884,6 +884,59 @@ def message_from_thread(request, thread_id, user_id):
     return redirect('hirevision:conversation_detail', conversation_id=conversation.id)
 
 @login_required
+def get_new_messages(request, conversation_id):
+    """API endpoint to fetch new messages for a conversation"""
+    from django.http import JsonResponse
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
+    
+    # Get the last message timestamp from the request
+    last_message_time = request.GET.get('last_message_time')
+    
+    if last_message_time:
+        try:
+            # Parse the timestamp and get messages after this time
+            last_time = timezone.datetime.fromisoformat(last_message_time.replace('Z', '+00:00'))
+            new_messages = conversation.messages.filter(
+                created_at__gt=last_time
+            ).exclude(sender=request.user).select_related('sender').order_by('created_at')
+        except (ValueError, TypeError):
+            # If timestamp is invalid, return empty
+            new_messages = conversation.messages.none()
+    else:
+        # If no timestamp provided, get messages from last 5 minutes
+        five_minutes_ago = timezone.now() - timedelta(minutes=5)
+        new_messages = conversation.messages.filter(
+            created_at__gt=five_minutes_ago
+        ).exclude(sender=request.user).select_related('sender').order_by('created_at')
+    
+    # Mark new messages as read
+    if new_messages.exists():
+        new_messages.update(is_read=True)
+    
+    # Convert messages to JSON
+    messages_data = []
+    for message in new_messages:
+        message_data = {
+            'id': str(message.id),
+            'content': message.content or '',
+            'image_url': message.image.url if message.image else None,
+            'sender_id': str(message.sender.id),
+            'sender_name': message.sender.get_full_name() or message.sender.username,
+            'created_at': message.created_at.strftime('%b %d, %I:%M %p'),
+            'is_read': message.is_read
+        }
+        messages_data.append(message_data)
+    
+    return JsonResponse({
+        'success': True,
+        'messages': messages_data,
+        'count': len(messages_data)
+    })
+
+@login_required
 def delete_conversation(request, conversation_id):
     """Delete a conversation (remove current user from participants)"""
     conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
