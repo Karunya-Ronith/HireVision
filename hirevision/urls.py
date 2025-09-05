@@ -56,6 +56,7 @@ urlpatterns = [
     path('messages/new/', views.new_message, name='new_message'),
     path('messages/conversation/<uuid:conversation_id>/', views.conversation_detail, name='conversation_detail'),
     path('messages/conversation/<uuid:conversation_id>/delete/', views.delete_conversation, name='delete_conversation'),
+    path('messages/conversation/<uuid:conversation_id>/new-messages/', views.get_new_messages, name='get_new_messages'),
     path('messages/start/<uuid:user_id>/', views.start_conversation, name='start_conversation'),
     path('messages/from-thread/<uuid:thread_id>/<uuid:user_id>/', views.message_from_thread, name='message_from_thread'),
     path('messages/search-users/', views.search_users_ajax, name='search_users_ajax'),
