@@ -144,6 +144,44 @@
         font-size: 1.25rem;
     }
 
+    .optional-badge {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        margin-left: 0.5rem;
+    }
+
+    .section-description {
+        color: var(--secondary-color);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+        font-style: italic;
+    }
+
+    .skip-section-btn {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .skip-section-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+    }
+
     .form-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -240,24 +278,30 @@
 
     /* Dynamic Sections */
     .dynamic-section {
-        background: var(--light-color);
-        border-radius: 12px;
+        background: #ffffff;
+        border-radius: 8px;
         padding: 1.5rem;
         margin-bottom: 1rem;
-        border: 2px dashed var(--border-color);
+        border: 1px solid #e2e8f0;
         transition: all 0.3s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .dynamic-section:hover {
         border-color: var(--primary-color);
-        background: rgba(37, 99, 235, 0.05);
+        background: #ffffff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .section-header {
         display: flex;
-        justify-content: between;
+        justify-content: space-between;
         align-items: center;
         margin-bottom: 1rem;
+        padding: 0.75rem 1rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
     }
 
     .section-title-small {
@@ -267,22 +311,37 @@
     }
 
     .remove-section {
-        background: var(--danger-color);
+        background: #6b7280;
         color: white;
         border: none;
-        border-radius: 50%;
-        width: 32px;
-        height: 32px;
+        border-radius: 6px;
+        padding: 0.5rem 0.75rem;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         transition: all 0.3s ease;
+        font-size: 0.75rem;
+        font-weight: 500;
+        min-width: auto;
+        height: auto;
     }
 
     .remove-section:hover {
-        background: #dc2626;
-        transform: scale(1.1);
+        background: #4b5563;
+        transform: none;
+    }
+
+    .remove-section i {
+        margin-right: 0.25rem;
+    }
+
+    .form-help {
+        color: #6b7280;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        display: block;
+        font-style: italic;
     }
 
     /* Add Section Button */
@@ -536,11 +595,11 @@
                 </div>
                 <div class="step-indicator pending" data-step="3">
                     <div class="step-number">3</div>
-                    <span>Experience</span>
+                    <span>Experience <small>(Optional)</small></span>
                 </div>
                 <div class="step-indicator pending" data-step="4">
                     <div class="step-number">4</div>
-                    <span>Skills & Projects</span>
+                    <span>Skills & Projects <small>(Projects Optional)</small></span>
                 </div>
                 <div class="step-indicator pending" data-step="5">
                     <div class="step-number">5</div>
@@ -611,7 +670,7 @@
                             <div class="section-header">
                                 <h4 class="section-title-small">Education Entry #1</h4>
                                 <button type="button" class="remove-section" onclick="removeSection(this)">
-                                    <i class="fas fa-times"></i>
+                                    <i class="fas fa-trash"></i> Remove
                                 </button>
                             </div>
                             <div class="form-grid">
@@ -648,14 +707,15 @@
                 <div class="form-section" id="step-3">
                     <h3 class="section-title">
                         <i class="fas fa-briefcase"></i>
-                        Work Experience
+                        Work Experience <span class="optional-badge">(Optional)</span>
                     </h3>
+                    <p class="section-description">Add your work experience to showcase your professional background. You can skip this section if you don't have work experience yet.</p>
                     <div id="experience-sections">
                         <div class="dynamic-section experience-item">
                             <div class="section-header">
                                 <h4 class="section-title-small">Experience Entry #1</h4>
                                 <button type="button" class="remove-section" onclick="removeSection(this)">
-                                    <i class="fas fa-times"></i>
+                                    <i class="fas fa-trash"></i> Remove
                                 </button>
                             </div>
                             <div class="form-grid">
@@ -671,12 +731,14 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Start Date *</label>
-                                    <input type="month" class="form-input" name="experience_start[]" required>
+                                    <input type="text" class="form-input" name="experience_start[]" placeholder="e.g., Jan 2020 or 2020-01" required>
+                                    <small class="form-help">Format: Month Year (e.g., Jan 2020) or YYYY-MM</small>
                                     <div class="error-message" id="experience_start-error-0"></div>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">End Date <span class="optional-label">(Optional)</span></label>
-                                    <input type="month" class="form-input" name="experience_end[]" placeholder="Present">
+                                    <input type="text" class="form-input" name="experience_end[]" placeholder="e.g., Present, Dec 2022, or 2022-12">
+                                    <small class="form-help">Leave blank or enter "Present" for current position</small>
                                     <div class="error-message" id="experience_end-error-0"></div>
                                 </div>
                             </div>
@@ -687,10 +749,16 @@
                             </div>
                         </div>
                     </div>
-                    <button type="button" class="add-section-btn" onclick="addExperienceSection()">
-                        <i class="fas fa-plus"></i>
-                        Add Another Experience Entry
-                    </button>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button type="button" class="add-section-btn" onclick="addExperienceSection()">
+                            <i class="fas fa-plus"></i>
+                            Add Another Experience Entry
+                        </button>
+                        <button type="button" class="skip-section-btn" onclick="skipExperienceSection()">
+                            <i class="fas fa-forward"></i>
+                            Skip Experience Section
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Step 4: Skills & Projects -->
@@ -710,14 +778,15 @@
                     <!-- Projects Section -->
                     <h4 class="section-title-small" style="margin-top: 2rem; margin-bottom: 1rem;">
                         <i class="fas fa-project-diagram"></i>
-                        Projects
+                        Projects <span class="optional-badge">(Optional)</span>
                     </h4>
+                    <p class="section-description" style="margin-bottom: 1rem;">Add your personal or academic projects to demonstrate your skills and experience. You can skip this section if you don't have projects to showcase.</p>
                     <div id="project-sections">
                         <div class="dynamic-section project-item">
                             <div class="section-header">
                                 <h4 class="section-title-small">Project #1</h4>
                                 <button type="button" class="remove-section" onclick="removeSection(this)">
-                                    <i class="fas fa-times"></i>
+                                    <i class="fas fa-trash"></i> Remove
                                 </button>
                             </div>
                             <div class="form-grid">
@@ -754,7 +823,7 @@
                             <div class="section-header">
                                 <h4 class="section-title-small">Research Paper #1</h4>
                                 <button type="button" class="remove-section" onclick="removeSection(this)">
-                                    <i class="fas fa-times"></i>
+                                    <i class="fas fa-trash"></i> Remove
                                 </button>
                             </div>
                             <div class="form-grid">
@@ -982,7 +1051,7 @@ function addEducationSection() {
         <div class="section-header">
             <h4 class="section-title-small">Education Entry #${sectionCount}</h4>
             <button type="button" class="remove-section" onclick="removeSection(this)">
-                <i class="fas fa-times"></i>
+                <i class="fas fa-trash"></i> Remove
             </button>
         </div>
         <div class="form-grid">
@@ -1024,7 +1093,7 @@ function addExperienceSection() {
         <div class="section-header">
             <h4 class="section-title-small">Experience Entry #${sectionCount}</h4>
             <button type="button" class="remove-section" onclick="removeSection(this)">
-                <i class="fas fa-times"></i>
+                <i class="fas fa-trash"></i> Remove
             </button>
         </div>
         <div class="form-grid">
@@ -1040,12 +1109,14 @@ function addExperienceSection() {
             </div>
             <div class="form-group">
                 <label class="form-label">Start Date *</label>
-                <input type="month" class="form-input" name="experience_start[]" required>
+                <input type="text" class="form-input" name="experience_start[]" placeholder="e.g., Jan 2020 or 2020-01" required>
+                <small class="form-help">Format: Month Year (e.g., Jan 2020) or YYYY-MM</small>
                 <div class="error-message" id="experience_start-error-${sectionCount - 1}"></div>
             </div>
             <div class="form-group">
                 <label class="form-label">End Date <span class="optional-label">(Optional)</span></label>
-                <input type="month" class="form-input" name="experience_end[]" placeholder="Present">
+                <input type="text" class="form-input" name="experience_end[]" placeholder="e.g., Present, Dec 2022, or 2022-12">
+                <small class="form-help">Leave blank or enter "Present" for current position</small>
                 <div class="error-message" id="experience_end-error-${sectionCount - 1}"></div>
             </div>
         </div>
@@ -1061,6 +1132,27 @@ function addExperienceSection() {
     addRealTimeValidation(newSection);
 }
 
+function skipExperienceSection() {
+    // Clear all experience fields
+    const container = document.getElementById('experience-sections');
+    container.innerHTML = '';
+    
+    // Show a message that the section was skipped
+    const skipMessage = document.createElement('div');
+    skipMessage.className = 'skip-message';
+    skipMessage.innerHTML = `
+        <div style="text-align: center; padding: 2rem; background: #f8fafc; border-radius: 8px; border: 2px dashed #cbd5e1;">
+            <i class="fas fa-check-circle" style="color: #10b981; font-size: 2rem; margin-bottom: 1rem;"></i>
+            <h4 style="color: var(--dark-color); margin-bottom: 0.5rem;">Experience Section Skipped</h4>
+            <p style="color: var(--secondary-color); margin: 0;">You can always add experience later by clicking "Add Experience Entry"</p>
+        </div>
+    `;
+    container.appendChild(skipMessage);
+    
+    // Move to next step
+    nextStep();
+}
+
 function addProjectSection() {
     const container = document.getElementById('project-sections');
     const sectionCount = container.children.length + 1;
@@ -1071,7 +1163,7 @@ function addProjectSection() {
         <div class="section-header">
             <h4 class="section-title-small">Project #${sectionCount}</h4>
             <button type="button" class="remove-section" onclick="removeSection(this)">
-                <i class="fas fa-times"></i>
+                <i class="fas fa-trash"></i> Remove
             </button>
         </div>
         <div class="form-grid">
@@ -1108,7 +1200,7 @@ function addResearchSection() {
         <div class="section-header">
             <h4 class="section-title-small">Research Paper #${sectionCount}</h4>
             <button type="button" class="remove-section" onclick="removeSection(this)">
-                <i class="fas fa-times"></i>
+                <i class="fas fa-trash"></i> Remove
             </button>
         </div>
         <div class="form-grid">
