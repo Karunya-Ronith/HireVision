@@ -672,14 +672,18 @@ def delete_comment(request, comment_id):
 @login_required
 def messages_list(request):
     """Display all conversations for the current user"""
+    # Get conversations with proper prefetching
     conversations = Conversation.objects.filter(participants=request.user).prefetch_related(
         'participants', 'messages__sender'
     ).order_by('-updated_at')
     
-    # Get unread counts for each conversation
+    # Process each conversation to add computed fields
     for conversation in conversations:
+        # Get unread count for the current user
         conversation.unread_count = conversation.get_unread_count(request.user)
-
+        
+        # Get other participant (not the current user)
+        conversation.other_participant = conversation.participants.exclude(id=request.user.id).first()
     
     return render(request, 'hirevision/messages_list.html', {'conversations': conversations})
 
@@ -691,11 +695,8 @@ def conversation_detail(request, conversation_id):
     # Mark messages as read
     conversation.messages.filter(is_read=False).exclude(sender=request.user).update(is_read=True)
     
-
+    # Get conversation messages
     conversation_messages = conversation.messages.all().select_related('sender').order_by('created_at')
-
-    messages = conversation.messages.all().select_related('sender').order_by('created_at')
-
     
     if request.method == 'POST':
         form = MessageForm(request.POST, request.FILES)
@@ -708,8 +709,41 @@ def conversation_detail(request, conversation_id):
             # Update conversation timestamp
             conversation.save()
             
-            messages.success(request, "Message sent successfully!")
-            return redirect('hirevision:conversation_detail', conversation_id=conversation_id)
+            # Check if this is an AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                # Return JSON response for AJAX requests
+                from django.http import JsonResponse
+                from django.utils import timezone
+                
+                message_data = {
+                    'id': str(message.id),
+                    'content': message.content or '',
+                    'image_url': message.image.url if message.image else None,
+                    'sender_id': str(message.sender.id),
+                    'sender_name': message.sender.get_full_name() or message.sender.username,
+                    'created_at': message.created_at.strftime('%b %d, %I:%M %p'),
+                    'is_read': message.is_read
+                }
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': message_data
+                })
+            else:
+                # Regular form submission
+                messages.success(request, "Message sent successfully!")
+                return redirect('hirevision:conversation_detail', conversation_id=conversation_id)
+        else:
+            # Form validation failed
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                from django.http import JsonResponse
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Invalid message data. Please check your input.'
+                })
+            else:
+                # Regular form submission with errors
+                pass
     else:
         form = MessageForm()
     
@@ -718,11 +752,7 @@ def conversation_detail(request, conversation_id):
     
     context = {
         'conversation': conversation,
-
         'messages': conversation_messages,
-
-        'messages': messages,
-
         'message_form': form,
         'other_participant': other_participant
     }
@@ -763,7 +793,7 @@ def start_conversation(request, user_id):
         messages.error(request, "You cannot message yourself.")
         return redirect('hirevision:new_message')
     
-    # Check if conversation already exists
+    # Check if conversation already exists between these two users
     existing_conversation = Conversation.objects.filter(
         participants=request.user
     ).filter(
@@ -771,11 +801,15 @@ def start_conversation(request, user_id):
     ).first()
     
     if existing_conversation:
+        # Redirect to existing conversation
         return redirect('hirevision:conversation_detail', conversation_id=existing_conversation.id)
     
     # Create new conversation
     conversation = Conversation.objects.create()
     conversation.participants.add(request.user, other_user)
+    
+    # Update the conversation timestamp
+    conversation.save()
     
     messages.success(request, f"Started conversation with {other_user.get_full_name() or other_user.username}")
     return redirect('hirevision:conversation_detail', conversation_id=conversation.id)
@@ -790,7 +824,7 @@ def message_from_thread(request, thread_id, user_id):
         messages.error(request, "You cannot message yourself.")
         return redirect('hirevision:thread_detail', thread_id=thread_id)
     
-    # Check if conversation already exists
+    # Check if conversation already exists between these two users
     existing_conversation = Conversation.objects.filter(
         participants=request.user
     ).filter(
@@ -798,11 +832,15 @@ def message_from_thread(request, thread_id, user_id):
     ).first()
     
     if existing_conversation:
+        # Redirect to existing conversation
         return redirect('hirevision:conversation_detail', conversation_id=existing_conversation.id)
     
     # Create new conversation
     conversation = Conversation.objects.create()
     conversation.participants.add(request.user, other_user)
+    
+    # Update the conversation timestamp
+    conversation.save()
     
     messages.success(request, f"Started conversation with {other_user.get_full_name() or other_user.username}")
     return redirect('hirevision:conversation_detail', conversation_id=conversation.id)

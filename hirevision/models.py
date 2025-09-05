@@ -23,6 +23,7 @@ class User(AbstractUser):
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    last_seen = models.DateTimeField(default=timezone.now)
     
     # Use email as the username field
     USERNAME_FIELD = 'email'
@@ -366,7 +367,7 @@ class Message(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
-    content = models.TextField()
+    content = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='message_images/', blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now)
     is_read = models.BooleanField(default=False)
