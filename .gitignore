@@ -146,9 +146,13 @@ $RECYCLE.BIN/
 .nfs*
 
 # Project specific
-# Generated PDFs
-pdfs/
+# Generated PDFs (but allow sample PDFs)
+pdfs/*
+!pdfs/sample.pdf
+!pdfs/Sample Resume.pdf
 *.pdf
+!pdfs/sample.pdf
+!pdfs/Sample Resume.pdf
 
 # Resume files (if you want to ignore uploaded resumes)
 media/resumes/
