@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import ResumeAnalysis, LearningPath, ResumeBuilder, User, Thread, Comment, Conversation, Message
+from .models import ResumeAnalysis, LearningPath, ResumeBuilder, User, Thread, Comment, ThreadLike, Conversation, Message
 import time
 from logging_config import get_logger, log_function_call, log_performance
 
@@ -245,6 +245,31 @@ class CommentAdmin(admin.ModelAdmin):
             return result
         except Exception as e:
             logger.error(f"Admin comment save failed: {obj.id}, Error: {str(e)}", exc_info=True)
+            raise
+
+@admin.register(ThreadLike)
+class ThreadLikeAdmin(admin.ModelAdmin):
+    list_display = ['user', 'thread', 'created_at']
+    list_filter = ['created_at', 'user', 'thread']
+    search_fields = ['user__username', 'thread__title']
+    ordering = ['-created_at']
+    readonly_fields = ['created_at']
+    
+    def save_model(self, request, obj, form, change):
+        start_time = time.time()
+        if change:
+            logger.info(f"Admin updating thread like: {obj.id}, User: {obj.user.email}, Thread: {obj.thread.title}")
+        else:
+            logger.info(f"Admin creating new thread like: User: {obj.user.email}, Thread: {obj.thread.title}")
+        
+        try:
+            result = super().save_model(request, obj, form, change)
+            duration = time.time() - start_time
+            log_performance("Admin thread like save", duration, f"ID: {obj.id}, User: {obj.user.email}, Thread: {obj.thread.title}")
+            logger.info(f"Admin thread like save successful: {obj.id}")
+            return result
+        except Exception as e:
+            logger.error(f"Admin thread like save failed: {obj.id}, Error: {str(e)}", exc_info=True)
             raise
 
 @admin.register(Conversation)
