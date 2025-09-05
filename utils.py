@@ -3,12 +3,25 @@ import re
 import time
 import os
 from typing import Dict, Any, Optional, Tuple
+from openai import OpenAI
 from config import (
     ERROR_MESSAGES,
     MAX_FILE_SIZE,
     SUPPORTED_FILE_TYPES,
     MAX_RETRIES,
     RETRY_DELAY,
+    USE_OPENAI_OVERRIDE,
+    OPENROUTER_API_KEY,
+    OPENROUTER_BASE_URL,
+    OPENROUTER_MODEL,
+    OPENROUTER_TEMPERATURE,
+    # OPENROUTER_MAX_TOKENS,  # Using default max tokens
+    OPENROUTER_SITE_URL,
+    OPENROUTER_SITE_NAME,
+    OPENAI_API_KEY,
+    OPENAI_MODEL,
+    OPENAI_TEMPERATURE,
+    # OPENAI_MAX_TOKENS,  # Using default max tokens
 )
 from logging_config import get_logger, log_function_call, log_performance
 
@@ -346,3 +359,126 @@ def sanitize_input(text: str) -> str:
     log_performance("Input sanitization", duration, f"Sanitized {len(text)} characters, removed {chars_removed} dangerous chars")
     
     return result
+
+
+@log_function_call
+def get_api_client():
+    """
+    Get the appropriate API client based on configuration.
+    Returns OpenAI client configured for either OpenRouter or OpenAI based on USE_OPENAI_OVERRIDE setting.
+    """
+    start_time = time.time()
+    logger.info("Getting API client")
+    logger.debug(f"USE_OPENAI_OVERRIDE: {USE_OPENAI_OVERRIDE}")
+    
+    if USE_OPENAI_OVERRIDE:
+        # Use OpenAI directly
+        logger.info("Using OpenAI API (override mode)")
+        logger.debug(f"OpenAI Model: {OPENAI_MODEL}")
+        
+        if not OPENAI_API_KEY:
+            logger.error("OpenAI API key not configured")
+            raise ValueError("OpenAI API key not configured. Please set OPENAI_API_KEY in your environment.")
+        
+        client = OpenAI(api_key=OPENAI_API_KEY)
+        logger.info("OpenAI client created successfully")
+        
+        duration = time.time() - start_time
+        log_performance("API client creation", duration, f"Created OpenAI client with model {OPENAI_MODEL}")
+        
+        return client, {
+            "model": OPENAI_MODEL,
+            "temperature": OPENAI_TEMPERATURE,
+            "max_tokens": None,  # Use default max tokens
+            "extra_headers": {},
+            "extra_body": {}
+        }
+    else:
+        # Use OpenRouter
+        logger.info("Using OpenRouter API (default mode)")
+        logger.debug(f"OpenRouter Model: {OPENROUTER_MODEL}")
+        
+        if not OPENROUTER_API_KEY:
+            logger.error("OpenRouter API key not configured")
+            raise ValueError("OpenRouter API key not configured. Please set OPENROUTER_API_KEY in your environment.")
+        
+        client = OpenAI(
+            base_url=OPENROUTER_BASE_URL,
+            api_key=OPENROUTER_API_KEY,
+        )
+        logger.info("OpenRouter client created successfully")
+        
+        duration = time.time() - start_time
+        log_performance("API client creation", duration, f"Created OpenRouter client with model {OPENROUTER_MODEL}")
+        
+        return client, {
+            "model": OPENROUTER_MODEL,
+            "temperature": OPENROUTER_TEMPERATURE,
+            "max_tokens": None,  # Use default max tokens
+            "extra_headers": {
+                "HTTP-Referer": OPENROUTER_SITE_URL,
+                "X-Title": OPENROUTER_SITE_NAME,
+            },
+            "extra_body": {}
+        }
+
+
+@log_function_call
+def make_api_call(messages, system_message=None):
+    """
+    Make an API call using the appropriate client (OpenRouter or OpenAI).
+    
+    Args:
+        messages: List of message dictionaries for the API call
+        system_message: Optional system message to prepend to messages
+    
+    Returns:
+        The response content from the API
+    """
+    start_time = time.time()
+    logger.info("Making API call")
+    logger.debug(f"Number of messages: {len(messages)}")
+    logger.debug(f"System message provided: {bool(system_message)}")
+    
+    try:
+        # Get the appropriate client and configuration
+        client, config = get_api_client()
+        
+        # Prepare messages
+        api_messages = []
+        if system_message:
+            api_messages.append({"role": "system", "content": system_message})
+        api_messages.extend(messages)
+        
+        logger.debug(f"Total messages for API: {len(api_messages)}")
+        logger.debug(f"Using model: {config['model']}")
+        
+        # Make the API call
+        api_params = {
+            "extra_headers": config.get("extra_headers", {}),
+            "extra_body": config.get("extra_body", {}),
+            "model": config["model"],
+            "messages": api_messages,
+            "temperature": config["temperature"],
+        }
+        
+        # Only add max_tokens if it's specified
+        if config.get("max_tokens") is not None:
+            api_params["max_tokens"] = config["max_tokens"]
+        
+        response = client.chat.completions.create(**api_params)
+        
+        content = response.choices[0].message.content
+        api_duration = time.time() - start_time
+        
+        logger.info(f"API call successful in {api_duration:.3f}s")
+        logger.debug(f"Response length: {len(content)} characters")
+        
+        log_performance("API call", api_duration, f"Successful call to {config['model']}, response length: {len(content)}")
+        
+        return content
+        
+    except Exception as e:
+        api_duration = time.time() - start_time
+        logger.error(f"API call failed after {api_duration:.3f}s: {str(e)}", exc_info=True)
+        raise e

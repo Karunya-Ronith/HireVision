@@ -8,7 +8,7 @@ from config import (
     OPENROUTER_BASE_URL,
     OPENROUTER_MODEL,
     OPENROUTER_TEMPERATURE,
-    OPENROUTER_MAX_TOKENS,
+    # OPENROUTER_MAX_TOKENS,  # Using default max tokens
     OPENROUTER_SITE_URL,
     OPENROUTER_SITE_NAME,
     ERROR_MESSAGES,
@@ -23,6 +23,7 @@ from utils import (
     handle_api_error,
     validate_file_content,
     sanitize_input,
+    make_api_call,
 )
 from logging_config import get_logger, log_function_call, log_api_call, log_file_operation, log_performance
 
@@ -181,7 +182,7 @@ def validate_document_type_with_llm(text):
     
     def make_validation_call():
         """Make the API call for document validation"""
-        logger.info("Making OpenRouter API call for document type validation")
+        logger.info("Making API call for document type validation")
         
         validation_prompt = f"""
         You are an expert document classifier. Your task is to determine if the following document is a resume/CV or not.
@@ -217,47 +218,11 @@ def validate_document_type_with_llm(text):
         
         logger.debug(f"Validation prompt length: {len(validation_prompt)} characters")
         
-        client = OpenAI(
-            base_url=OPENROUTER_BASE_URL,
-            api_key=OPENROUTER_API_KEY,
-        )
+        # Use the centralized API call function
+        system_message = "You are an expert document classifier. Analyze the document and return only valid JSON with the specified structure."
+        messages = [{"role": "user", "content": validation_prompt}]
         
-        api_start_time = time.time()
-        try:
-            response = client.chat.completions.create(
-                extra_headers={
-                    "HTTP-Referer": OPENROUTER_SITE_URL,
-                    "X-Title": OPENROUTER_SITE_NAME,
-                },
-                extra_body={},
-                model=OPENROUTER_MODEL,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are an expert document classifier. Analyze the document and return only valid JSON with the specified structure.",
-                    },
-                    {"role": "user", "content": validation_prompt},
-                ],
-                temperature=0.1,  # Low temperature for consistent classification
-                max_tokens=500,   # Shorter response for validation
-            )
-            
-            api_duration = time.time() - api_start_time
-            logger.info(f"Document validation API call successful in {api_duration:.3f}s")
-            log_api_call("Document Validation", 
-                        request_data={"model": OPENROUTER_MODEL, "temperature": 0.1, "max_tokens": 500},
-                        response_data={"response_length": len(response.choices[0].message.content)},
-                        success=True)
-            
-            return response.choices[0].message.content
-            
-        except Exception as e:
-            api_duration = time.time() - api_start_time
-            logger.error(f"Document validation API call failed after {api_duration:.3f}s: {str(e)}")
-            log_api_call("Document Validation", 
-                        request_data={"model": OPENROUTER_MODEL, "temperature": 0.1, "max_tokens": 500},
-                        success=False, error=str(e))
-            raise
+        return make_api_call(messages, system_message)
 
     try:
         # Use retry logic for validation calls
@@ -317,13 +282,39 @@ def analyze_resume(resume_text, job_description):
     logger.debug(f"Sanitized resume text length: {len(resume_text)}")
     logger.debug(f"Sanitized job description length: {len(job_description)}")
 
-                # Check if OpenRouter API key is available
-    logger.info(f"OpenRouter API key configured: {bool(OPENROUTER_API_KEY)}")
-    logger.info(f"OpenRouter API key starts with: {OPENROUTER_API_KEY[:10] if OPENROUTER_API_KEY else 'None'}...")
+    # Check if API key is available (either OpenRouter or OpenAI based on override setting)
+    from config import USE_OPENAI_OVERRIDE, OPENAI_API_KEY
     
-    if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "your_openrouter_api_key_here":
-        logger.warning("OpenRouter API key not configured, returning demo message")
-        return """
+    if USE_OPENAI_OVERRIDE:
+        logger.info(f"OpenAI API key configured: {bool(OPENAI_API_KEY)}")
+        logger.info(f"OpenAI API key starts with: {OPENAI_API_KEY[:10] if OPENAI_API_KEY else 'None'}...")
+        
+        if not OPENAI_API_KEY or OPENAI_API_KEY == "your_openai_api_key_here":
+            logger.warning("OpenAI API key not configured, returning demo message")
+            return """
+## ⚠️ OpenAI API Key Not Configured
+
+To get full AI-powered analysis, please:
+
+1. Get your OpenAI API key from: https://platform.openai.com/api-keys
+2. Create a `.env` file in the project directory
+3. Add your API key: `OPENAI_API_KEY=your_actual_api_key_here`
+4. Restart the application
+
+**For now, you can use the demo version by running:**
+```bash
+python demo.py
+```
+
+This will show you the interface without requiring an API key.
+"""
+    else:
+        logger.info(f"OpenRouter API key configured: {bool(OPENROUTER_API_KEY)}")
+        logger.info(f"OpenRouter API key starts with: {OPENROUTER_API_KEY[:10] if OPENROUTER_API_KEY else 'None'}...")
+        
+        if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "your_openrouter_api_key_here":
+            logger.warning("OpenRouter API key not configured, returning demo message")
+            return """
 ## ⚠️ OpenRouter API Key Not Configured
 
 To get full AI-powered analysis, please:
@@ -341,132 +332,87 @@ python demo.py
 This will show you the interface without requiring an API key.
 """
 
-    def make_api_call():
-        """Make the actual API call with retry logic"""
-        logger.info("Making OpenRouter API call for resume analysis")
-        
-        # Create the enhanced analysis prompt for top 1% HR manager
-        prompt = f"""
-        You are a top 1% HR manager in the world with 20+ years of experience at Fortune 500 companies. 
-        You have hired thousands of candidates and have an exceptional eye for talent evaluation.
-        
-        Your task is to critically analyze the following resume against the job description with the expertise 
-        of a senior HR executive who has seen tens of thousands of resumes. You are a STRICT but FAIR judge 
-        who must differentiate clearly between strong and weak candidates.
-        
-        **CRITICAL SCREENING REQUIREMENTS:**
-        1. **ATS Score (0-100)** - Be STRICT and DISCRIMINATING in your scoring:
-           - **0-20**: No resume provided, completely unacceptable
-           - **21-40**: Poor resume with major issues (formatting, missing key sections, irrelevant content)
-           - **41-60**: Below average resume with significant gaps or weak presentation
-           - **61-75**: Average resume with room for improvement
-           - **76-85**: Good resume with some strong points
-           - **86-95**: Excellent resume with minor areas for improvement
-           - **96-100**: Outstanding resume that clearly demonstrates exceptional qualifications
-        
-        2. **Severe Penalties**:
-           - NO RESUME PROVIDED: Automatic score of 0-10 with clear explanation
-           - Missing key sections (experience, education, skills): -20 points
-           - Poor formatting or unprofessional presentation: -15 points
-           - Irrelevant or generic content: -10 points
-           - Spelling/grammar errors: -5 points per major error
-        
-        3. **Score Differentiation**:
-           - Clearly distinguish between candidates with similar backgrounds
-           - Reward specific achievements, quantifiable results, and relevant experience
-           - Penalize generic statements, lack of specificity, and poor organization
-           - Consider industry standards and role requirements strictly
-        
-        4. **Comprehensive Strengths Analysis** - Identify ALL strengths, including soft skills, potential, 
-           and transferable experience, but be realistic about their impact
-        
-        5. **Constructive Weaknesses** - Provide specific, actionable feedback that helps the candidate improve
-        
-        6. **Skills Gap Analysis** - Identify missing skills with realistic assessment of learning difficulty
-        
-        7. **Strategic Recommendations** - Provide specific, actionable advice for improvement
-        
-        **RESUME TO ANALYZE:**
-        {resume_text}
-        
-        **JOB DESCRIPTION:**
-        {job_description}
-        
-        **ANALYSIS INSTRUCTIONS:**
-        - Be STRICT and DISCRIMINATING in your assessment - differentiate clearly between candidates
-        - Apply severe penalties for missing resumes, poor formatting, and unprofessional content
-        - Consider both explicit and implicit qualifications, but prioritize demonstrated skills
-        - Provide constructive, actionable feedback that addresses specific deficiencies
-        - Be honest about areas for improvement - do not sugarcoat weaknesses
-        - Consider the candidate's potential but base scoring primarily on current qualifications
-        - Reward specific achievements, quantifiable results, and relevant experience
-        - Penalize generic statements, lack of specificity, and poor organization
-        
-        Please provide your analysis in the following JSON format:
-        {{
-            "ats_score": <score_between_0_and_100>,
-            "score_explanation": "<detailed_explanation_of_why_this_score_was_given>",
-            "strengths": ["<strength1>", "<strength2>", ...],
-            "weaknesses": ["<weakness1>", "<weakness2>", ...],
-            "recommendations": ["<specific_actionable_recommendation1>", "<recommendation2>", ...],
-            "skills_gap": ["<missing_skill1>", "<missing_skill2>", ...],
-            "upskilling_suggestions": ["<specific_upskilling_suggestion1>", "<suggestion2>", ...],
-            "overall_assessment": "<comprehensive_assessment_with_encouraging_tone>"
-        }}
-        
-        Remember: You are evaluating a real person's career prospects in a competitive job market. Be thorough, strict, and discriminating to help employers identify the best candidates. Apply penalties consistently and differentiate clearly between strong and weak resumes.
-        """
+    # Create the enhanced analysis prompt for top 1% HR manager
+    prompt = f"""
+    You are a top 1% HR manager in the world with 20+ years of experience at Fortune 500 companies. 
+    You have hired thousands of candidates and have an exceptional eye for talent evaluation.
+    
+    Your task is to critically analyze the following resume against the job description with the expertise 
+    of a senior HR executive who has seen tens of thousands of resumes. You are a STRICT but FAIR judge 
+    who must differentiate clearly between strong and weak candidates.
+    
+    **CRITICAL SCREENING REQUIREMENTS:**
+    1. **ATS Score (0-100)** - Be STRICT and DISCRIMINATING in your scoring:
+       - **0-20**: No resume provided, completely unacceptable
+       - **21-40**: Poor resume with major issues (formatting, missing key sections, irrelevant content)
+       - **41-60**: Below average resume with significant gaps or weak presentation
+       - **61-75**: Average resume with room for improvement
+       - **76-85**: Good resume with some strong points
+       - **86-95**: Excellent resume with minor areas for improvement
+       - **96-100**: Outstanding resume that clearly demonstrates exceptional qualifications
+    
+    2. **Severe Penalties**:
+       - NO RESUME PROVIDED: Automatic score of 0-10 with clear explanation
+       - Missing key sections (experience, education, skills): -20 points
+       - Poor formatting or unprofessional presentation: -15 points
+       - Irrelevant or generic content: -10 points
+       - Spelling/grammar errors: -5 points per major error
+    
+    3. **Score Differentiation**:
+       - Clearly distinguish between candidates with similar backgrounds
+       - Reward specific achievements, quantifiable results, and relevant experience
+       - Penalize generic statements, lack of specificity, and poor organization
+       - Consider industry standards and role requirements strictly
+    
+    4. **Comprehensive Strengths Analysis** - Identify ALL strengths, including soft skills, potential, 
+       and transferable experience, but be realistic about their impact
+    
+    5. **Constructive Weaknesses** - Provide specific, actionable feedback that helps the candidate improve
+    
+    6. **Skills Gap Analysis** - Identify missing skills with realistic assessment of learning difficulty
+    
+    7. **Strategic Recommendations** - Provide specific, actionable advice for improvement
+    
+    **RESUME TO ANALYZE:**
+    {resume_text}
+    
+    **JOB DESCRIPTION:**
+    {job_description}
+    
+    **ANALYSIS INSTRUCTIONS:**
+    - Be STRICT and DISCRIMINATING in your assessment - differentiate clearly between candidates
+    - Apply severe penalties for missing resumes, poor formatting, and unprofessional content
+    - Consider both explicit and implicit qualifications, but prioritize demonstrated skills
+    - Provide constructive, actionable feedback that addresses specific deficiencies
+    - Be honest about areas for improvement - do not sugarcoat weaknesses
+    - Consider the candidate's potential but base scoring primarily on current qualifications
+    - Reward specific achievements, quantifiable results, and relevant experience
+    - Penalize generic statements, lack of specificity, and poor organization
+    
+    Please provide your analysis in the following JSON format:
+    {{
+        "ats_score": <score_between_0_and_100>,
+        "score_explanation": "<detailed_explanation_of_why_this_score_was_given>",
+        "strengths": ["<strength1>", "<strength2>", ...],
+        "weaknesses": ["<weakness1>", "<weakness2>", ...],
+        "recommendations": ["<specific_actionable_recommendation1>", "<recommendation2>", ...],
+        "skills_gap": ["<missing_skill1>", "<missing_skill2>", ...],
+        "upskilling_suggestions": ["<specific_upskilling_suggestion1>", "<suggestion2>", ...],
+        "overall_assessment": "<comprehensive_assessment_with_encouraging_tone>"
+    }}
+    
+    Remember: You are evaluating a real person's career prospects in a competitive job market. Be thorough, strict, and discriminating to help employers identify the best candidates. Apply penalties consistently and differentiate clearly between strong and weak resumes.
+    """
 
-        logger.debug(f"Prompt length: {len(prompt)} characters")
-        logger.debug(f"Using model: {OPENROUTER_MODEL}, temperature: {OPENROUTER_TEMPERATURE}, max_tokens: {OPENROUTER_MAX_TOKENS}")
-
-        # Call OpenRouter API using the OpenAI-compatible client
-        client = OpenAI(
-            base_url=OPENROUTER_BASE_URL,
-            api_key=OPENROUTER_API_KEY,
-        )
-        
-        api_start_time = time.time()
-        try:
-            response = client.chat.completions.create(
-                extra_headers={
-                    "HTTP-Referer": OPENROUTER_SITE_URL,
-                    "X-Title": OPENROUTER_SITE_NAME,
-                },
-                extra_body={},
-                model=OPENROUTER_MODEL,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a top 1% HR manager with exceptional talent evaluation skills. You are a strict but fair judge who must differentiate clearly between strong and weak candidates. Apply severe penalties for missing resumes and poor quality content.",
-                    },
-                    {"role": "user", "content": prompt},
-                ],
-                temperature=OPENROUTER_TEMPERATURE,
-                max_tokens=OPENROUTER_MAX_TOKENS,
-            )
-            
-            api_duration = time.time() - api_start_time
-            logger.info(f"OpenRouter API call successful in {api_duration:.3f}s")
-            log_api_call("OpenRouter Chat Completions", 
-                        request_data={"model": OPENROUTER_MODEL, "temperature": OPENROUTER_TEMPERATURE, "max_tokens": OPENROUTER_MAX_TOKENS},
-                        response_data={"response_length": len(response.choices[0].message.content)},
-                        success=True)
-            
-            return response.choices[0].message.content
-            
-        except Exception as e:
-            api_duration = time.time() - api_start_time
-            logger.error(f"OpenRouter API call failed after {api_duration:.3f}s: {str(e)}")
-            log_api_call("OpenRouter Chat Completions", 
-                        request_data={"model": OPENROUTER_MODEL, "temperature": OPENROUTER_TEMPERATURE, "max_tokens": OPENROUTER_MAX_TOKENS},
-                        success=False, error=str(e))
-            raise
-
+    logger.debug(f"Prompt length: {len(prompt)} characters")
+    
     try:
-        # Use retry logic for API calls
-        logger.info("Starting retry logic for API calls")
-        analysis_text = retry_with_backoff(make_api_call)
+        # Use the centralized API call function directly
+        logger.info("Making API call for resume analysis")
+        system_message = "You are a top 1% HR manager with exceptional talent evaluation skills. You are a strict but fair judge who must differentiate clearly between strong and weak candidates. Apply severe penalties for missing resumes and poor quality content."
+        messages = [{"role": "user", "content": prompt}]
+        
+        analysis_text = make_api_call(messages, system_message)
 
         if not analysis_text:
             logger.error("Failed to get response from AI service after multiple attempts")

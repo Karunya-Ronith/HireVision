@@ -30,6 +30,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '192.168.1.7',  # Your local IP for LAN access
     '192.168.1.*',  # Allow any device on your local network
+    '192.168.0.100'
     '*',  # Allow all hosts (use with caution, only for development)
 ]
 

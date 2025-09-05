@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test script to check OpenRouter API integration
+Test script to check both OpenRouter and OpenAI API integration
 """
 
 import os
@@ -19,35 +19,37 @@ from config import (
     OPENROUTER_BASE_URL,
     OPENROUTER_MODEL,
     OPENROUTER_TEMPERATURE,
-    OPENROUTER_MAX_TOKENS,
+    # OPENROUTER_MAX_TOKENS,  # Using default max tokens
     OPENROUTER_SITE_URL,
     OPENROUTER_SITE_NAME,
+    OPENAI_API_KEY,
+    OPENAI_MODEL,
+    OPENAI_TEMPERATURE,
+    # OPENAI_MAX_TOKENS,  # Using default max tokens
+    USE_OPENAI_OVERRIDE,
 )
+from utils import get_api_client, make_api_call
 
-def test_openrouter_api():
-    """Test the OpenRouter API with a simple prompt"""
+def test_api_integration():
+    """Test both OpenRouter and OpenAI API integration"""
     
-    print("=== OpenRouter API Test ===")
-    print(f"API Key configured: {bool(OPENROUTER_API_KEY)}")
-    print(f"API Key starts with: {OPENROUTER_API_KEY[:10] if OPENROUTER_API_KEY else 'None'}...")
-    print(f"Base URL: {OPENROUTER_BASE_URL}")
-    print(f"Model: {OPENROUTER_MODEL}")
-    print(f"Temperature: {OPENROUTER_TEMPERATURE}")
-    print(f"Max Tokens: {OPENROUTER_MAX_TOKENS}")
-    print(f"Site URL: {OPENROUTER_SITE_URL}")
-    print(f"Site Name: {OPENROUTER_SITE_NAME}")
+    print("=== API Integration Test ===")
+    print(f"Override setting: {USE_OPENAI_OVERRIDE}")
+    print(f"OpenRouter API Key configured: {bool(OPENROUTER_API_KEY)}")
+    print(f"OpenAI API Key configured: {bool(OPENAI_API_KEY)}")
     print()
     
-    if not OPENROUTER_API_KEY:
-        print("❌ No OpenRouter API key found!")
-        return False
-    
+    # Test the centralized API client function
     try:
-        # Create the client
-        client = OpenAI(
-            base_url=OPENROUTER_BASE_URL,
-            api_key=OPENROUTER_API_KEY,
-        )
+        print("Testing centralized API client function...")
+        client, config = get_api_client()
+        
+        print(f"✅ API client created successfully!")
+        print(f"Model: {config['model']}")
+        print(f"Temperature: {config['temperature']}")
+        print(f"Max Tokens: {config['max_tokens']}")
+        print(f"Extra Headers: {config.get('extra_headers', {})}")
+        print()
         
         # Test prompt
         test_prompt = """
@@ -70,27 +72,13 @@ def test_openrouter_api():
         }
         """
         
-        print("Making API call...")
+        print("Making API call using centralized function...")
         
-        response = client.chat.completions.create(
-            extra_headers={
-                "HTTP-Referer": OPENROUTER_SITE_URL,
-                "X-Title": OPENROUTER_SITE_NAME,
-            },
-            extra_body={},
-            model=OPENROUTER_MODEL,
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a top 1% HR manager with exceptional talent evaluation skills. Provide thorough, fair, and constructive resume analysis.",
-                },
-                {"role": "user", "content": test_prompt},
-            ],
-            temperature=OPENROUTER_TEMPERATURE,
-            max_tokens=OPENROUTER_MAX_TOKENS,
-        )
+        system_message = "You are a top 1% HR manager with exceptional talent evaluation skills. Provide thorough, fair, and constructive resume analysis."
+        messages = [{"role": "user", "content": test_prompt}]
         
-        content = response.choices[0].message.content
+        content = make_api_call(messages, system_message)
+        
         print("✅ API call successful!")
         print(f"Response length: {len(content)} characters")
         print(f"Response preview: {content[:500]}...")
@@ -98,7 +86,6 @@ def test_openrouter_api():
         
         # Try to extract JSON
         import json
-        import re
         
         # Find JSON in the response
         start_idx = content.find("{")
@@ -129,9 +116,72 @@ def test_openrouter_api():
         print(f"❌ API call failed: {e}")
         return False
 
-if __name__ == "__main__":
-    success = test_openrouter_api()
-    if success:
-        print("\n🎉 OpenRouter API test passed!")
+
+def test_both_apis():
+    """Test both OpenRouter and OpenAI APIs"""
+    
+    print("=== Testing Both APIs ===")
+    
+    # Test OpenRouter (if not in override mode)
+    if not USE_OPENAI_OVERRIDE and OPENROUTER_API_KEY:
+        print("\n--- Testing OpenRouter API ---")
+        try:
+            # Temporarily set override to False to test OpenRouter
+            import config
+            original_override = config.USE_OPENAI_OVERRIDE
+            config.USE_OPENAI_OVERRIDE = False
+            
+            success = test_api_integration()
+            config.USE_OPENAI_OVERRIDE = original_override
+            
+            if success:
+                print("✅ OpenRouter API test passed!")
+            else:
+                print("❌ OpenRouter API test failed!")
+        except Exception as e:
+            print(f"❌ OpenRouter API test error: {e}")
+    
+    # Test OpenAI (if available)
+    if OPENAI_API_KEY:
+        print("\n--- Testing OpenAI API ---")
+        try:
+            # Temporarily set override to True to test OpenAI
+            import config
+            original_override = config.USE_OPENAI_OVERRIDE
+            config.USE_OPENAI_OVERRIDE = True
+            
+            success = test_api_integration()
+            config.USE_OPENAI_OVERRIDE = original_override
+            
+            if success:
+                print("✅ OpenAI API test passed!")
+            else:
+                print("❌ OpenAI API test failed!")
+        except Exception as e:
+            print(f"❌ OpenAI API test error: {e}")
+    
+    print("\n--- Current Configuration ---")
+    print(f"USE_OPENAI_OVERRIDE: {USE_OPENAI_OVERRIDE}")
+    if USE_OPENAI_OVERRIDE:
+        print("Currently using: OpenAI")
     else:
-        print("\n💥 OpenRouter API test failed!") 
+        print("Currently using: OpenRouter")
+
+if __name__ == "__main__":
+    print("🚀 Starting API Integration Tests...")
+    print()
+    
+    # Test current configuration
+    success = test_api_integration()
+    if success:
+        print("\n🎉 Current API configuration test passed!")
+    else:
+        print("\n💥 Current API configuration test failed!")
+    
+    print("\n" + "="*50)
+    
+    # Test both APIs
+    test_both_apis()
+    
+    print("\n" + "="*50)
+    print("🏁 API Integration Tests Complete!") 

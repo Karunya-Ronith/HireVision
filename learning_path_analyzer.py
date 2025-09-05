@@ -6,7 +6,7 @@ from config import (
     OPENROUTER_BASE_URL,
     OPENROUTER_MODEL,
     OPENROUTER_TEMPERATURE,
-    OPENROUTER_MAX_TOKENS,
+    # OPENROUTER_MAX_TOKENS,  # Using default max tokens
     OPENROUTER_SITE_URL,
     OPENROUTER_SITE_NAME,
     ERROR_MESSAGES,
@@ -17,6 +17,7 @@ from utils import (
     handle_api_error,
     sanitize_input,
     extract_json_from_text,
+    make_api_call,
 )
 from logging_config import get_logger, log_function_call, log_api_call, log_performance
 
@@ -43,17 +44,20 @@ def analyze_learning_path(current_skills, dream_role):
     logger.debug(f"Sanitized current skills length: {len(current_skills)}")
     logger.debug(f"Sanitized dream role length: {len(dream_role)}")
 
-    # Check if OpenRouter API key is available
-    if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "your_openrouter_api_key_here":
-        logger.warning("OpenRouter API key not configured, returning error message")
-        return "## ❌ Configuration Error\n\nOpenRouter API key not configured. Please configure your API key to use the learning path generator."
+    # Check if API key is available (either OpenRouter or OpenAI based on override setting)
+    from config import USE_OPENAI_OVERRIDE, OPENAI_API_KEY
+    
+    if USE_OPENAI_OVERRIDE:
+        if not OPENAI_API_KEY or OPENAI_API_KEY == "your_openai_api_key_here":
+            logger.warning("OpenAI API key not configured, returning error message")
+            return "## ❌ Configuration Error\n\nOpenAI API key not configured. Please configure your API key to use the learning path generator."
+    else:
+        if not OPENROUTER_API_KEY or OPENROUTER_API_KEY == "your_openrouter_api_key_here":
+            logger.warning("OpenRouter API key not configured, returning error message")
+            return "## ❌ Configuration Error\n\nOpenRouter API key not configured. Please configure your API key to use the learning path generator."
 
-    def make_api_call():
-        """Make the actual API call with retry logic"""
-        logger.info("Making OpenRouter API call for learning path analysis")
-        
-        # Create a focused, structured prompt for better results
-        prompt = f"""
+    # Create a focused, structured prompt for better results
+    prompt = f"""
 You are an expert career coach and learning path specialist. Analyze the user's current skills against their dream role and provide a comprehensive, actionable learning path.
 
 **Current Skills:**
@@ -135,56 +139,15 @@ You are an expert career coach and learning path specialist. Analyze the user's 
 - Include 1 hands-on project per phase
 """
 
-        logger.debug(f"Prompt length: {len(prompt)} characters")
-        logger.debug(f"Using model: {OPENROUTER_MODEL}, temperature: {OPENROUTER_TEMPERATURE}, max_tokens: {OPENROUTER_MAX_TOKENS}")
-
-        # Call OpenRouter API using the OpenAI-compatible client
-        client = OpenAI(
-            base_url=OPENROUTER_BASE_URL,
-            api_key=OPENROUTER_API_KEY,
-        )
-        
-        api_start_time = time.time()
-        try:
-            response = client.chat.completions.create(
-                extra_headers={
-                    "HTTP-Referer": OPENROUTER_SITE_URL,
-                    "X-Title": OPENROUTER_SITE_NAME,
-                },
-                extra_body={},
-                model=OPENROUTER_MODEL,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are an expert career coach and learning path specialist. Provide detailed, actionable learning paths with verified resources only. Return only valid JSON in the exact format requested. Never hallucinate or invent fake links.",
-                    },
-                    {"role": "user", "content": prompt},
-                ],
-                temperature=OPENROUTER_TEMPERATURE,
-                max_tokens=OPENROUTER_MAX_TOKENS,
-            )
-            
-            api_duration = time.time() - api_start_time
-            logger.info(f"OpenRouter API call successful in {api_duration:.3f}s")
-            log_api_call("OpenRouter Learning Path Analysis", 
-                        request_data={"model": OPENROUTER_MODEL, "temperature": OPENROUTER_TEMPERATURE, "max_tokens": OPENROUTER_MAX_TOKENS},
-                        response_data={"response_length": len(response.choices[0].message.content)},
-                        success=True)
-            
-            return response.choices[0].message.content
-            
-        except Exception as e:
-            api_duration = time.time() - api_start_time
-            logger.error(f"OpenRouter API call failed after {api_duration:.3f}s: {str(e)}")
-            log_api_call("OpenRouter Learning Path Analysis", 
-                        request_data={"model": OPENROUTER_MODEL, "temperature": OPENROUTER_TEMPERATURE, "max_tokens": OPENROUTER_MAX_TOKENS},
-                        success=False, error=str(e))
-            raise
-
+    logger.debug(f"Prompt length: {len(prompt)} characters")
+    
     try:
-        # Use retry logic for API calls
-        logger.info("Starting retry logic for API calls")
-        analysis_text = retry_with_backoff(make_api_call)
+        # Use the centralized API call function directly
+        logger.info("Making API call for learning path analysis")
+        system_message = "You are an expert career coach and learning path specialist. Provide detailed, actionable learning paths with verified resources only. Return only valid JSON in the exact format requested. Never hallucinate or invent fake links."
+        messages = [{"role": "user", "content": prompt}]
+        
+        analysis_text = make_api_call(messages, system_message)
 
         if not analysis_text:
             logger.error("Failed to get response from AI service after multiple attempts")
