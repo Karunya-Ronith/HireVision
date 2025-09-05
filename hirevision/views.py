@@ -14,7 +14,7 @@ import os
 import time
 
 from .forms import ResumeAnalysisForm, LearningPathForm, ResumeBuilderForm, UserSignUpForm, UserLoginForm, ThreadForm, CommentForm, MessageForm, UserSearchForm
-from .models import ResumeAnalysis, LearningPath, ResumeBuilder, User, Thread, Comment, Message, Conversation
+from .models import ResumeAnalysis, LearningPath, ResumeBuilder, User, Thread, Comment, ThreadLike, Message, Conversation
 from .tasks import process_resume_analysis_task, process_learning_path_task, process_resume_builder_task
 
 # Import the existing modules
@@ -582,6 +582,11 @@ def check_resume_builder_status(request, resume_id):
 def threads_list(request):
     """Display all threads"""
     threads = Thread.objects.all().select_related('user').prefetch_related('comments')
+    
+    # Add like status for each thread
+    for thread in threads:
+        thread.user_has_liked = thread.is_liked_by(request.user)
+    
     return render(request, 'hirevision/threads_list.html', {'threads': threads})
 
 @login_required
@@ -589,6 +594,9 @@ def thread_detail(request, thread_id):
     """Display a single thread with its comments"""
     thread = get_object_or_404(Thread, id=thread_id)
     comments = thread.comments.all().select_related('user')
+    
+    # Add like status for the thread
+    thread.user_has_liked = thread.is_liked_by(request.user)
     
     if request.method == 'POST':
         comment_form = CommentForm(request.POST, request.FILES)
@@ -705,6 +713,69 @@ def delete_comment(request, comment_id):
         return redirect('hirevision:thread_detail', thread_id=thread_id)
     
     return render(request, 'hirevision/delete_comment.html', {'comment': comment})
+
+# Thread Like Views
+@login_required
+def like_thread(request, thread_id):
+    """Like or unlike a thread"""
+    from django.http import JsonResponse
+    from django.db import IntegrityError
+    
+    thread = get_object_or_404(Thread, id=thread_id)
+    
+    try:
+        # Try to create a like
+        ThreadLike.objects.create(thread=thread, user=request.user)
+        is_liked = True
+        action = 'liked'
+        logger.info(f"User {request.user.email} liked thread {thread.title}")
+    except IntegrityError:
+        # Like already exists, so unlike it
+        ThreadLike.objects.filter(thread=thread, user=request.user).delete()
+        is_liked = False
+        action = 'unliked'
+        logger.info(f"User {request.user.email} unliked thread {thread.title}")
+    
+    # Get updated like count
+    like_count = thread.like_count
+    
+    # If it's an AJAX request, return JSON
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'is_liked': is_liked,
+            'like_count': like_count,
+            'action': action
+        })
+    
+    # Regular form submission
+    messages.success(request, f"Thread {action} successfully!")
+    return redirect('hirevision:threads_list')
+
+@login_required
+def get_thread_likes(request, thread_id):
+    """Get users who liked a thread (for modal display)"""
+    from django.http import JsonResponse
+    
+    thread = get_object_or_404(Thread, id=thread_id)
+    likes = thread.get_liked_by_users(limit=20)  # Get first 20 likes
+    
+    likes_data = []
+    for like in likes:
+        likes_data.append({
+            'user_id': str(like.user.id),
+            'username': like.user.username,
+            'full_name': like.user.get_full_name() or like.user.username,
+            'profile_picture': like.user.profile_picture.url if like.user.profile_picture else None,
+            'liked_at': like.created_at.strftime('%b %d, %Y at %I:%M %p')
+        })
+    
+    return JsonResponse({
+        'success': True,
+        'likes': likes_data,
+        'total_likes': thread.like_count,
+        'has_more': thread.like_count > 20
+    })
 
 # Messaging Views
 @login_required

@@ -259,10 +259,26 @@ class Thread(models.Model):
         return count
     
     @property
+    def like_count(self):
+        count = self.likes.count()
+        logger.debug(f"Like count calculated for thread {self.id}: {count}")
+        return count
+    
+    @property
     def has_media(self):
         has_media = bool(self.image or self.article_url)
         logger.debug(f"Has media check for thread {self.id}: {has_media}")
         return has_media
+    
+    def is_liked_by(self, user):
+        """Check if a specific user has liked this thread"""
+        if not user or not user.is_authenticated:
+            return False
+        return self.likes.filter(user=user).exists()
+    
+    def get_liked_by_users(self, limit=10):
+        """Get users who liked this thread (for display)"""
+        return self.likes.select_related('user').order_by('-created_at')[:limit]
     
     @log_function_call
     def save(self, *args, **kwargs):
@@ -317,6 +333,37 @@ class Comment(models.Model):
             return result
         except Exception as e:
             logger.error(f"Failed to save Comment by {self.user.email}: {str(e)}", exc_info=True)
+            raise
+
+class ThreadLike(models.Model):
+    """Model for thread likes"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='thread_likes')
+    created_at = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        verbose_name_plural = "Thread Likes"
+        ordering = ['-created_at']
+        unique_together = ['thread', 'user']  # Prevent duplicate likes
+    
+    def __str__(self):
+        logger.debug(f"ThreadLike string representation called for ID: {self.id}, User: {self.user.email}, Thread: {self.thread.title}")
+        return f"{self.user.username} liked {self.thread.title}"
+    
+    @log_function_call
+    def save(self, *args, **kwargs):
+        start_time = time.time()
+        logger.info(f"Saving ThreadLike by user: {self.user.email}, thread: {self.thread.title}")
+        
+        try:
+            result = super().save(*args, **kwargs)
+            duration = time.time() - start_time
+            log_performance("ThreadLike save operation", duration, f"User: {self.user.email}, Thread: {self.thread.title}")
+            logger.info(f"ThreadLike saved successfully by {self.user.email}")
+            return result
+        except Exception as e:
+            logger.error(f"Failed to save ThreadLike by {self.user.email}: {str(e)}", exc_info=True)
             raise
 
 class Conversation(models.Model):

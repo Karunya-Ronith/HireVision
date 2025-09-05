@@ -4,6 +4,9 @@
 {% block title %}{{ thread.title }} - HireVision{% endblock %}
 
 {% block content %}
+<!-- CSRF Token for AJAX requests -->
+{% csrf_token %}
+
 <div class="container mt-4">
     <div class="row">
         <div class="col-12">
@@ -64,6 +67,32 @@
                                 <span class="mx-2">•</span>
                                 <span class="text-muted">(edited)</span>
                             {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Like Section -->
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <button class="btn btn-outline-danger btn-sm me-3 like-btn" 
+                                    data-thread-id="{{ thread.id }}" 
+                                    data-liked="{% if thread.user_has_liked %}true{% else %}false{% endif %}">
+                                <i class="fas fa-heart {% if thread.user_has_liked %}text-danger{% endif %}"></i>
+                                <span class="like-text">{% if thread.user_has_liked %}Unlike{% else %}Like{% endif %}</span>
+                                <span class="like-count" id="like-count-{{ thread.id }}">({{ thread.like_count }})</span>
+                            </button>
+                            
+                            <button class="btn btn-outline-info btn-sm me-3 view-likes-btn" 
+                                    data-thread-id="{{ thread.id }}" 
+                                    data-likes-count="{{ thread.like_count }}"
+                                    {% if thread.like_count == 0 %}disabled{% endif %}>
+                                <i class="fas fa-users"></i>
+                                <span>Who liked</span>
+                            </button>
+                            
+                            <span class="text-muted small">
+                                <i class="fas fa-comments me-1"></i>
+                                {{ thread.comment_count }} comments
+                            </span>
                         </div>
                     </div>
                     
@@ -207,4 +236,164 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Like button functionality with AJAX
+    const likeButtons = document.querySelectorAll('.like-btn');
+    likeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const threadId = this.dataset.threadId;
+            const isLiked = this.dataset.liked === 'true';
+            const likeCountSpan = this.querySelector('.like-count');
+            const likeTextSpan = this.querySelector('.like-text');
+            const heartIcon = this.querySelector('i');
+            
+            // Disable button during request
+            this.disabled = true;
+            
+            fetch(`/threads/${threadId}/like/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update button state
+                    this.dataset.liked = data.is_liked.toString();
+                    likeCountSpan.textContent = `(${data.like_count})`;
+                    likeTextSpan.textContent = data.is_liked ? 'Unlike' : 'Like';
+                    
+                    if (data.is_liked) {
+                        heartIcon.classList.add('text-danger');
+                        this.classList.add('liked');
+                    } else {
+                        heartIcon.classList.remove('text-danger');
+                        this.classList.remove('liked');
+                    }
+                    
+                    // Update "Who liked" button state
+                    const viewLikesBtn = document.querySelector(`[data-thread-id="${threadId}"].view-likes-btn`);
+                    if (viewLikesBtn) {
+                        viewLikesBtn.disabled = data.like_count === 0;
+                        viewLikesBtn.dataset.likesCount = data.like_count;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating like. Please try again.');
+            })
+            .finally(() => {
+                this.disabled = false;
+            });
+        });
+    });
+
+    // View likes button functionality
+    const viewLikesButtons = document.querySelectorAll('.view-likes-btn');
+    viewLikesButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const threadId = this.dataset.threadId;
+            
+            // Show loading state
+            const originalContent = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            this.disabled = true;
+            
+            fetch(`/threads/${threadId}/likes/`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showLikesModal(data.likes, data.total_likes, data.has_more);
+                } else {
+                    alert('Error loading likes. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error loading likes. Please try again.');
+            })
+            .finally(() => {
+                this.innerHTML = originalContent;
+                this.disabled = false;
+            });
+        });
+    });
+
+    // Function to show likes modal
+    function showLikesModal(likes, totalLikes, hasMore) {
+        const modalHtml = `
+            <div class="modal fade" id="likesModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fas fa-heart text-danger me-2"></i>
+                                People who liked this thread (${totalLikes})
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            ${likes.length === 0 ? 
+                                '<p class="text-muted text-center">No likes yet.</p>' :
+                                likes.map(like => `
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="me-3">
+                                            ${like.profile_picture ? 
+                                                `<img src="${like.profile_picture}" alt="${like.full_name}" class="rounded-circle" width="40" height="40">` :
+                                                `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                    ${like.full_name.charAt(0).toUpperCase()}
+                                                </div>`
+                                            }
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">${like.full_name}</h6>
+                                            <small class="text-muted">@${like.username}</small>
+                                        </div>
+                                        <div class="text-muted">
+                                            <small>${like.liked_at}</small>
+                                        </div>
+                                    </div>
+                                `).join('')
+                            }
+                            ${hasMore ? '<p class="text-muted text-center">... and more</p>' : ''}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Remove existing modal if any
+        const existingModal = document.getElementById('likesModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Add new modal to body
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('likesModal'));
+        modal.show();
+        
+        // Clean up modal when hidden
+        document.getElementById('likesModal').addEventListener('hidden.bs.modal', function() {
+            this.remove();
+        });
+    }
+});
+</script>
 {% endblock %} 

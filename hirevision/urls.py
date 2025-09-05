@@ -48,6 +48,8 @@ urlpatterns = [
     path('threads/<uuid:thread_id>/', views.thread_detail, name='thread_detail'),
     path('threads/<uuid:thread_id>/edit/', views.edit_thread, name='edit_thread'),
     path('threads/<uuid:thread_id>/delete/', views.delete_thread, name='delete_thread'),
+    path('threads/<uuid:thread_id>/like/', views.like_thread, name='like_thread'),
+    path('threads/<uuid:thread_id>/likes/', views.get_thread_likes, name='get_thread_likes'),
     path('comments/<uuid:comment_id>/edit/', views.edit_comment, name='edit_comment'),
     path('comments/<uuid:comment_id>/delete/', views.delete_comment, name='delete_comment'),
     
