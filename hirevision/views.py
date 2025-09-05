@@ -381,16 +381,54 @@ def resume_builder(request):
 
 @login_required
 def resume_builder_result(request, resume_id):
-    """Display resume builder result"""
+    """Display resume builder result with proper error handling"""
+    start_time = time.time()
+    user_id = request.user.id
+    logger.info(f"Resume builder result accessed by user: {user_id} for resume ID: {resume_id}")
+    
     try:
         resume = ResumeBuilder.objects.get(id=resume_id)
+        logger.debug(f"Resume found: {resume_id}, status: {resume.task_status}")
+        
         # Check if user has permission to view this resume
         if request.user.is_authenticated and resume.user and resume.user != request.user:
+            logger.warning(f"Permission denied: user {user_id} tried to access resume {resume_id} owned by user {resume.user.id}")
+            log_user_action(str(user_id), "unauthorized_access", f"Tried to access resume {resume_id}", success=False)
             messages.error(request, "You don't have permission to view this resume.")
             return redirect('hirevision:resume_builder')
+        
+        log_user_action(str(user_id), "view_resume_builder_result", f"Viewed resume result: {resume_id}")
+        
+        # Check task status and provide appropriate feedback
+        if resume.task_status == 'failed':
+            logger.warning(f"Resume {resume_id} failed for user {user_id}: {resume.task_error}")
+            messages.error(request, "The resume generation failed. Please try again or contact support if the issue persists.")
+        elif resume.task_status == 'pending':
+            logger.info(f"Resume {resume_id} still pending for user {user_id}")
+            # No notification needed - user already got success message when generation started
+        elif resume.task_status == 'running':
+            logger.info(f"Resume {resume_id} running for user {user_id}")
+            # No notification needed - user already got success message when generation started
+        elif resume.task_status == 'completed':
+            logger.info(f"Resume {resume_id} completed successfully for user {user_id}")
+            # Check if we have meaningful data
+            if not resume.latex_content or len(resume.latex_content.strip()) < 100:
+                logger.warning(f"Resume {resume_id} completed but has insufficient data")
+                messages.warning(request, "The resume generation completed but the results may be incomplete. Please try again.")
+        
+        duration = time.time() - start_time
+        log_performance("Resume builder result", duration, f"Resume result displayed for user {user_id}, resume {resume_id}")
+        
         return render(request, 'hirevision/resume_builder_result.html', {'resume': resume})
+        
     except ResumeBuilder.DoesNotExist:
-        messages.error(request, "Resume not found.")
+        logger.error(f"Resume {resume_id} not found for user {user_id}")
+        log_user_action(str(user_id), "resume_not_found", f"Tried to access non-existent resume: {resume_id}", success=False)
+        messages.error(request, "Resume not found. It may have been deleted or you may have an invalid link.")
+        return redirect('hirevision:resume_builder')
+    except Exception as e:
+        logger.error(f"Error accessing resume builder result for user {user_id}, resume ID {resume_id}: {str(e)}", exc_info=True)
+        messages.error(request, "An error occurred while loading the resume result. Please try again.")
         return redirect('hirevision:resume_builder')
 
 def sample_resume(request):

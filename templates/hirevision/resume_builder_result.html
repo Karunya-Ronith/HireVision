@@ -459,14 +459,39 @@
 
         <!-- Results Content -->
         <div id="results-content"{% if resume.task_status != 'completed' %} style="display: none;"{% endif %}>
-            <div class="success-container">
-                <div class="success-header">
-                    <h2 class="success-title">
-                        <i class="fas fa-check-circle me-2"></i>
-                        Resume Generated Successfully!
-                    </h2>
-                    <p class="success-subtitle">Your professional resume is ready for download</p>
+            {% if resume.task_status == 'failed' %}
+                <div class="error-container">
+                    <div class="error-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3 class="error-title">Resume Generation Failed</h3>
+                    <p class="error-message">
+                        {% if resume.task_error %}
+                            {{ resume.task_error|linebreaks }}
+                        {% else %}
+                            An error occurred while generating your resume. Please try again.
+                        {% endif %}
+                    </p>
+                    <div class="action-buttons">
+                        <a href="{% url 'hirevision:resume_builder' %}" class="action-btn primary">
+                            <i class="fas fa-redo"></i>
+                            Try Again
+                        </a>
+                        <a href="{% url 'hirevision:home' %}" class="action-btn secondary">
+                            <i class="fas fa-home"></i>
+                            Go Home
+                        </a>
+                    </div>
                 </div>
+            {% elif resume.task_status == 'completed' %}
+                <div class="success-container">
+                    <div class="success-header">
+                        <h2 class="success-title">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Resume Generated Successfully!
+                        </h2>
+                        <p class="success-subtitle">Your professional resume is ready for download</p>
+                    </div>
                 
                 <div class="success-content">
                     <!-- Download Section -->
@@ -516,7 +541,7 @@
                         </a>
                     </div>
                 </div>
-            </div>
+            {% endif %}
         </div>
     </div>
 </div>

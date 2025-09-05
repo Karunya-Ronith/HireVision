@@ -371,7 +371,21 @@ def generate_research_section(research_papers: List[Dict[str, Any]]) -> str:
     """Generate research papers section"""
     latex = "\n%-----------RESEARCH PAPERS-----------\n\\section{Research Papers}\n  \\resumeSubHeadingListStart\n"
 
+    # Handle case where research_papers might be empty or None
+    if not research_papers:
+        latex += "  \\resumeSubHeadingListEnd\n"
+        return latex
+
     for paper in research_papers:
+        # Handle case where paper might be a string instead of dict
+        if isinstance(paper, str):
+            logger.warning(f"Research paper is a string instead of dict: {paper}")
+            continue
+            
+        if not isinstance(paper, dict):
+            logger.warning(f"Research paper is not a dict: {type(paper)}")
+            continue
+            
         title = sanitize_input(paper.get("title", ""))
         authors = sanitize_input(paper.get("authors", ""))
         journal = sanitize_input(paper.get("journal", ""))
@@ -388,8 +402,13 @@ def generate_achievements_section(achievements: List[str]) -> str:
     """Generate achievements section"""
     latex = "\n%-----------ACHIEVEMENTS-----------\n\\section{Achievements}\n \\begin{itemize}[leftmargin=0.15in, label={}]\n"
 
+    # Handle case where achievements might be empty or None
+    if not achievements:
+        latex += " \\end{itemize}\n"
+        return latex
+
     for achievement in achievements:
-        if isinstance(achievement, str):
+        if isinstance(achievement, str) and achievement.strip():
             latex += f"    \\small{{\\item{{{sanitize_input(achievement)}}}}}\n"
 
     latex += " \\end{itemize}\n"
@@ -400,8 +419,13 @@ def generate_others_section(others: List[str]) -> str:
     """Generate others section"""
     latex = "\n%-----------OTHERS-----------\n\\section{Others}\n \\begin{itemize}[leftmargin=0.15in, label={}]\n"
 
+    # Handle case where others might be empty or None
+    if not others:
+        latex += " \\end{itemize}\n"
+        return latex
+
     for item in others:
-        if isinstance(item, str):
+        if isinstance(item, str) and item.strip():
             latex += f"    \\small{{\\item{{{sanitize_input(item)}}}}}\n"
 
     latex += " \\end{itemize}\n"
